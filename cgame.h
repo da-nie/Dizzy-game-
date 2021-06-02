@@ -42,10 +42,8 @@ class CGame
   static const int32_t BlockWidthSize=4;
   static const int32_t MapWidth=320/BlockWidthSize;
   static const int32_t MapHeight=240/BlockHeightSize;
-
   static const int32_t DizzyWidth=25;
   static const int32_t DizzyHeight=22;
-
  private:
   //-переменные-----------------------------------------------------------------------------------------
 
@@ -111,16 +109,14 @@ class CGame
   ~CGame();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  void OnPaint(IVideo *iVideo_Ptr);//отрисовать доску  
-  void OnTimer(void);//обработка таймера  
+  void OnPaint(IVideo *iVideo_Ptr);//отрисовать картинку  
+  void OnTimer(IVideo *iVideo_Ptr);//обработка таймера  
   void KeyboardControl(bool left,bool right,bool up,bool down,bool fire);//управление от клавиатуры
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
   void GetMapCoord(int32_t x,int32_t y,int32_t &map_x,int32_t &map_y);//получить координаты блока
-  bool IsCollizionDownOneBlock(int32_t xp,int32_t yp);//определить, что столкновение произошло по нижней линии и на один блок (левый или правый)
-  bool IsCollizion(int32_t xp,int32_t yp);//проверить столкновение с блоками
-
-
+  bool IsCollizionDownOneBlock(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//определить, что столкновение произошло по нижней линии и на один блок (левый или правый)
+  bool IsCollizion(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками
 };
 
 #endif

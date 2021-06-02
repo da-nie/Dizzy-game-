@@ -194,16 +194,6 @@ CGame::~CGame()
 //----------------------------------------------------------------------------------------------------
 void CGame::OnPaint(IVideo *iVideo_Ptr)
 {
- for(size_t x=0;x<MapWidth;x++)
- {
-  for(size_t y=0;y<MapHeight;y++) 
-  {
-   uint32_t color=0x000000;
-   if (Map[y][x]==true) color=0x00ffffff;
-   iVideo_Ptr->FillRectangle(x*BlockWidthSize,y*BlockHeightSize,x*BlockWidthSize+(BlockWidthSize-1),y*BlockHeightSize+(BlockHeightSize-1),color);   
-  }
- } 
-
  int32_t map_x_left=(X)/BlockWidthSize;
  int32_t map_y_top=(Y)/BlockHeightSize;
  int32_t map_x_right=(X+DizzyWidth-1)/BlockWidthSize;
@@ -235,8 +225,14 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
 //----------------------------------------------------------------------------------------------------
 //определить, что столкновение произошло по нижней линии и на один блок (левый или правый)
 //----------------------------------------------------------------------------------------------------
-bool CGame::IsCollizionDownOneBlock(int32_t xp,int32_t yp)
+bool CGame::IsCollizionDownOneBlock(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
+ bool left=cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*sFrame_Ptr->ImageFrame+DizzyWidth-1-BlockWidthSize,DizzyHeight-1-BlockHeightSize*2,BlockWidthSize,BlockHeightSize*2,true,0,0,0); 
+ bool right=cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*sFrame_Ptr->ImageFrame+DizzyWidth-1-BlockWidthSize,DizzyHeight-1-BlockHeightSize*2,BlockWidthSize,BlockHeightSize*2,true,0,0,0); 
+ if (left!=right) return(true);
+ return(false);
+
+ /*
  //определяем, в каких блоках объект
  int32_t map_x_left;
  int32_t map_y_top;
@@ -260,6 +256,7 @@ bool CGame::IsCollizionDownOneBlock(int32_t xp,int32_t yp)
  }
  if (collizion==1) return(true);
  return(false);
+ */
 }
 
 
@@ -280,8 +277,11 @@ void CGame::GetMapCoord(int32_t x,int32_t y,int32_t &map_x,int32_t &map_y)
 //----------------------------------------------------------------------------------------------------
 //проверить столкновение с блоками
 //----------------------------------------------------------------------------------------------------
-bool CGame::IsCollizion(int32_t xp,int32_t yp)
+bool CGame::IsCollizion(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*sFrame_Ptr->ImageFrame,0,25,22,true,0,0,0)); 
+ /*
+
  //определяем, в каких блоках объект
  int32_t map_x_left;
  int32_t map_y_top;
@@ -299,13 +299,25 @@ bool CGame::IsCollizion(int32_t xp,int32_t yp)
   }
  }
  return(false);
+ */
 }
 
 //----------------------------------------------------------------------------------------------------
 //обработка таймера
 //----------------------------------------------------------------------------------------------------
-void CGame::OnTimer(void)
+void CGame::OnTimer(IVideo *iVideo_Ptr)
 {
+ //рисфуем фон с непроницаемыми объектами
+ for(size_t x=0;x<MapWidth;x++)
+ {
+  for(size_t y=0;y<MapHeight;y++) 
+  {
+   uint32_t color=0x000000;
+   if (Map[y][x]==true) color=0x00ffffff;
+   iVideo_Ptr->FillRectangle(x*BlockWidthSize,y*BlockHeightSize,x*BlockWidthSize+(BlockWidthSize-1),y*BlockHeightSize+(BlockHeightSize-1),color);   
+  }
+ }
+
  SmallTickCounter++;
  SmallTickCounter%=7;
 
@@ -325,9 +337,9 @@ void CGame::OnTimer(void)
   
   if (dx>0) X++;
   if (dx<0) X--;
-  if (IsCollizion(X,Y)==true)//зафиксировано столкновение
+  if (IsCollizion(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
   {
-   if (IsCollizionDownOneBlock(X,Y)==true)//столкновение произошло на нижнем уровне и на один блок
+   if (IsCollizionDownOneBlock(iVideo_Ptr,X,Y)==true)//столкновение произошло на нижнем уровне и на один блок
    {
     Y-=BlockHeightSize;
    }
@@ -337,7 +349,7 @@ void CGame::OnTimer(void)
 
   if (dy>0) Y++;
   if (dy<0) Y--;
-  if (IsCollizion(X,Y)==true)//зафиксировано столкновение
+  if (IsCollizion(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
   {
    Y=last_y;
    dy=0;
@@ -345,7 +357,7 @@ void CGame::OnTimer(void)
   }
  }
 
- if (IsCollizion(X,Y+1)==false)//можно падать
+ if (IsCollizion(iVideo_Ptr,X,Y+1)==false)//можно падать
  {
   if (SmallTickCounter==0) 
   {

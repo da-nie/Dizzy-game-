@@ -164,7 +164,7 @@ afx_msg void CWnd_Main::OnTimer(UINT nIDEvent)
  counter++;
  counter%=3;
 
- cGame_Ptr->OnTimer();
+ cGame_Ptr->OnTimer(iVideo_Ptr.get());
  cGame_Ptr->OnPaint(iVideo_Ptr.get());
  InvalidateRect(NULL,FALSE);
 }
