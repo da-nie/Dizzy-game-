@@ -157,9 +157,9 @@ CGame::CGame(void)
    top=0;
    dy=1;
   }
-  if (top>=MapHeight-10)
+  if (top>=MapHeight-50)
   {
-   top=MapHeight-11;
+   top=MapHeight-51;
    dy=-1;
   }
   for(size_t y=top;y<MapHeight;y++) Map[y][x]=true;
@@ -169,6 +169,11 @@ CGame::CGame(void)
   Map[y][0]=true;
   Map[y][MapWidth-2]=true;
  }
+ for(size_t y=130;y<MapHeight;y++)
+ {
+  Map[y][70]=true;
+ }
+
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -194,112 +199,14 @@ CGame::~CGame()
 //----------------------------------------------------------------------------------------------------
 void CGame::OnPaint(IVideo *iVideo_Ptr)
 {
- int32_t map_x_left=(X)/BlockWidthSize;
- int32_t map_y_top=(Y)/BlockHeightSize;
- int32_t map_x_right=(X+DizzyWidth-1)/BlockWidthSize;
- int32_t map_y_bottom=(Y+DizzyHeight-1)/BlockHeightSize;
-
- if (map_x_left<0) map_x_left=0;
- if (map_x_right<0) map_x_right=0;
-
- if (map_y_top<0) map_y_top=0;
- if (map_y_bottom<0) map_y_bottom=0;
-
- if (map_x_left>=MapWidth) map_x_left=MapWidth-1;
- if (map_x_right>=MapWidth) map_x_right=MapWidth-1;
-
- if (map_y_top>=MapHeight) map_y_top=MapHeight-1;
- if (map_y_bottom>=MapHeight) map_y_bottom=MapHeight-1;
-
- for (size_t x=map_x_left;x<=map_x_right;x++)
- {
-  for (size_t y=map_y_top;y<=map_y_bottom;y++)
-  {
-   //iVideo_Ptr->FillRectangle(x*BlockWidthSize,y*BlockHeightSize,x*BlockWidthSize+(BlockWidthSize-1),y*BlockHeightSize+(BlockHeightSize-1),0x00FFFF00);   
-  }
- }
-
  cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*sFrame_Ptr->ImageFrame,0,25,22,true); 
 }
-
-//----------------------------------------------------------------------------------------------------
-//определить, что столкновение произошло по нижней линии и на один блок (левый или правый)
-//----------------------------------------------------------------------------------------------------
-bool CGame::IsCollizionDownOneBlock(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
-{
- bool left=cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*sFrame_Ptr->ImageFrame+DizzyWidth-1-BlockWidthSize,DizzyHeight-1-BlockHeightSize*2,BlockWidthSize,BlockHeightSize*2,true,0,0,0); 
- bool right=cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*sFrame_Ptr->ImageFrame+DizzyWidth-1-BlockWidthSize,DizzyHeight-1-BlockHeightSize*2,BlockWidthSize,BlockHeightSize*2,true,0,0,0); 
- if (left!=right) return(true);
- return(false);
-
- /*
- //определяем, в каких блоках объект
- int32_t map_x_left;
- int32_t map_y_top;
- int32_t map_x_right;
- int32_t map_y_bottom;
-
- GetMapCoord(xp,yp,map_x_left,map_y_top);
- GetMapCoord(xp+DizzyWidth-1,yp+DizzyHeight-1,map_x_right,map_y_bottom);
-
- int32_t collizion=0;
- for (size_t x=map_x_left;x<=map_x_right;x++)
- {
-  for (size_t y=map_y_top;y<=map_y_bottom;y++)
-  {
-   if (Map[y][x]==true)
-   {
-    if (y!=map_y_bottom) return(false);
-	collizion++;
-   }
-  }
- }
- if (collizion==1) return(true);
- return(false);
- */
-}
-
-
-//----------------------------------------------------------------------------------------------------
-//получить координаты блока
-//----------------------------------------------------------------------------------------------------
-void CGame::GetMapCoord(int32_t x,int32_t y,int32_t &map_x,int32_t &map_y)
-{
- map_x=x/BlockWidthSize;
- map_y=y/BlockHeightSize;
-
- if (map_x<0) map_x=0;
- if (map_y<0) map_y=0;
- if (map_x>=MapWidth) map_x=MapWidth-1;
- if (map_y>=MapHeight) map_y=MapHeight-1;
-}
-
 //----------------------------------------------------------------------------------------------------
 //проверить столкновение с блоками
 //----------------------------------------------------------------------------------------------------
 bool CGame::IsCollizion(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
- return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*sFrame_Ptr->ImageFrame,0,25,22,true,0,0,0)); 
- /*
-
- //определяем, в каких блоках объект
- int32_t map_x_left;
- int32_t map_y_top;
- int32_t map_x_right;
- int32_t map_y_bottom;
-
- GetMapCoord(xp,yp,map_x_left,map_y_top);
- GetMapCoord(xp+DizzyWidth-1,yp+DizzyHeight-1,map_x_right,map_y_bottom);
-
- for (size_t x=map_x_left;x<=map_x_right;x++)
- {
-  for (size_t y=map_y_top;y<=map_y_bottom;y++)
-  {
-   if (Map[y][x]==true) return(true);
-  }
- }
- return(false);
- */
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*39,0,25,22,true,0,0,0)); 
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -337,14 +244,19 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
   
   if (dx>0) X++;
   if (dx<0) X--;
+
   if (IsCollizion(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
   {
-   if (IsCollizionDownOneBlock(iVideo_Ptr,X,Y)==true)//столкновение произошло на нижнем уровне и на один блок
+   if (cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*40,0,25,22,true,0,0,0)==false)//пересечение не выше допуска
    {
-    Y-=BlockHeightSize;
+    //поднимаем Диззи на уровень без пересечения
+    while(IsCollizion(iVideo_Ptr,X,Y)==true) Y--;
    }
-   X=last_x;
-   dx=0;
+   else
+   {
+    X=last_x;
+    dx=0;
+   }
   }
 
   if (dy>0) Y++;
@@ -359,7 +271,7 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
 
  if (IsCollizion(iVideo_Ptr,X,Y+1)==false)//можно падать
  {
-  if (SmallTickCounter==0) 
+  if (SmallTickCounter==0)
   {
    if (dY<SPEED_Y) dY++;
   }
@@ -383,7 +295,6 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
   {
    SmallTickCounter=0;
    dY=-SPEED_Y;  
-   //MoveControl=false;
    if (dX==0) sFrame_Ptr=sFrame_Jump_Ptr;
   } 
   if (dY<0)
@@ -391,17 +302,14 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
    if (dX>0 && sFrame_Ptr->Move!=MOVE_JUMP_RIGHT) 
    {
     sFrame_Ptr=sFrame_JumpRight_Ptr;
-	//MoveControl=false;
    }
    if (dX<0 && sFrame_Ptr->Move!=MOVE_JUMP_LEFT) 
    {
     sFrame_Ptr=sFrame_JumpLeft_Ptr; 
-	//MoveControl=false;
    }
    if (dX==0 && sFrame_Ptr->Move!=MOVE_JUMP && sFrame_Ptr->Move!=MOVE_JUMP_RIGHT && sFrame_Ptr->Move!=MOVE_JUMP_LEFT)
    {
   	sFrame_Ptr=sFrame_Stop_Ptr;
-	//MoveControl=false;
    }
   }
   else

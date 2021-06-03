@@ -38,8 +38,8 @@ class CGame
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
-  static const int32_t BlockHeightSize=4;
-  static const int32_t BlockWidthSize=4;
+  static const int32_t BlockHeightSize=1;
+  static const int32_t BlockWidthSize=1;
   static const int32_t MapWidth=320/BlockWidthSize;
   static const int32_t MapHeight=240/BlockHeightSize;
   static const int32_t DizzyWidth=25;
@@ -114,8 +114,6 @@ class CGame
   void KeyboardControl(bool left,bool right,bool up,bool down,bool fire);//управление от клавиатуры
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
-  void GetMapCoord(int32_t x,int32_t y,int32_t &map_x,int32_t &map_y);//получить координаты блока
-  bool IsCollizionDownOneBlock(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//определить, что столкновение произошло по нижней линии и на один блок (левый или правый)
   bool IsCollizion(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками
 };
 
