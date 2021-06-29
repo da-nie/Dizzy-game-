@@ -16,6 +16,7 @@
 
 #include "ivideo.h"
 #include "csprite.h"
+#include "ipart.h"
 
 //****************************************************************************************************
 //макроопределения
@@ -38,19 +39,24 @@ class CGame
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
-  static const int32_t BlockHeightSize=1;
-  static const int32_t BlockWidthSize=1;
-  static const int32_t MapWidth=320/BlockWidthSize;
-  static const int32_t MapHeight=240/BlockHeightSize;
   static const int32_t DizzyWidth=25;
   static const int32_t DizzyHeight=22;
+
+  static const int32_t TILE_WIDTH=16;//ширина тайла
+  static const int32_t TILE_HEIGHT=16;//высота тайла
+  static const int32_t TILE_BORDER_WIDTH=1;//ширина рамки
+  static const int32_t TILE_BORDER_HEIGHT=1;//высота рамки  
+  static const int32_t TILE_WITH_BORDER_WIDTH=TILE_WIDTH+TILE_BORDER_WIDTH+TILE_BORDER_WIDTH;//ширина тайла с рамкой
+  static const int32_t TILE_WITH_BORDER_HEIGHT=TILE_HEIGHT+TILE_BORDER_HEIGHT+TILE_BORDER_HEIGHT;//высота тайла с рамкой
  private:
   //-переменные-----------------------------------------------------------------------------------------
 
-  //карта
-  bool Map[MapHeight][MapWidth];//карта
+  //карта  
 
   CSprite cSprite_Dizzy;//спрайт Диззи
+
+  CSprite cSprite_Tiles;//тайлы
+  CSprite cSprite_TilesBarrier;//непроницаемость тайлов
   
   int32_t X;//координаты
   int32_t Y;
@@ -102,6 +108,8 @@ class CGame
   std::vector<SFrame> sFrame_Array;//набор кадров для анимации
 
   int32_t SmallTickCounter;//счётчик малого такта
+
+  std::vector<std::shared_ptr<IPart>> Map;//карта
  public:
   //-конструктор----------------------------------------------------------------------------------------
   CGame(void);
@@ -115,6 +123,7 @@ class CGame
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
   bool IsCollizion(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками
+  bool LoadMap(const std::string &file_name);//загрузить карту
 };
 
 #endif

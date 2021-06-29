@@ -83,11 +83,10 @@ afx_msg int CWnd_Main::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
  CRect cRect;
  GetWindowRect(&cRect);
- cRect.right=cRect.left+rect.right;
- cRect.bottom=cRect.top+rect.bottom;
+ cRect.right=cRect.left+rect.right-rect.left;
+ cRect.bottom=cRect.top+rect.bottom-rect.top;
  
  MoveWindow(&cRect,TRUE);
-
  SetTimer(ID_TIMER_MAIN,30,NULL);
  return(0);
 }
