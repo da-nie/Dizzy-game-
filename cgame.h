@@ -41,6 +41,9 @@ class CGame
   //-константы------------------------------------------------------------------------------------------
   static const int32_t DizzyWidth=25;
   static const int32_t DizzyHeight=22;
+    
+  static const int32_t SCREEN_WIDTH=320;
+  static const int32_t SCREEN_HEIGHT=240;
 
   static const int32_t TILE_WIDTH=16;//ширина тайла
   static const int32_t TILE_HEIGHT=16;//высота тайла
@@ -52,6 +55,9 @@ class CGame
   //-переменные-----------------------------------------------------------------------------------------
 
   //карта  
+
+  int32_t Map_X;//координаты левого верхнего угла карты
+  int32_t Map_Y;
 
   CSprite cSprite_Dizzy;//спрайт Диззи
 
@@ -127,6 +133,9 @@ class CGame
   bool IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками ног Диззи
   bool IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками корпуса Диззи
   bool LoadMap(const std::string &file_name);//загрузить карту
+  void DrawBarrier(IVideo *iVideo_Ptr);//нарисовать преграды
+  void DrawMap(IVideo *iVideo_Ptr);//нарисовать карту
+  void ClearScreen(IVideo *iVideo_Ptr,uint32_t color);//очистить экран
 };
 
 #endif

@@ -37,7 +37,7 @@ END_MESSAGE_MAP()
 //----------------------------------------------------------------------------------------------------
 CWnd_Main::CWnd_Main(void)
 { 
- iVideo_Ptr.reset(IVideo::CreateNewCVideoSoftware(SCREEN_WIDTH,SCREEN_HEIGHT));
+ iVideo_Ptr.reset(IVideo::CreateNewCVideoSoftware(CGame::SCREEN_WIDTH,CGame::SCREEN_HEIGHT));
  iVideo_Ptr->Init();
 
  cGame_Ptr.reset(new CGame()); 
@@ -76,9 +76,9 @@ afx_msg int CWnd_Main::OnCreate(LPCREATESTRUCT lpCreateStruct)
  //определим размер окна по заданной клиентской области
  RECT rect;
  rect.left=0;
- rect.right=SCREEN_WIDTH;
+ rect.right=CGame::SCREEN_WIDTH*2;
  rect.top=0;
- rect.bottom=SCREEN_HEIGHT;
+ rect.bottom=CGame::SCREEN_HEIGHT*2;
  AdjustWindowRect(&rect,WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,FALSE);
 
  CRect cRect;
@@ -133,7 +133,7 @@ afx_msg void CWnd_Main::OnPaint(void)
  rgbq.rgbReserved=0;
  info.bmiHeader=bmih;
  info.bmiColors[0]=rgbq;
- StretchDIBits(dc.m_hDC,0,0,width,height,0,0,width,height,vptr,&info,DIB_RGB_COLORS,SRCCOPY);
+ StretchDIBits(dc.m_hDC,0,0,width*2,height*2,0,0,width,height,vptr,&info,DIB_RGB_COLORS,SRCCOPY);
  CWnd::OnPaint();
 }
 //----------------------------------------------------------------------------------------------------

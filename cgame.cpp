@@ -13,8 +13,8 @@
 //****************************************************************************************************
 //константы
 //****************************************************************************************************
-static const int32_t SPEED_X=2;
-static const int32_t SPEED_Y=2;
+static const int32_t SPEED_X=2;//скорость Диззи по X
+static const int32_t SPEED_Y=2;//скорость Диззи по Y
 
 //****************************************************************************************************
 //макроопределения
@@ -143,6 +143,9 @@ CGame::CGame(void)
  X=160;
  Y=5;
 
+ Map_X=0;
+ Map_Y=0;
+
  dX=0;
  dY=0;
 
@@ -180,7 +183,6 @@ bool CGame::IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
  return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*40,0,25,22,true,0,0,0)); 
 }
 
-
 //----------------------------------------------------------------------------------------------------
 //загрузить карту
 //----------------------------------------------------------------------------------------------------
@@ -200,6 +202,71 @@ bool CGame::LoadMap(const std::string &file_name)
  }
  return(true);
 }
+//----------------------------------------------------------------------------------------------------
+//нарисовать преграды
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawBarrier(IVideo *iVideo_Ptr)
+{
+ //рисуем фон с непроницаемыми объектами
+ CSprite &tiles=cSprite_TilesBarrier;
+
+ auto drawing_barrier_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ { 
+  if (iPart_Ptr->Barrier==false) return;
+
+  int32_t block_x=iPart_Ptr->BlockPosX;
+  int32_t block_y=iPart_Ptr->BlockPosY;
+
+  int32_t screen_x=block_x*TILE_WIDTH-Map_X;
+  int32_t screen_y=block_y*TILE_HEIGHT-Map_Y;
+
+  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
+  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
+
+  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
+  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
+
+  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
+ };
+ std::for_each(Map.begin(),Map.end(),drawing_barrier_function);
+}
+//----------------------------------------------------------------------------------------------------
+//нарисовать карту
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawMap(IVideo *iVideo_Ptr)
+{
+ //рисуем фон
+ CSprite &tiles=cSprite_Tiles;
+
+ auto drawing_barrier_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ { 
+  int32_t block_x=iPart_Ptr->BlockPosX;
+  int32_t block_y=iPart_Ptr->BlockPosY;
+
+  int32_t screen_x=block_x*TILE_WIDTH-Map_X;
+  int32_t screen_y=block_y*TILE_HEIGHT-Map_Y;
+
+  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
+  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
+
+  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
+  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
+
+  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
+ };
+ std::for_each(Map.begin(),Map.end(),drawing_barrier_function);
+}
+//----------------------------------------------------------------------------------------------------
+//очистить экран
+//----------------------------------------------------------------------------------------------------
+void CGame::ClearScreen(IVideo *iVideo_Ptr,uint32_t color)
+{
+ uint32_t width;
+ uint32_t height;
+ iVideo_Ptr->GetScreenSize(width,height);
+ iVideo_Ptr->FillRectangle(0,0,width,height,color);
+}
+
 
 
 //****************************************************************************************************
@@ -212,32 +279,11 @@ bool CGame::LoadMap(const std::string &file_name)
 void CGame::OnPaint(IVideo *iVideo_Ptr)
 {
  //стираем фон
- uint32_t width;
- uint32_t height;
- iVideo_Ptr->GetScreenSize(width,height);
  uint32_t sky=(0<<24)|(81<<16)|(162<<8)|(243<<0);
- iVideo_Ptr->FillRectangle(0,0,width,height,sky);
+ ClearScreen(iVideo_Ptr,sky);
 
- //рисуем фон
- CSprite &tiles=cSprite_Tiles;
+ DrawMap(iVideo_Ptr);
 
- auto drawing_barrier_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
- { 
-  int32_t block_x=iPart_Ptr->BlockPosX;
-  int32_t block_y=iPart_Ptr->BlockPosY;
-
-  int32_t screen_x=block_x*TILE_WIDTH;
-  int32_t screen_y=block_y*TILE_HEIGHT;
-
-  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
-  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
-
-  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
-  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
-
-  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
- };
- std::for_each(Map.begin(),Map.end(),drawing_barrier_function);
  //рисуем Диззи
  cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*sFrame_Ptr->ImageFrame,0,25,22,true); 
 }
@@ -256,35 +302,13 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
  counter++;
  counter%=3;
 
-
  //стираем фон
  uint32_t width;
  uint32_t height;
  iVideo_Ptr->GetScreenSize(width,height);
- iVideo_Ptr->FillRectangle(0,0,width,height,0x00000000);
  
- //рисуем фон с непроницаемыми объектами
- CSprite &tiles=cSprite_TilesBarrier;
-
- auto drawing_barrier_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
- { 
-  if (iPart_Ptr->Barrier==false) return;
-
-  int32_t block_x=iPart_Ptr->BlockPosX;
-  int32_t block_y=iPart_Ptr->BlockPosY;
-
-  int32_t screen_x=block_x*TILE_WIDTH;
-  int32_t screen_y=block_y*TILE_HEIGHT;
-
-  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
-  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
-
-  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
-  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
-
-  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
- };
- std::for_each(Map.begin(),Map.end(),drawing_barrier_function);
+ ClearScreen(iVideo_Ptr,0x00000000); 
+ DrawBarrier(iVideo_Ptr);
  
  SmallTickCounter++;
  SmallTickCounter%=7;
@@ -328,6 +352,42 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
    Y=last_y;
    dy=0;
    dY=0;
+  }
+
+  bool redraw_barrier=false;
+  if (X<width/4 && Map_X>=2)
+  {
+   Map_X-=2;
+   //Map_X-=width/8;
+   //X+=width/8;
+   X+=2;
+   redraw_barrier=true;
+  }
+  if (X>=3*width/4)
+  {
+   Map_X+=2;
+   X-=2;
+   //X-=7*width/8;
+   //Map_X+=7*width/8;
+   redraw_barrier=true;
+  }
+  if (Y>=3*height/4)
+  {
+   Y-=2;
+   Map_Y+=2;
+   redraw_barrier=true;
+  }
+  if (Y<height/4 && Map_Y>=2)
+  {
+   Y+=2;
+   Map_Y-=2;
+   redraw_barrier=true;
+  }
+
+  if (redraw_barrier==true)
+  {
+   ClearScreen(iVideo_Ptr,0x00000000); 
+   DrawBarrier(iVideo_Ptr);
   }
  }
 
