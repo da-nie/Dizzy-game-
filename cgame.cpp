@@ -39,50 +39,50 @@ CGame::CGame(void)
  cSprite_TilesBarrier.SetAlpha(0,0,0,0);
 
  //Dizzy стоит
- sFrame_Array.push_back(SFrame(0,MOVE_STOP,NULL));//0 
- sFrame_Array.push_back(SFrame(1,MOVE_STOP,NULL));//1
+ sFrame_Array.push_back(SFrame(0,MOVE_STOP,false,NULL));//0 
+ sFrame_Array.push_back(SFrame(1,MOVE_STOP,true,NULL));//1
  //Dizzy идёт влево
- sFrame_Array.push_back(SFrame(9,MOVE_LEFT,NULL));//2 
- sFrame_Array.push_back(SFrame(10,MOVE_LEFT,NULL));//3
- sFrame_Array.push_back(SFrame(11,MOVE_LEFT,NULL));//4
- sFrame_Array.push_back(SFrame(12,MOVE_LEFT,NULL));//5
- sFrame_Array.push_back(SFrame(13,MOVE_LEFT,NULL));//6
- sFrame_Array.push_back(SFrame(14,MOVE_LEFT,NULL));//7
- sFrame_Array.push_back(SFrame(15,MOVE_LEFT,NULL));//8
- sFrame_Array.push_back(SFrame(16,MOVE_LEFT,NULL));//9
+ sFrame_Array.push_back(SFrame(9,MOVE_LEFT,false,NULL));//2 
+ sFrame_Array.push_back(SFrame(10,MOVE_LEFT,false,NULL));//3
+ sFrame_Array.push_back(SFrame(11,MOVE_LEFT,false,NULL));//4
+ sFrame_Array.push_back(SFrame(12,MOVE_LEFT,false,NULL));//5
+ sFrame_Array.push_back(SFrame(13,MOVE_LEFT,false,NULL));//6
+ sFrame_Array.push_back(SFrame(14,MOVE_LEFT,false,NULL));//7
+ sFrame_Array.push_back(SFrame(15,MOVE_LEFT,false,NULL));//8
+ sFrame_Array.push_back(SFrame(16,MOVE_LEFT,true,NULL));//9
  //Dizzy идёт вправо
- sFrame_Array.push_back(SFrame(17,MOVE_RIGHT,NULL));//10 
- sFrame_Array.push_back(SFrame(18,MOVE_RIGHT,NULL));//11
- sFrame_Array.push_back(SFrame(19,MOVE_RIGHT,NULL));//12
- sFrame_Array.push_back(SFrame(20,MOVE_RIGHT,NULL));//13
- sFrame_Array.push_back(SFrame(21,MOVE_RIGHT,NULL));//14
- sFrame_Array.push_back(SFrame(22,MOVE_RIGHT,NULL));//15
- sFrame_Array.push_back(SFrame(23,MOVE_RIGHT,NULL));//16
- sFrame_Array.push_back(SFrame(24,MOVE_RIGHT,NULL));//17
+ sFrame_Array.push_back(SFrame(17,MOVE_RIGHT,false,NULL));//10 
+ sFrame_Array.push_back(SFrame(18,MOVE_RIGHT,false,NULL));//11
+ sFrame_Array.push_back(SFrame(19,MOVE_RIGHT,false,NULL));//12
+ sFrame_Array.push_back(SFrame(20,MOVE_RIGHT,false,NULL));//13
+ sFrame_Array.push_back(SFrame(21,MOVE_RIGHT,false,NULL));//14
+ sFrame_Array.push_back(SFrame(22,MOVE_RIGHT,false,NULL));//15
+ sFrame_Array.push_back(SFrame(23,MOVE_RIGHT,false,NULL));//16
+ sFrame_Array.push_back(SFrame(24,MOVE_RIGHT,true,NULL));//17
  //Dizzy прыгает на месте
- sFrame_Array.push_back(SFrame(2,MOVE_JUMP,NULL));//18 
- sFrame_Array.push_back(SFrame(3,MOVE_JUMP,NULL));//19
- sFrame_Array.push_back(SFrame(4,MOVE_JUMP,NULL));//20
- sFrame_Array.push_back(SFrame(5,MOVE_JUMP,NULL));//21
- sFrame_Array.push_back(SFrame(6,MOVE_JUMP,NULL));//22
- sFrame_Array.push_back(SFrame(7,MOVE_JUMP,NULL));//23
- sFrame_Array.push_back(SFrame(8,MOVE_JUMP,NULL));//24
+ sFrame_Array.push_back(SFrame(2,MOVE_JUMP,false,NULL));//18 
+ sFrame_Array.push_back(SFrame(3,MOVE_JUMP,false,NULL));//19
+ sFrame_Array.push_back(SFrame(4,MOVE_JUMP,false,NULL));//20
+ sFrame_Array.push_back(SFrame(5,MOVE_JUMP,false,NULL));//21
+ sFrame_Array.push_back(SFrame(6,MOVE_JUMP,false,NULL));//22
+ sFrame_Array.push_back(SFrame(7,MOVE_JUMP,false,NULL));//23
+ sFrame_Array.push_back(SFrame(8,MOVE_JUMP,true,NULL));//24
  //Dizzy прыгает влево
- sFrame_Array.push_back(SFrame(25,MOVE_JUMP_LEFT,NULL));//25
- sFrame_Array.push_back(SFrame(26,MOVE_JUMP_LEFT,NULL));//26
- sFrame_Array.push_back(SFrame(27,MOVE_JUMP_LEFT,NULL));//27
- sFrame_Array.push_back(SFrame(28,MOVE_JUMP_LEFT,NULL));//28
- sFrame_Array.push_back(SFrame(29,MOVE_JUMP_LEFT,NULL));//29
- sFrame_Array.push_back(SFrame(30,MOVE_JUMP_LEFT,NULL));//30
- sFrame_Array.push_back(SFrame(31,MOVE_JUMP_LEFT,NULL));//31
+ sFrame_Array.push_back(SFrame(25,MOVE_JUMP_LEFT,false,NULL));//25
+ sFrame_Array.push_back(SFrame(26,MOVE_JUMP_LEFT,false,NULL));//26
+ sFrame_Array.push_back(SFrame(27,MOVE_JUMP_LEFT,false,NULL));//27
+ sFrame_Array.push_back(SFrame(28,MOVE_JUMP_LEFT,false,NULL));//28
+ sFrame_Array.push_back(SFrame(29,MOVE_JUMP_LEFT,false,NULL));//29
+ sFrame_Array.push_back(SFrame(30,MOVE_JUMP_LEFT,false,NULL));//30
+ sFrame_Array.push_back(SFrame(31,MOVE_JUMP_LEFT,true,NULL));//31
  //Dizzy прыгает вправо
- sFrame_Array.push_back(SFrame(32,MOVE_JUMP_RIGHT,NULL));//32
- sFrame_Array.push_back(SFrame(33,MOVE_JUMP_RIGHT,NULL));//33
- sFrame_Array.push_back(SFrame(34,MOVE_JUMP_RIGHT,NULL));//34
- sFrame_Array.push_back(SFrame(35,MOVE_JUMP_RIGHT,NULL));//35
- sFrame_Array.push_back(SFrame(36,MOVE_JUMP_RIGHT,NULL));//36
- sFrame_Array.push_back(SFrame(37,MOVE_JUMP_RIGHT,NULL));//37
- sFrame_Array.push_back(SFrame(38,MOVE_JUMP_RIGHT,NULL));//38
+ sFrame_Array.push_back(SFrame(32,MOVE_JUMP_RIGHT,false,NULL));//32
+ sFrame_Array.push_back(SFrame(33,MOVE_JUMP_RIGHT,false,NULL));//33
+ sFrame_Array.push_back(SFrame(34,MOVE_JUMP_RIGHT,false,NULL));//34
+ sFrame_Array.push_back(SFrame(35,MOVE_JUMP_RIGHT,false,NULL));//35
+ sFrame_Array.push_back(SFrame(36,MOVE_JUMP_RIGHT,false,NULL));//36
+ sFrame_Array.push_back(SFrame(37,MOVE_JUMP_RIGHT,false,NULL));//37
+ sFrame_Array.push_back(SFrame(38,MOVE_JUMP_RIGHT,true,NULL));//38
 
 
 
@@ -166,12 +166,20 @@ CGame::~CGame()
 //****************************************************************************************************
 
 //----------------------------------------------------------------------------------------------------
-//проверить столкновение с блоками
+//проверить столкновение с блоками ног Диззи
 //----------------------------------------------------------------------------------------------------
-bool CGame::IsCollizion(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
+bool CGame::IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
  return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*39,0,25,22,true,0,0,0)); 
 }
+//----------------------------------------------------------------------------------------------------
+//проверить столкновение с блоками корпуса Диззи
+//----------------------------------------------------------------------------------------------------
+bool CGame::IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
+{
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*40,0,25,22,true,0,0,0)); 
+}
+
 
 //----------------------------------------------------------------------------------------------------
 //загрузить карту
@@ -239,6 +247,16 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
 //----------------------------------------------------------------------------------------------------
 void CGame::OnTimer(IVideo *iVideo_Ptr)
 { 
+ static int counter=0;
+ if (counter==0)
+ {
+  if (sFrame_Ptr->sFrame_Next_Ptr!=NULL) sFrame_Ptr=sFrame_Ptr->sFrame_Next_Ptr;
+                                    else sFrame_Ptr=sFrame_Stop_Ptr;
+ }
+ counter++;
+ counter%=3;
+
+
  //стираем фон
  uint32_t width;
  uint32_t height;
@@ -288,23 +306,24 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
   if (dx>0) X++;
   if (dx<0) X--;
 
-  if (IsCollizion(iVideo_Ptr,X,Y)==true || cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*40,0,25,22,true,0,0,0)==true)//зафиксировано столкновение
+  if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
   {
-   if (cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*40,0,25,22,true,0,0,0)==false)//пересечение не выше допуска
+   if (IsCollizionBody(iVideo_Ptr,X,Y)==false)//пересечение не выше допуска
    {
     //поднимаем Диззи на уровень без пересечения
-    while(IsCollizion(iVideo_Ptr,X,Y)==true) Y--;
+    while(IsCollizionLegs(iVideo_Ptr,X,Y)==true) Y--;
    }
    else
    {
     X=last_x;
     dx=0;
+	//dX=0;//TODO: если так сделать, Диззи не сможет забираться перекатываясь через края блоков.
    }
   }
 
   if (dy>0) Y++;
   if (dy<0) Y--;
-  if (IsCollizion(iVideo_Ptr,X,Y)==true || cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*40,0,25,22,true,0,0,0)==true)//зафиксировано столкновение
+  if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
   {
    Y=last_y;
    dy=0;
@@ -312,7 +331,7 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
   }
  }
 
- if (IsCollizion(iVideo_Ptr,X,Y+1)==false)//можно падать
+ if (IsCollizionLegs(iVideo_Ptr,X,Y+1)==false)//можно падать
  {
   if (SmallTickCounter==0)
   {
@@ -320,15 +339,20 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
   }
   MoveControl=false;
  }
- else MoveControl=true;
+ else
+ {
+  if (sFrame_Ptr->Move==MOVE_JUMP_RIGHT || sFrame_Ptr->Move==MOVE_JUMP_LEFT)//режим прыжка должен завершиться
+  {
+   if (sFrame_Ptr->EndFrame==true) MoveControl=true;//перекатывание завершено
+  }
+  else MoveControl=true;
+ }
 }
 //----------------------------------------------------------------------------------------------------
 //управление от клавиатуры
 //----------------------------------------------------------------------------------------------------
 void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
 {
- if (sFrame_Ptr->sFrame_Next_Ptr!=NULL) sFrame_Ptr=sFrame_Ptr->sFrame_Next_Ptr;
-                                   else sFrame_Ptr=sFrame_Stop_Ptr; 
  if (MoveControl==true)
  {
   if (left==true) dX=-SPEED_X;

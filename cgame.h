@@ -87,12 +87,14 @@ class CGame
    MOVE Move;//режим движения
    int32_t ImageFrame;//номер кадра в изображении
    SFrame *sFrame_Next_Ptr;//указатель на следующий кадр
+   bool EndFrame;//является ли кадр последним кадром
    
-   SFrame(int32_t image_frame,MOVE move,SFrame *next_ptr=NULL)
+   SFrame(int32_t image_frame,MOVE move,bool end_frame=false,SFrame *next_ptr=NULL)
    { 
     Move=move;
 	ImageFrame=image_frame;
 	sFrame_Next_Ptr=next_ptr;
+	EndFrame=end_frame;
    }
   };
   
@@ -122,7 +124,8 @@ class CGame
   void KeyboardControl(bool left,bool right,bool up,bool down,bool fire);//управление от клавиатуры
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
-  bool IsCollizion(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками
+  bool IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками ног Диззи
+  bool IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками корпуса Диззи
   bool LoadMap(const std::string &file_name);//загрузить карту
 };
 
