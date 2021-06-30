@@ -53,8 +53,9 @@ class CSprite
   bool Load(char *file_name);//загрузить спрайт
   void Put(IVideo *iVideo_Ptr,int32_t x,int32_t y,bool alpha);//отобразить спрайт
   void PutSpriteItem(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offsetx,int32_t offsety,int32_t width,int32_t height,bool alpha);//отобразить часть спрайта
+  bool IsCollizionSpriteItem(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offsetx,int32_t offsety,int32_t width,int32_t height,bool alpha,uint8_t back_r,uint8_t back_g,uint8_t back_b);//проверить на пересечение части спрайта с точками, отличными от фона
   void PutSpriteItemMask(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offsetx,int32_t offsety,int32_t width,int32_t height,uint8_t *Mask);//отобразить часть спрайта с маской
-  void SetAlpha(uint8_t alpha,uint8_t r,uint8_t g,uint8_t b);//установить значение програчности
+  void SetAlpha(uint8_t alpha,uint8_t r,uint8_t g,uint8_t b);//установить значение прозрачности
   void Release(void);//удалить спрайт
   int32_t GetWidth(void);//получить ширину спрайта
   int32_t GetHeight(void);//получить высоту спрайта

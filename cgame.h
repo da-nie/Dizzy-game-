@@ -16,6 +16,7 @@
 
 #include "ivideo.h"
 #include "csprite.h"
+#include "ipart.h"
 
 //****************************************************************************************************
 //макроопределения
@@ -38,21 +39,30 @@ class CGame
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
-  static const int32_t BlockHeightSize=4;
-  static const int32_t BlockWidthSize=4;
-  static const int32_t MapWidth=320/BlockWidthSize;
-  static const int32_t MapHeight=240/BlockHeightSize;
-
   static const int32_t DizzyWidth=25;
   static const int32_t DizzyHeight=22;
+    
+  static const int32_t SCREEN_WIDTH=320;
+  static const int32_t SCREEN_HEIGHT=240;
 
+  static const int32_t TILE_WIDTH=16;//ширина тайла
+  static const int32_t TILE_HEIGHT=16;//высота тайла
+  static const int32_t TILE_BORDER_WIDTH=1;//ширина рамки
+  static const int32_t TILE_BORDER_HEIGHT=1;//высота рамки  
+  static const int32_t TILE_WITH_BORDER_WIDTH=TILE_WIDTH+TILE_BORDER_WIDTH+TILE_BORDER_WIDTH;//ширина тайла с рамкой
+  static const int32_t TILE_WITH_BORDER_HEIGHT=TILE_HEIGHT+TILE_BORDER_HEIGHT+TILE_BORDER_HEIGHT;//высота тайла с рамкой
  private:
   //-переменные-----------------------------------------------------------------------------------------
 
-  //карта
-  bool Map[MapHeight][MapWidth];//карта
+  //карта  
+
+  int32_t Map_X;//координаты левого верхнего угла карты
+  int32_t Map_Y;
 
   CSprite cSprite_Dizzy;//спрайт Диззи
+
+  CSprite cSprite_Tiles;//тайлы
+  CSprite cSprite_TilesBarrier;//непроницаемость тайлов
   
   int32_t X;//координаты
   int32_t Y;
@@ -83,12 +93,14 @@ class CGame
    MOVE Move;//режим движения
    int32_t ImageFrame;//номер кадра в изображении
    SFrame *sFrame_Next_Ptr;//указатель на следующий кадр
+   bool EndFrame;//является ли кадр последним кадром
    
-   SFrame(int32_t image_frame,MOVE move,SFrame *next_ptr=NULL)
+   SFrame(int32_t image_frame,MOVE move,bool end_frame=false,SFrame *next_ptr=NULL)
    { 
     Move=move;
 	ImageFrame=image_frame;
 	sFrame_Next_Ptr=next_ptr;
+	EndFrame=end_frame;
    }
   };
   
@@ -104,6 +116,8 @@ class CGame
   std::vector<SFrame> sFrame_Array;//набор кадров для анимации
 
   int32_t SmallTickCounter;//счётчик малого такта
+
+  std::vector<std::shared_ptr<IPart>> Map;//карта
  public:
   //-конструктор----------------------------------------------------------------------------------------
   CGame(void);
@@ -111,16 +125,17 @@ class CGame
   ~CGame();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  void OnPaint(IVideo *iVideo_Ptr);//отрисовать доску  
-  void OnTimer(void);//обработка таймера  
+  void OnPaint(IVideo *iVideo_Ptr);//отрисовать картинку  
+  void OnTimer(IVideo *iVideo_Ptr);//обработка таймера  
   void KeyboardControl(bool left,bool right,bool up,bool down,bool fire);//управление от клавиатуры
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
-  void GetMapCoord(int32_t x,int32_t y,int32_t &map_x,int32_t &map_y);//получить координаты блока
-  bool IsCollizionDownOneBlock(int32_t xp,int32_t yp);//определить, что столкновение произошло по нижней линии и на один блок (левый или правый)
-  bool IsCollizion(int32_t xp,int32_t yp);//проверить столкновение с блоками
-
-
+  bool IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками ног Диззи
+  bool IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками корпуса Диззи
+  bool LoadMap(const std::string &file_name);//загрузить карту
+  void DrawBarrier(IVideo *iVideo_Ptr);//нарисовать преграды
+  void DrawMap(IVideo *iVideo_Ptr);//нарисовать карту
+  void ClearScreen(IVideo *iVideo_Ptr,uint32_t color);//очистить экран
 };
 
 #endif

@@ -12,22 +12,30 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cgame.cpp" />
+    <ClCompile Include="cpart.cpp" />
     <ClCompile Include="craiifilein.cpp" />
     <ClCompile Include="craiifileout.cpp" />
     <ClCompile Include="csprite.cpp" />
+    <ClCompile Include="ctile.cpp" />
+    <ClCompile Include="ctilessequence.cpp" />
     <ClCompile Include="cvideo_software.cpp" />
     <ClCompile Include="cwnd_main.cpp" />
+    <ClCompile Include="ipart.cpp" />
     <ClCompile Include="ivideo.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="tga.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h" />
+    <ClInclude Include="cpart.h" />
     <ClInclude Include="craiifilein.h" />
     <ClInclude Include="craiifileout.h" />
     <ClInclude Include="csprite.h" />
+    <ClInclude Include="ctile.h" />
+    <ClInclude Include="ctilessequence.h" />
     <ClInclude Include="cvideo_software.h" />
     <ClInclude Include="cwnd_main.h" />
+    <ClInclude Include="ipart.h" />
     <ClInclude Include="ivideo.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="tga.h" />

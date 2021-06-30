@@ -42,6 +42,18 @@
     <ClCompile Include="tga.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cpart.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ctilessequence.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ipart.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -69,6 +81,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tga.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ipart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cpart.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ctile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ctilessequence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
