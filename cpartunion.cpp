@@ -100,7 +100,7 @@ bool CPartUnion::Export(std::ofstream &file,int32_t scale_x,int32_t scale_y)
 //----------------------------------------------------------------------------------------------------
 //получить указатель на список элементов
 //----------------------------------------------------------------------------------------------------
-std::list<std::shared_ptr<IPart>>* CPartUnion::GetItemPtr(void)
+std::list<std::shared_ptr<IPart> >* CPartUnion::GetItemPtr(void)
 {
  return(&Item);
 }

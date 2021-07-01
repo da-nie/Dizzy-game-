@@ -407,6 +407,12 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
   }
   else MoveControl=true;
  }
+ //выполняем анимацию
+ if (SmallTickCounter==0)
+ { 
+  size_t size=Map.size();
+  for(size_t n=0;n<size;n++) Map[n]->AnimateTiles();
+ }
 }
 //----------------------------------------------------------------------------------------------------
 //управление от клавиатуры

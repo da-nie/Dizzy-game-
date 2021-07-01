@@ -54,7 +54,7 @@ class CPart:public IPart
   void AnimateTiles(void);//выполнить анимацию тайлов
   void Visit(std::function<void(std::shared_ptr<IPart>)> callback_function);//обойти все элементы
   void RemovePart(std::function<bool(std::shared_ptr<IPart>)> callback_function);//удалить часть
-  std::list<std::shared_ptr<IPart>>* GetItemPtr(void);//получить указатель на список элементов
+  std::list<std::shared_ptr<IPart> >* GetItemPtr(void);//получить указатель на список элементов
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
 };

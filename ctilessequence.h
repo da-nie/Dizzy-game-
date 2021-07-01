@@ -56,6 +56,7 @@ class CTilesSequence
   size_t GetCurrentIndex(void);//получить текущий индекс тайла
   void ToNextTile(void);//перейти к следующему индексу тайла
   void ResetCurrentIndex(void);//сбросить текущий индекс тайла
+  std::vector<CTile>* GetItemPtr(void);//получить указатель на список тайлов
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
 };

@@ -157,7 +157,7 @@ void CPart::RemovePart(std::function<bool(std::shared_ptr<IPart>)> callback_func
 //----------------------------------------------------------------------------------------------------
 //получить указатель на список элементов
 //----------------------------------------------------------------------------------------------------
-std::list<std::shared_ptr<IPart>>* CPart::GetItemPtr(void)
+std::list<std::shared_ptr<IPart> >* CPart::GetItemPtr(void)
 {
  return(NULL);
 }
