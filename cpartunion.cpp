@@ -55,9 +55,6 @@ bool CPartUnion::Save(std::ofstream &file)
  size_t part=Item.size();
  if (file.write(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
 
- static const uint8_t PART_TYPE=0;
- static const uint8_t UNION_TYPE=1;
-
  auto save_function=[&file](std::shared_ptr<IPart> iPart_Ptr)
  {
   uint8_t part_union=UNION_TYPE;
@@ -76,9 +73,6 @@ bool CPartUnion::Load(std::ifstream &file)
  size_t part;
  if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
 
- static const uint8_t PART_TYPE=0;
- static const uint8_t UNION_TYPE=1;
-
  for(size_t n=0;n<part;n++)
  {
   //загружаем, какого типа объект нам нужно создавать
@@ -95,11 +89,11 @@ bool CPartUnion::Load(std::ifstream &file)
 //----------------------------------------------------------------------------------------------------
 //экспортировать
 //----------------------------------------------------------------------------------------------------
-bool CPartUnion::Export(std::ofstream &file)
+bool CPartUnion::Export(std::ofstream &file,int32_t scale_x,int32_t scale_y)
 {
- auto export_function=[&file](std::shared_ptr<IPart> iPart_Ptr)
+ auto export_function=[&file,scale_x,scale_y](std::shared_ptr<IPart> iPart_Ptr)
  {
-  iPart_Ptr->Export(file);
+  iPart_Ptr->Export(file,scale_x,scale_y);
  };
  std::for_each(Item.begin(),Item.end(),export_function);
 }

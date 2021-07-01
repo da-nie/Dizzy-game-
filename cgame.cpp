@@ -217,8 +217,8 @@ void CGame::DrawBarrier(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x*TILE_WIDTH-Map_X;
-  int32_t screen_y=block_y*TILE_HEIGHT-Map_Y;
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -243,8 +243,8 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x*TILE_WIDTH-Map_X;
-  int32_t screen_y=block_y*TILE_HEIGHT-Map_Y;
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);

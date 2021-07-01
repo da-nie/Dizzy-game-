@@ -38,19 +38,18 @@ class CPart:public IPart
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
   //-переменные-----------------------------------------------------------------------------------------
-  std::list<std::shared_ptr<IPart>> Item;//элементы
  private:
   //-переменные-----------------------------------------------------------------------------------------
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CPart(int32_t block_x=0,int32_t block_y=0,const CTilesSequence &cTilesSequence_Set=CTilesSequence(),bool barrier=false);
+  CPart(int32_t block_x=0,int32_t block_y=0,const CTilesSequence &cTilesSequence_Set=CTilesSequence(),bool barrier=false,const std::string &name="");
   //-деструктор-----------------------------------------------------------------------------------------
   ~CPart();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
   bool Save(std::ofstream &file);//записать
   bool Load(std::ifstream &file);//сохранить
-  bool Export(std::ofstream &file);//экспортировать
+  bool Export(std::ofstream &file,int32_t scale_x,int32_t scale_y);//экспортировать
   void Release(void);//удалить все элементы
   void AnimateTiles(void);//выполнить анимацию тайлов
   void Visit(std::function<void(std::shared_ptr<IPart>)> callback_function);//обойти все элементы

@@ -38,12 +38,15 @@ class IPart:public std::enable_shared_from_this<IPart>
   //-перечисления---------------------------------------------------------------------------------------    
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
+  static const uint8_t PART_TYPE=0;//отдельный элемент
+  static const uint8_t UNION_TYPE=1;//объединение элементов
   //-переменные-----------------------------------------------------------------------------------------
   int32_t BlockPosX;//позиция в блоках
   int32_t BlockPosY;
   CTilesSequence cTilesSequence;//последовательность тайлов
   bool Barrier;//является ли барьером
   bool Selected;//выбран
+  std::string Name;//название
  private:
   //-переменные-----------------------------------------------------------------------------------------
  public:
@@ -54,6 +57,7 @@ class IPart:public std::enable_shared_from_this<IPart>
    BlockPosY=0;
    Barrier=false;
    Selected=false;
+   Name="";
   }
   //-деструктор-----------------------------------------------------------------------------------------
   virtual ~IPart() {}  
@@ -61,7 +65,7 @@ class IPart:public std::enable_shared_from_this<IPart>
   //-открытые функции-----------------------------------------------------------------------------------
   virtual bool Save(std::ofstream &file)=0;//записать
   virtual bool Load(std::ifstream &file)=0;//сохранить
-  virtual bool Export(std::ofstream &file)=0;//экспортировать
+  virtual bool Export(std::ofstream &file,int32_t scale_x,int32_t scale_y)=0;//экспортировать
   virtual void Release(void)=0;//удалить все элементы
   virtual void AnimateTiles(void)=0;//выполнить анимацию тайлов
   virtual void Visit(std::function<void(std::shared_ptr<IPart>)> callback_function)=0;//обойти все элементы
