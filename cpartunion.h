@@ -50,7 +50,9 @@ class CPartUnion:public IPart
   bool Load(std::ifstream &file);//загрузить
   bool Export(std::ofstream &file,int32_t scale_x,int32_t scale_y);//экспортировать
   void Release(void);//удалить все элементы
-  void AnimateTiles(void);//выполнить анимацию тайлов
+  void AnimationTiles(void);//выполнить анимацию тайлов
+  void AnimationTilesByForce(void);//выполнить анимацию тайлов принудительно
+  void SetTilesAnimationFrame(size_t frame);//задать кадр анимации
   void Visit(std::function<void(std::shared_ptr<IPart>)> callback_function);//обойти все элементы
   void RemovePart(std::function<bool(std::shared_ptr<IPart>)> callback_function);//удалить часть
   std::list<std::shared_ptr<IPart> >* GetItemPtr(void);//получить указатель на список элементов

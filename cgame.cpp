@@ -173,14 +173,14 @@ CGame::~CGame()
 //----------------------------------------------------------------------------------------------------
 bool CGame::IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
- return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*39,0,25,22,true,0,0,0)); 
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*39,0,DizzyWidth,DizzyHeight,true,0,0,0)); 
 }
 //----------------------------------------------------------------------------------------------------
 //проверить столкновение с блоками корпуса Диззи
 //----------------------------------------------------------------------------------------------------
 bool CGame::IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
- return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*40,0,25,22,true,0,0,0)); 
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*40,0,DizzyWidth,DizzyHeight,true,0,0,0)); 
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -238,8 +238,10 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
  //рисуем фон
  CSprite &tiles=cSprite_Tiles;
 
- auto drawing_barrier_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
  { 
+  if (iPart_Ptr->FirstPlane==true) return;//передний план выводится отдельно
+
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
@@ -254,7 +256,35 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
 
   tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
  };
- std::for_each(Map.begin(),Map.end(),drawing_barrier_function);
+ std::for_each(Map.begin(),Map.end(),drawing_function);
+}
+//----------------------------------------------------------------------------------------------------
+//нарисовать карту переднего плана
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
+{
+ //рисуем фон
+ CSprite &tiles=cSprite_Tiles;
+
+ auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ { 
+  if (iPart_Ptr->FirstPlane==false) return;//здесь выводится только передний план
+
+  int32_t block_x=iPart_Ptr->BlockPosX;
+  int32_t block_y=iPart_Ptr->BlockPosY;
+
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
+
+  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
+  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
+
+  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
+  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
+
+  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
+ };
+ std::for_each(Map.begin(),Map.end(),drawing_function);
 }
 //----------------------------------------------------------------------------------------------------
 //очистить экран
@@ -266,8 +296,6 @@ void CGame::ClearScreen(IVideo *iVideo_Ptr,uint32_t color)
  iVideo_Ptr->GetScreenSize(width,height);
  iVideo_Ptr->FillRectangle(0,0,width,height,color);
 }
-
-
 
 //****************************************************************************************************
 //открытые функции
@@ -281,11 +309,12 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
  //стираем фон
  uint32_t sky=(0<<24)|(81<<16)|(162<<8)|(243<<0);
  ClearScreen(iVideo_Ptr,sky);
-
+ //рисуем карту
  DrawMap(iVideo_Ptr);
-
  //рисуем Диззи
- cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*sFrame_Ptr->ImageFrame,0,25,22,true); 
+ cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*sFrame_Ptr->ImageFrame,0,DizzyWidth,DizzyHeight,true); 
+ //рисуем элементы переднего плана
+ DrawFirstPlaneMap(iVideo_Ptr);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -411,9 +440,10 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
  if (SmallTickCounter==0)
  { 
   size_t size=Map.size();
-  for(size_t n=0;n<size;n++) Map[n]->AnimateTiles();
+  for(size_t n=0;n<size;n++) Map[n]->AnimationTiles();
  }
 }
+
 //----------------------------------------------------------------------------------------------------
 //управление от клавиатуры
 //----------------------------------------------------------------------------------------------------

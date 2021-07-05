@@ -52,14 +52,16 @@ CPartUnion::~CPartUnion()
 //----------------------------------------------------------------------------------------------------
 bool CPartUnion::Save(std::ofstream &file)
 {
+ //сохраняем тип элемента
+ uint8_t type=0;
+ type|=MASK_PART_IS_UNION;
+ if (file.write(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
+
  size_t part=Item.size();
  if (file.write(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
 
  auto save_function=[&file](std::shared_ptr<IPart> iPart_Ptr)
  {
-  uint8_t part_union=UNION_TYPE;
-  if (iPart_Ptr->GetItemPtr()==NULL) part_union=PART_TYPE;
-  if (file.write(reinterpret_cast<char*>(&part_union),sizeof(part_union)).fail()==true) return;
   iPart_Ptr->Save(file);
  };
  std::for_each(Item.begin(),Item.end(),save_function);
@@ -70,17 +72,24 @@ bool CPartUnion::Save(std::ofstream &file)
 //----------------------------------------------------------------------------------------------------
 bool CPartUnion::Load(std::ifstream &file)
 {
+ //считываем тип
+ uint8_t type;
+ if (file.read(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
+
+ if (!(type&MASK_PART_IS_UNION)) return(false);//неверный тип
+
  size_t part;
  if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
-
  for(size_t n=0;n<part;n++)
  {
-  //загружаем, какого типа объект нам нужно создавать
-  uint8_t part_union;
-  if (file.read(reinterpret_cast<char*>(&part_union),sizeof(part_union)).fail()==true) return(false);
+  //загружаем, какого типа объект нам нужно создавать  
+  if (file.read(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
+  //возвращаемся назад, так как сам класс тоже будет считывать свой тип
+  file.seekg(-static_cast<int32_t>(sizeof(type)),std::ios_base::cur);
+
   IPart *iPart_Ptr=NULL;
-  if (part_union==UNION_TYPE) iPart_Ptr=new CPartUnion();
-                   else iPart_Ptr=new CPart();
+  if (type&MASK_PART_IS_UNION) iPart_Ptr=new CPartUnion();
+                          else iPart_Ptr=new CPart();
   iPart_Ptr->Load(file);
   Item.push_back(std::shared_ptr<IPart>(iPart_Ptr));
  }
@@ -149,11 +158,35 @@ void CPartUnion::RemovePart(std::function<bool(std::shared_ptr<IPart>)> callback
 //----------------------------------------------------------------------------------------------------
 //выполнить анимацию тайлов
 //----------------------------------------------------------------------------------------------------
-void CPartUnion::AnimateTiles(void)
+void CPartUnion::AnimationTiles(void)
 {
- auto animatetiles_function=[](std::shared_ptr<IPart> iPart_Ptr)
+ auto animationtiles_function=[](std::shared_ptr<IPart> iPart_Ptr)
  {
-  iPart_Ptr->AnimateTiles();
+  iPart_Ptr->AnimationTiles();
  };
- std::for_each(Item.begin(),Item.end(),animatetiles_function);
+ std::for_each(Item.begin(),Item.end(),animationtiles_function);
 }
+//----------------------------------------------------------------------------------------------------
+//выполнить анимацию тайлов принудительно
+//----------------------------------------------------------------------------------------------------
+void CPartUnion::AnimationTilesByForce(void)
+{
+ auto animationtiles_function=[](std::shared_ptr<IPart> iPart_Ptr)
+ {
+  iPart_Ptr->AnimationTilesByForce();
+ };
+ std::for_each(Item.begin(),Item.end(),animationtiles_function);
+}
+//----------------------------------------------------------------------------------------------------
+//задать кадр анимации
+//----------------------------------------------------------------------------------------------------
+void CPartUnion::SetTilesAnimationFrame(size_t frame)
+{
+ auto setanimationframe_function=[&frame](std::shared_ptr<IPart> iPart_Ptr)
+ {
+  iPart_Ptr->SetTilesAnimationFrame(frame);
+ };
+ std::for_each(Item.begin(),Item.end(),setanimationframe_function);
+}
+
+

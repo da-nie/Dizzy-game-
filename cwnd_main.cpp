@@ -158,10 +158,7 @@ afx_msg void CWnd_Main::OnTimer(UINT nIDEvent)
  if (GetAsyncKeyState(VK_DOWN)&32768) down=true;
  if (GetAsyncKeyState(VK_SPACE)&32768) fire=true;
  
- static int counter=0;
- if (counter==0) cGame_Ptr->KeyboardControl(left,right,up,down,fire);
- counter++;
- counter%=3;
+ cGame_Ptr->KeyboardControl(left,right,up,down,fire);
 
  cGame_Ptr->OnTimer(iVideo_Ptr.get());
  cGame_Ptr->OnPaint(iVideo_Ptr.get());

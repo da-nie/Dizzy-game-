@@ -27,6 +27,7 @@ CTilesSequence::CTilesSequence(const CTile &cTile)
 {
  cTile_Sequence.push_back(cTile);
  CurrentIndex=0;
+ AnimationMode=ANIMATION_MODE_CYCLIC;
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -52,6 +53,10 @@ CTilesSequence::~CTilesSequence()
 //----------------------------------------------------------------------------------------------------
 bool CTilesSequence::Save(std::ofstream &file)
 {
+ uint8_t animation_mode=ANIMATION_MODE_SET_STEP_FOR_SAVE;
+ if (AnimationMode==ANIMATION_MODE_CYCLIC) animation_mode=ANIMATION_MODE_CYCLIC_FOR_SAVE;
+ if (file.write(reinterpret_cast<char*>(&animation_mode),sizeof(animation_mode)).fail()==true) return(false);
+
  bool ret=true;
  auto save_function=[&file,&ret](CTile &cTile)
  {
@@ -67,6 +72,11 @@ bool CTilesSequence::Save(std::ofstream &file)
 //----------------------------------------------------------------------------------------------------
 bool CTilesSequence::Load(std::ifstream &file)
 {
+ uint8_t animation_mode;
+ if (file.read(reinterpret_cast<char*>(&animation_mode),sizeof(animation_mode)).fail()==true) return(false);
+ AnimationMode=ANIMATION_MODE_SET_STEP;
+ if (animation_mode==ANIMATION_MODE_CYCLIC_FOR_SAVE) AnimationMode=ANIMATION_MODE_CYCLIC;
+
  int32_t size;
  if (file.read(reinterpret_cast<char*>(&size),sizeof(size)).fail()==true) return(false);
  cTile_Sequence.clear();
@@ -120,12 +130,31 @@ size_t CTilesSequence::GetCurrentIndex(void)
  return(CurrentIndex);
 }
 //----------------------------------------------------------------------------------------------------
-//перейти к следующему индексу тайла
+//перейти к следующему индексу тайла в зависимости от режима анимации
 //----------------------------------------------------------------------------------------------------
 void CTilesSequence::ToNextTile(void)
 {
+ if (AnimationMode==ANIMATION_MODE_CYCLIC)
+ {
+  CurrentIndex++;
+  CurrentIndex%=GetSize();
+ }
+}
+//----------------------------------------------------------------------------------------------------
+//перейти к следующему индексу тайла принудительно
+//----------------------------------------------------------------------------------------------------
+void CTilesSequence::ToNextTileByForce(void)
+{
  CurrentIndex++;
  CurrentIndex%=GetSize();
+}
+//----------------------------------------------------------------------------------------------------
+//перейти к индексу тайла
+//----------------------------------------------------------------------------------------------------
+void CTilesSequence::ToTile(size_t index)
+{
+ index%=GetSize();
+ CurrentIndex=index;
 }
 //----------------------------------------------------------------------------------------------------
 //сбросить текущий индекс тайла
@@ -141,3 +170,18 @@ std::vector<CTile>* CTilesSequence::GetItemPtr(void)
 {
  return(&cTile_Sequence);
 }
+//----------------------------------------------------------------------------------------------------
+//получить режим анимации
+//----------------------------------------------------------------------------------------------------
+CTilesSequence::ANIMATION_MODE CTilesSequence::GetAnimationMode(void)
+{
+ return(AnimationMode);
+}
+//----------------------------------------------------------------------------------------------------
+//задать режим анимации
+//----------------------------------------------------------------------------------------------------
+void CTilesSequence::SetAnimationMode(CTilesSequence::ANIMATION_MODE animation_mode)
+{
+ AnimationMode=animation_mode;
+}
+

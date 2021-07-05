@@ -22,12 +22,13 @@
 //----------------------------------------------------------------------------------------------------
 //конструктор
 //----------------------------------------------------------------------------------------------------
-CPart::CPart(int32_t block_x,int32_t block_y,const CTilesSequence &cTilesSequence_Set,bool barrier,const std::string &name)
+CPart::CPart(int32_t block_x,int32_t block_y,const CTilesSequence &cTilesSequence_Set,bool barrier,bool first_plane,const std::string &name)
 {
  BlockPosX=block_x;
  BlockPosY=block_y;
  cTilesSequence=cTilesSequence_Set;
  Barrier=barrier;
+ FirstPlane=first_plane;
  Name=name;
 }
 //----------------------------------------------------------------------------------------------------
@@ -55,22 +56,20 @@ CPart::~CPart()
 //----------------------------------------------------------------------------------------------------
 bool CPart::Save(std::ofstream &file)
 {
+ //сохраняем тип элемента
+ uint8_t type=0;
+ if (Barrier==true) type|=MASK_PART_IS_BARRIER;
+ if (FirstPlane==true) type|=MASK_PART_IS_FIRST_PLANE;
+ if (file.write(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
+ //сохраняем координаты элемента
  if (file.write(reinterpret_cast<char*>(&BlockPosX),sizeof(BlockPosX)).fail()==true) return(false);
  if (file.write(reinterpret_cast<char*>(&BlockPosY),sizeof(BlockPosY)).fail()==true) return(false);
-
+ //сохраняем имя элемента
  uint32_t name_length=Name.length();
  if (file.write(reinterpret_cast<char*>(&name_length),sizeof(name_length)).fail()==true) return(false);
  if (file.write(reinterpret_cast<const char*>(Name.c_str()),sizeof(char)*name_length).fail()==true) return(false);
-
+ //сохраняем последовательность анимации тайлов элемента
  cTilesSequence.Save(file);
-
- static const uint8_t NO_BARRIER_TYPE=0;
- static const uint8_t BARRIER_TYPE=1;
- uint8_t barrier=NO_BARRIER_TYPE;
- if (Barrier==true) barrier=BARRIER_TYPE;
-
- if (file.write(reinterpret_cast<char*>(&barrier),sizeof(barrier)).fail()==true) return(false);
-
  return(true);
 }
 //----------------------------------------------------------------------------------------------------
@@ -78,9 +77,14 @@ bool CPart::Save(std::ofstream &file)
 //----------------------------------------------------------------------------------------------------
 bool CPart::Load(std::ifstream &file)
 {
+ //считываем тип
+ uint8_t type;
+ if (file.read(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
+
+ if (type&MASK_PART_IS_UNION) return(false);//неверный тип
+
  if (file.read(reinterpret_cast<char*>(&BlockPosX),sizeof(BlockPosX)).fail()==true) return(false);
  if (file.read(reinterpret_cast<char*>(&BlockPosY),sizeof(BlockPosY)).fail()==true) return(false);
-
 
  uint32_t name_length;
  if (file.read(reinterpret_cast<char*>(&name_length),sizeof(name_length)).fail()==true) return(false);
@@ -92,15 +96,10 @@ bool CPart::Load(std::ifstream &file)
 
  cTilesSequence.Load(file);
 
- static const uint8_t NO_BARRIER_TYPE=0;
- static const uint8_t BARRIER_TYPE=1;
-
- uint8_t barrier;
- if (file.read(reinterpret_cast<char*>(&barrier),sizeof(barrier)).fail()==true) return(false);
-
- Barrier=false;
- if (barrier==BARRIER_TYPE) Barrier=true;
-
+ if (type&MASK_PART_IS_BARRIER) Barrier=true;
+                           else Barrier=false;
+ if (type&MASK_PART_IS_FIRST_PLANE) FirstPlane=true;
+                               else FirstPlane=false;
  return(true);
 }
 //----------------------------------------------------------------------------------------------------
@@ -108,6 +107,12 @@ bool CPart::Load(std::ifstream &file)
 //----------------------------------------------------------------------------------------------------
 bool CPart::Export(std::ofstream &file,int32_t scale_x,int32_t scale_y)
 {
+ //сохраняем тип элемента
+ uint8_t type=0;
+ if (Barrier==true) type|=MASK_PART_IS_BARRIER;
+ if (FirstPlane==true) type|=MASK_PART_IS_FIRST_PLANE;
+ if (file.write(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
+
  int32_t pos_x=scale_x*BlockPosX;
  int32_t pos_y=scale_y*BlockPosY;
 
@@ -120,12 +125,7 @@ bool CPart::Export(std::ofstream &file,int32_t scale_x,int32_t scale_y)
 
  cTilesSequence.Save(file);
 
- static const uint8_t NO_BARRIER_TYPE=0;
- static const uint8_t BARRIER_TYPE=1;
- uint8_t barrier=NO_BARRIER_TYPE;
- if (Barrier==true) barrier=BARRIER_TYPE;
-
- if (file.write(reinterpret_cast<char*>(&barrier),sizeof(barrier)).fail()==true) return(false);
+ return(true);
 }
 //----------------------------------------------------------------------------------------------------
 //удалить все элементы
@@ -136,9 +136,23 @@ void CPart::Release(void)
 //----------------------------------------------------------------------------------------------------
 //выполнить анимацию тайлов
 //----------------------------------------------------------------------------------------------------
-void CPart::AnimateTiles(void)
+void CPart::AnimationTiles(void)
 {
  cTilesSequence.ToNextTile();
+}
+//----------------------------------------------------------------------------------------------------
+//выполнить анимацию тайлов принудительно
+//----------------------------------------------------------------------------------------------------
+void CPart::AnimationTilesByForce(void)
+{
+ cTilesSequence.ToNextTileByForce();
+}
+//----------------------------------------------------------------------------------------------------
+//задать кадр анимации
+//----------------------------------------------------------------------------------------------------
+void CPart::SetTilesAnimationFrame(size_t frame)
+{
+ cTilesSequence.ToTile(frame);
 }
 //----------------------------------------------------------------------------------------------------
 //обойти все элементы

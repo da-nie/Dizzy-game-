@@ -135,6 +135,7 @@ class CGame
   bool LoadMap(const std::string &file_name);//загрузить карту
   void DrawBarrier(IVideo *iVideo_Ptr);//нарисовать преграды
   void DrawMap(IVideo *iVideo_Ptr);//нарисовать карту
+  void DrawFirstPlaneMap(IVideo *iVideo_Ptr);//нарисовать карту переднего плана
   void ClearScreen(IVideo *iVideo_Ptr,uint32_t color);//очистить экран
 };
 

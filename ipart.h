@@ -38,13 +38,15 @@ class IPart:public std::enable_shared_from_this<IPart>
   //-перечисления---------------------------------------------------------------------------------------    
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
-  static const uint8_t PART_TYPE=0;//отдельный элемент
-  static const uint8_t UNION_TYPE=1;//объединение элементов
+  static const uint8_t MASK_PART_IS_UNION=(1<<0);//указание, что данный элемент является объединением
+  static const uint8_t MASK_PART_IS_BARRIER=(1<<1);//указание, что данный элемент является препятствием
+  static const uint8_t MASK_PART_IS_FIRST_PLANE=(1<<2);//указание, что данный элемент является элементом переднего плана
   //-переменные-----------------------------------------------------------------------------------------
   int32_t BlockPosX;//позиция в блоках
   int32_t BlockPosY;
   CTilesSequence cTilesSequence;//последовательность тайлов
   bool Barrier;//является ли барьером
+  bool FirstPlane;//является ли передним планом (выводится поверх персонажа)
   bool Selected;//выбран
   std::string Name;//название
  private:
@@ -56,6 +58,7 @@ class IPart:public std::enable_shared_from_this<IPart>
    BlockPosX=0;
    BlockPosY=0;
    Barrier=false;
+   FirstPlane=false;
    Selected=false;
    Name="";
   }
@@ -67,7 +70,9 @@ class IPart:public std::enable_shared_from_this<IPart>
   virtual bool Load(std::ifstream &file)=0;//сохранить
   virtual bool Export(std::ofstream &file,int32_t scale_x,int32_t scale_y)=0;//экспортировать
   virtual void Release(void)=0;//удалить все элементы
-  virtual void AnimateTiles(void)=0;//выполнить анимацию тайлов
+  virtual void AnimationTiles(void)=0;//выполнить анимацию тайлов
+  virtual void AnimationTilesByForce(void)=0;//выполнить анимацию тайлов принудительно
+  virtual void SetTilesAnimationFrame(size_t frame)=0;//задать кадр анимации
   virtual void Visit(std::function<void(std::shared_ptr<IPart>)> callback_function)=0;//обойти все элементы
   virtual bool IsCoord(int32_t x,int32_t y)//находится ли данный блок в заданных координатах
   {
@@ -75,7 +80,7 @@ class IPart:public std::enable_shared_from_this<IPart>
    return(false);
   }
   virtual void RemovePart(std::function<bool(std::shared_ptr<IPart>)> callback_function)=0;//удалить часть
-  virtual std::list<std::shared_ptr<IPart>>* GetItemPtr(void)=0;//получить указатель на список элементов
+  virtual std::list<std::shared_ptr<IPart>>* GetItemPtr(void)=0;//получить указатель на список элементов  
   //-открытые статические функции-----------------------------------------------------------------------
 };
 

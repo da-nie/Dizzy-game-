@@ -39,10 +39,11 @@ class CPart:public IPart
   //-константы------------------------------------------------------------------------------------------
   //-переменные-----------------------------------------------------------------------------------------
  private:
+  //-константы------------------------------------------------------------------------------------------
   //-переменные-----------------------------------------------------------------------------------------
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CPart(int32_t block_x=0,int32_t block_y=0,const CTilesSequence &cTilesSequence_Set=CTilesSequence(),bool barrier=false,const std::string &name="");
+  CPart(int32_t block_x=0,int32_t block_y=0,const CTilesSequence &cTilesSequence_Set=CTilesSequence(),bool barrier=false,bool first_plane=false,const std::string &name="");
   //-деструктор-----------------------------------------------------------------------------------------
   ~CPart();
  public:
@@ -51,7 +52,9 @@ class CPart:public IPart
   bool Load(std::ifstream &file);//сохранить
   bool Export(std::ofstream &file,int32_t scale_x,int32_t scale_y);//экспортировать
   void Release(void);//удалить все элементы
-  void AnimateTiles(void);//выполнить анимацию тайлов
+  void AnimationTiles(void);//выполнить анимацию тайлов
+  void AnimationTilesByForce(void);//выполнить анимацию тайлов принудительно
+  void SetTilesAnimationFrame(size_t frame);//задать кадр анимации
   void Visit(std::function<void(std::shared_ptr<IPart>)> callback_function);//обойти все элементы
   void RemovePart(std::function<bool(std::shared_ptr<IPart>)> callback_function);//удалить часть
   std::list<std::shared_ptr<IPart> >* GetItemPtr(void);//получить указатель на список элементов
