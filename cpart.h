@@ -43,7 +43,7 @@ class CPart:public IPart
   //-переменные-----------------------------------------------------------------------------------------
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CPart(int32_t block_x=0,int32_t block_y=0,const CTilesSequence &cTilesSequence_Set=CTilesSequence(),bool barrier=false,bool first_plane=false,const std::string &name="");
+  CPart(int32_t block_x=0,int32_t block_y=0,const CTilesSequence &cTilesSequence_Set=CTilesSequence(),bool barrier=false,bool first_plane=false,bool item=false,const std::string &name="");
   //-деструктор-----------------------------------------------------------------------------------------
   ~CPart();
  public:

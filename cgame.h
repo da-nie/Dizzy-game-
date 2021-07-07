@@ -17,6 +17,8 @@
 #include "ivideo.h"
 #include "csprite.h"
 #include "ipart.h"
+#include "iconditionalexpression.h"
+#include "cgamestate.h"
 
 //****************************************************************************************************
 //макроопределения
@@ -39,8 +41,8 @@ class CGame
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
-  static const int32_t DizzyWidth=25;
-  static const int32_t DizzyHeight=22;
+  static const int32_t DIZZY_WIDTH=25;
+  static const int32_t DIZZY_HEIGHT=22;
     
   static const int32_t SCREEN_WIDTH=320;
   static const int32_t SCREEN_HEIGHT=240;
@@ -51,6 +53,8 @@ class CGame
   static const int32_t TILE_BORDER_HEIGHT=1;//высота рамки  
   static const int32_t TILE_WITH_BORDER_WIDTH=TILE_WIDTH+TILE_BORDER_WIDTH+TILE_BORDER_WIDTH;//ширина тайла с рамкой
   static const int32_t TILE_WITH_BORDER_HEIGHT=TILE_HEIGHT+TILE_BORDER_HEIGHT+TILE_BORDER_HEIGHT;//высота тайла с рамкой
+
+  static const int32_t USE_DELAY_COUNTER_MAX_VALUE=10;//максимальное значнение счётчика задержки до следующего нажатия кнопки "использовать"
  private:
   //-переменные-----------------------------------------------------------------------------------------
 
@@ -116,8 +120,12 @@ class CGame
   std::vector<SFrame> sFrame_Array;//набор кадров для анимации
 
   int32_t SmallTickCounter;//счётчик малого такта
+  
+  std::vector<std::shared_ptr<IConditionalExpression> > ConditionalExpression;//набор условных выражений игровой логики
 
-  std::vector<std::shared_ptr<IPart>> Map;//карта
+  CGameState cGameState;//состояние игры
+
+  uint32_t UseDelayCounter;//счётчик до следующего нажатия кнопки "использовать"
  public:
   //-конструктор----------------------------------------------------------------------------------------
   CGame(void);
@@ -128,6 +136,7 @@ class CGame
   void OnPaint(IVideo *iVideo_Ptr);//отрисовать картинку  
   void OnTimer(IVideo *iVideo_Ptr);//обработка таймера  
   void KeyboardControl(bool left,bool right,bool up,bool down,bool fire);//управление от клавиатуры
+  void PressUse(void);//нажата кнопка "использовать"
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
   bool IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками ног Диззи
@@ -136,7 +145,9 @@ class CGame
   void DrawBarrier(IVideo *iVideo_Ptr);//нарисовать преграды
   void DrawMap(IVideo *iVideo_Ptr);//нарисовать карту
   void DrawFirstPlaneMap(IVideo *iVideo_Ptr);//нарисовать карту переднего плана
+  void DrawItemMap(IVideo *iVideo_Ptr);//нарисовать карту предметов
   void ClearScreen(IVideo *iVideo_Ptr,uint32_t color);//очистить экран
+  void CreateConditionalExpression(void);//создать условные выражения
 };
 
 #endif

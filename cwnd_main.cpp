@@ -150,13 +150,15 @@ afx_msg void CWnd_Main::OnTimer(UINT nIDEvent)
  bool right=false;
  bool up=false;
  bool down=false;
- bool fire=false;
-
+ bool fire=false; 
  if (GetAsyncKeyState(VK_LEFT)&32768) left=true;
  if (GetAsyncKeyState(VK_RIGHT)&32768) right=true;
  if (GetAsyncKeyState(VK_UP)&32768) up=true;
  if (GetAsyncKeyState(VK_DOWN)&32768) down=true;
  if (GetAsyncKeyState(VK_SPACE)&32768) fire=true;
+ if (GetAsyncKeyState(VK_RETURN)&32768) fire=true;
+ if (GetAsyncKeyState(VK_LCONTROL)&32768) fire=true;
+ if (GetAsyncKeyState(VK_RCONTROL)&32768) fire=true;
  
  cGame_Ptr->KeyboardControl(left,right,up,down,fire);
 

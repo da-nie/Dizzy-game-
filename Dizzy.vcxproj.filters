@@ -54,6 +54,39 @@
     <ClCompile Include="ipart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cconditionalofintersection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cconditionalofuse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="iconditionalexpression.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cactionchangename.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cactionchangeposition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="iaction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cactionsetanimationstep.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cactionpickup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cgamestate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cconditionalofpickup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cactioncopyposition.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -93,6 +126,39 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ctilessequence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iconditionalexpression.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cconditionalofintersection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cconditionalofuse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="iaction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionchangename.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionchangeposition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionsetanimationstep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cgamestate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionpickup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cconditionalofpickup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactioncopyposition.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

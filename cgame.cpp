@@ -3,8 +3,17 @@
 //****************************************************************************************************
 #include "cgame.h"
 #include "cpart.h"
+#include "cconditionalofintersection.h"
+#include "cconditionalofuse.h"
+#include "cconditionalofpickup.h"
+#include "cactionchangename.h"
+#include "cactioncopyposition.h"
+#include "cactionchangeposition.h"
+#include "cactionsetanimationstep.h"
+#include "cactionpickup.h"
 #include <algorithm>
 #include <memory>
+
 
 //****************************************************************************************************
 //глобальные переменные
@@ -153,9 +162,13 @@ CGame::CGame(void)
 
  SmallTickCounter=0;
 
+ UseDelayCounter=0;
+
  //загружаем карту
- Map.clear();
+ cGameState.Map.clear();
  if (LoadMap("map.gam")==false) MessageBox(NULL,"Ошибка загрузки файла карты!","Ошибка",MB_OK);
+ //создаём условные выражения
+ CreateConditionalExpression(); 
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -173,14 +186,14 @@ CGame::~CGame()
 //----------------------------------------------------------------------------------------------------
 bool CGame::IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
- return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*39,0,DizzyWidth,DizzyHeight,true,0,0,0)); 
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DIZZY_WIDTH*39,0,DIZZY_WIDTH,DIZZY_HEIGHT,true,0,0,0)); 
 }
 //----------------------------------------------------------------------------------------------------
 //проверить столкновение с блоками корпуса Диззи
 //----------------------------------------------------------------------------------------------------
 bool CGame::IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
- return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DizzyWidth*40,0,DizzyWidth,DizzyHeight,true,0,0,0)); 
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DIZZY_WIDTH*40,0,DIZZY_WIDTH,DIZZY_HEIGHT,true,0,0,0)); 
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -198,7 +211,7 @@ bool CGame::LoadMap(const std::string &file_name)
  {
   std::shared_ptr<IPart> iPart_Ptr(new CPart());
   if (iPart_Ptr->Load(file)==false) return(false);
-  Map.push_back(iPart_Ptr);
+  cGameState.Map.push_back(iPart_Ptr);
  }
  return(true);
 }
@@ -228,7 +241,7 @@ void CGame::DrawBarrier(IVideo *iVideo_Ptr)
 
   tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
  };
- std::for_each(Map.begin(),Map.end(),drawing_barrier_function);
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_barrier_function);
 }
 //----------------------------------------------------------------------------------------------------
 //нарисовать карту
@@ -241,6 +254,7 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
  auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
  { 
   if (iPart_Ptr->FirstPlane==true) return;//передний план выводится отдельно
+  if (iPart_Ptr->Item==true) return;//предметы выводятся отдельно
 
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
@@ -256,7 +270,7 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
 
   tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
  };
- std::for_each(Map.begin(),Map.end(),drawing_function);
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
 }
 //----------------------------------------------------------------------------------------------------
 //нарисовать карту переднего плана
@@ -284,8 +298,38 @@ void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
 
   tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
  };
- std::for_each(Map.begin(),Map.end(),drawing_function);
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
 }
+
+//----------------------------------------------------------------------------------------------------
+//нарисовать карту предметов
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawItemMap(IVideo *iVideo_Ptr)
+{
+ //рисуем фон
+ CSprite &tiles=cSprite_Tiles;
+
+ auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ { 
+  if (iPart_Ptr->Item==false) return;//здесь выводятся только предметы
+
+  int32_t block_x=iPart_Ptr->BlockPosX;
+  int32_t block_y=iPart_Ptr->BlockPosY;
+
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
+
+  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
+  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
+
+  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
+  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
+
+  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
+ };
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
+}
+
 //----------------------------------------------------------------------------------------------------
 //очистить экран
 //----------------------------------------------------------------------------------------------------
@@ -296,6 +340,80 @@ void CGame::ClearScreen(IVideo *iVideo_Ptr,uint32_t color)
  iVideo_Ptr->GetScreenSize(width,height);
  iVideo_Ptr->FillRectangle(0,0,width,height,color);
 }
+
+//----------------------------------------------------------------------------------------------------
+//создать условные выражения
+//----------------------------------------------------------------------------------------------------
+void CGame::CreateConditionalExpression(void)
+{
+ std::shared_ptr<IAction> action_one_ptr;
+ std::shared_ptr<IAction> action_two_ptr;
+ std::shared_ptr<IConditionalExpression> conditional_ptr;
+
+ ConditionalExpression.clear();
+// ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfUse("","",NULL,std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfIntersection("BLOCK",std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
+ //добавляем событие взятия бутылки
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE",std::shared_ptr<IAction>(new CActionPickUp()))));
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE WATER",std::shared_ptr<IAction>(new CActionPickUp()))));
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("RING",std::shared_ptr<IAction>(new CActionPickUp()))));
+ //добавляем событие наполнения бутылки водой
+ action_one_ptr.reset(new CActionChangeName("BOTTLE WATER",std::shared_ptr<IAction>(new CActionSetAnimationStep(1))));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("BOTTLE","WATER",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ //добавляем событие передачи бутылки кошке
+ action_one_ptr.reset(new CActionChangePosition(-100,-100));//действие с первым объектом 
+ action_two_ptr.reset(new CActionChangeName("LUCKY CAT",std::shared_ptr<IAction>(new CActionCopyPosition("RING","RING_POS"))));//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("BOTTLE WATER","CAT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+}
+//----------------------------------------------------------------------------------------------------
+//нажата кнопка "использовать"
+//----------------------------------------------------------------------------------------------------
+void CGame::PressUse(void)
+{
+ if (UseDelayCounter>0) return;//рано
+ UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
+
+ //обрабатываем события взятия
+ size_t size; 
+ size=cGameState.Inventory.size();
+ if (size==0)//в инвентаре нет предметов
+ {
+  size=ConditionalExpression.size();
+  cGameState.Take.clear();
+  for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
+  //перемещаем возможные для взятия объекты в инвентарь
+  size=cGameState.Take.size();
+  for(size_t n=0;n<size;n++)
+  {
+   cGameState.Take[n]->BlockPosX=-100;
+   cGameState.Take[n]->BlockPosY=-100;
+   cGameState.Inventory.push_back(cGameState.Take[n]);
+  }  
+ }
+ else//если в инвентаре есть предметы, то применяем их или выкладываем
+ {
+  //задаём всем предметам координаты Диззи
+  for(size_t n=0;n<size;n++)
+  {
+   cGameState.Inventory[n]->BlockPosX=(X+DIZZY_WIDTH/2)-TILE_WIDTH/2+Map_X;
+   cGameState.Inventory[n]->BlockPosY=(Y+DIZZY_HEIGHT)-TILE_HEIGHT+Map_Y;
+   //используем предметы
+   cGameState.UsedObject=cGameState.Inventory[n];
+   size_t size=ConditionalExpression.size();
+   cGameState.Take.clear();
+   for(size_t m=0;m<size;m++) ConditionalExpression[m]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
+  }
+  cGameState.Inventory.clear();
+ } 
+}
+
+
+
+
 
 //****************************************************************************************************
 //открытые функции
@@ -311,8 +429,10 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
  ClearScreen(iVideo_Ptr,sky);
  //рисуем карту
  DrawMap(iVideo_Ptr);
+ //рисуем предметы
+ DrawItemMap(iVideo_Ptr);
  //рисуем Диззи
- cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DizzyWidth*sFrame_Ptr->ImageFrame,0,DizzyWidth,DizzyHeight,true); 
+ cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DIZZY_WIDTH*sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
  //рисуем элементы переднего плана
  DrawFirstPlaneMap(iVideo_Ptr);
 }
@@ -322,6 +442,8 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
 //----------------------------------------------------------------------------------------------------
 void CGame::OnTimer(IVideo *iVideo_Ptr)
 { 
+ if (UseDelayCounter>0) UseDelayCounter--;
+
  static int counter=0;
  if (counter==0)
  {
@@ -439,9 +561,14 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
  //выполняем анимацию
  if (SmallTickCounter==0)
  { 
-  size_t size=Map.size();
-  for(size_t n=0;n<size;n++) Map[n]->AnimationTiles();
+  size_t size=cGameState.Map.size();
+  for(size_t n=0;n<size;n++) cGameState.Map[n]->AnimationTiles();
  }
+
+ //обрабатываем события
+ size_t size=ConditionalExpression.size();
+ cGameState.Take.clear();
+ for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,false,cGameState);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -481,6 +608,7 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
    if (dX<0 && sFrame_Ptr->Move!=MOVE_LEFT) sFrame_Ptr=sFrame_MoveLeft_Ptr;
    if (dX==0 && dY==0 && sFrame_Ptr->Move!=MOVE_STOP) sFrame_Ptr=sFrame_Stop_Ptr;
   }
+  if (sFrame_Ptr->Move==MOVE_STOP && fire==true) PressUse();
  }
 }
 
