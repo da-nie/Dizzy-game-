@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "ivideo.h"
+#include "cfontprinter.h"
 #include "csprite.h"
 #include "ipart.h"
 #include "iconditionalexpression.h"
@@ -64,6 +65,7 @@ class CGame
   int32_t Map_Y;
 
   CSprite cSprite_Dizzy;//спрайт Диззи
+  CSprite cSprite_Frame;//рамки
 
   CSprite cSprite_Tiles;//тайлы
   CSprite cSprite_TilesBarrier;//непроницаемость тайлов
@@ -122,6 +124,7 @@ class CGame
   int32_t SmallTickCounter;//счётчик малого такта
   
   std::vector<std::shared_ptr<IConditionalExpression> > ConditionalExpression;//набор условных выражений игровой логики
+  std::shared_ptr<CFontPrinter> cFontPrinter_Ptr;//указатель на класс работы со шрифтами
 
   CGameState cGameState;//состояние игры
 
@@ -133,12 +136,13 @@ class CGame
   ~CGame();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  void OnPaint(IVideo *iVideo_Ptr);//отрисовать картинку  
-  void OnTimer(IVideo *iVideo_Ptr);//обработка таймера  
-  void KeyboardControl(bool left,bool right,bool up,bool down,bool fire);//управление от клавиатуры
-  void PressUse(void);//нажата кнопка "использовать"
+  void OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVideo_Ptr);//обработка таймера  
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
+  void OnPaint(IVideo *iVideo_Ptr);//отрисовать картинку  
+  void KeyboardControl(bool left,bool right,bool up,bool down,bool fire);//управление от клавиатуры
+  void PressUse(void);//нажата кнопка "использовать"
+  void Processing(IVideo *iVideo_Ptr);//обработка игрового поля
   bool IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками ног Диззи
   bool IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками корпуса Диззи
   bool LoadMap(const std::string &file_name);//загрузить карту
@@ -148,6 +152,7 @@ class CGame
   void DrawItemMap(IVideo *iVideo_Ptr);//нарисовать карту предметов
   void ClearScreen(IVideo *iVideo_Ptr,uint32_t color);//очистить экран
   void CreateConditionalExpression(void);//создать условные выражения
+  void PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr);//вывод сообщения
 };
 
 #endif

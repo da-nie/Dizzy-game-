@@ -25,6 +25,7 @@
 CActionPickUp::CActionPickUp(std::shared_ptr<IAction> iAction_Ptr)
 {
  iAction_NextPtr=iAction_Ptr;
+ Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -52,4 +53,11 @@ void CActionPickUp::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &cGameSt
 {
  cGameState.AddTake(iPart_Ptr);
  if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
+}
+//----------------------------------------------------------------------------------------------------
+//инициализация
+//----------------------------------------------------------------------------------------------------
+void CActionPickUp::Init(void)
+{
+ if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Init();
 }

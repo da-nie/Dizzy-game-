@@ -26,6 +26,7 @@ CActionChangeName::CActionChangeName(const std::string &name,std::shared_ptr<IAc
 { 
  Name=name;
  iAction_NextPtr=iAction_Ptr;
+ Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -53,4 +54,11 @@ void CActionChangeName::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &cGa
 {
  iPart_Ptr->Name=Name;
  if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
+}
+//----------------------------------------------------------------------------------------------------
+//инициализация
+//----------------------------------------------------------------------------------------------------
+void CActionChangeName::Init(void)
+{
+ if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Init();
 }

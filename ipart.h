@@ -51,6 +51,9 @@ class IPart:public std::enable_shared_from_this<IPart>
   bool Item;//является ли предметом
   bool Selected;//выбран
   std::string Name;//название
+
+  bool InInventory;//предмет находится в инвентаре
+  bool Enabled;//разрешён ли к использованию и выводу предмет
  private:
   //-переменные-----------------------------------------------------------------------------------------
  public:
@@ -63,6 +66,8 @@ class IPart:public std::enable_shared_from_this<IPart>
    FirstPlane=false;
    Item=false;
    Selected=false;
+   InInventory=false;
+   Enabled=true;
    Name="";
   }
   //-деструктор-----------------------------------------------------------------------------------------
@@ -84,6 +89,10 @@ class IPart:public std::enable_shared_from_this<IPart>
   }
   virtual void RemovePart(std::function<bool(std::shared_ptr<IPart>)> callback_function)=0;//удалить часть
   virtual std::list<std::shared_ptr<IPart>>* GetItemPtr(void)=0;//получить указатель на список элементов  
+  virtual void PushInventory(void)=0;//поместить предмет в инвентарь
+  virtual void PopInventory(void)=0;//забрать предмет из инвентаря
+  virtual void Enable(void)=0;//разрешить использование предмета
+  virtual void Disable(void)=0;//запретить использование предмета
   //-открытые статические функции-----------------------------------------------------------------------
 };
 

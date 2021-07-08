@@ -47,7 +47,7 @@ CSprite::~CSprite()
 //----------------------------------------------------------------------------------------------------
 //загрузить спрайт
 //----------------------------------------------------------------------------------------------------
-bool CSprite::Load(char *file_name)
+bool CSprite::Load(const char *file_name)
 {
  Release();
  Data_Ptr.reset(reinterpret_cast<uint32_t*>(LoadTGAFromFile(file_name,Width,Height)));

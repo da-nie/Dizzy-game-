@@ -50,7 +50,7 @@ class CSprite
   ~CSprite();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  bool Load(char *file_name);//загрузить спрайт
+  bool Load(const char *file_name);//загрузить спрайт
   void Put(IVideo *iVideo_Ptr,int32_t x,int32_t y,bool alpha);//отобразить спрайт
   void PutSpriteItem(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offsetx,int32_t offsety,int32_t width,int32_t height,bool alpha);//отобразить часть спрайта
   bool IsCollizionSpriteItem(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offsetx,int32_t offsety,int32_t width,int32_t height,bool alpha,uint8_t back_r,uint8_t back_g,uint8_t back_b);//проверить на пересечение части спрайта с точками, отличными от фона

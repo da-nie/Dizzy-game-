@@ -27,6 +27,7 @@ CConditionalOfIntersection::CConditionalOfIntersection(const std::string &name,s
 { 
  Name=name;
  iAction_Ptr=iAction_SetPtr;
+ Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -56,6 +57,9 @@ void CConditionalOfIntersection::Execute(std::vector<std::shared_ptr<IPart> > &M
  auto execute_function=[this,&cGameState,&iAction_LocalPtr,part_width,part_height,dizzy_x,dizzy_y,dizzy_width,dizzy_height](std::shared_ptr<IPart> iPart_Ptr)
  {  
   if (iPart_Ptr->Name.compare(Name)!=0) return;//имена не совпадают
+  if (iPart_Ptr->InInventory==true) return;//предмет в инвентаре
+  if (iPart_Ptr->Enabled==false) return;//предмет неактивен
+
   //проверяем пересечение
   int32_t x1=iPart_Ptr->BlockPosX;
   int32_t y1=iPart_Ptr->BlockPosY;
@@ -76,4 +80,11 @@ void CConditionalOfIntersection::Execute(std::vector<std::shared_ptr<IPart> > &M
   if (iAction_LocalPtr.get()!=NULL) iAction_LocalPtr->Execute(iPart_Ptr,cGameState);
  };
  std::for_each(Map.begin(),Map.end(),execute_function);
+}
+//----------------------------------------------------------------------------------------------------
+//инициализация
+//----------------------------------------------------------------------------------------------------
+void CConditionalOfIntersection::Init(void)
+{
+ if (iAction_Ptr.get()!=NULL) iAction_Ptr->Init();
 }

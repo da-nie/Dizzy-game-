@@ -7,9 +7,13 @@
 #include "cconditionalofuse.h"
 #include "cconditionalofpickup.h"
 #include "cactionchangename.h"
+#include "cactionchangenameglobal.h"
 #include "cactioncopyposition.h"
 #include "cactionchangeposition.h"
 #include "cactionsetanimationstep.h"
+#include "cactionmessage.h"
+#include "cactionsingle.h"
+#include "cactionsetenabled.h"
 #include "cactionpickup.h"
 #include <algorithm>
 #include <memory>
@@ -46,6 +50,11 @@ CGame::CGame(void)
 
  cSprite_TilesBarrier.Load("Tiles\\tiles_barrier.tga");
  cSprite_TilesBarrier.SetAlpha(0,0,0,0);
+
+ cSprite_Frame.Load("Sprites\\frame.tga");
+ cSprite_Frame.SetAlpha(0,81,162,243);
+
+ cFontPrinter_Ptr.reset(new CFontPrinter("Sprites\\font.tga",8,8,81,162,243));
 
  //Dizzy стоит
  sFrame_Array.push_back(SFrame(0,MOVE_STOP,false,NULL));//0 
@@ -180,194 +189,62 @@ CGame::~CGame()
 //****************************************************************************************************
 //закрытые функции
 //****************************************************************************************************
-
 //----------------------------------------------------------------------------------------------------
-//проверить столкновение с блоками ног Диззи
+//перерисовать картинку
 //----------------------------------------------------------------------------------------------------
-bool CGame::IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
+void CGame::OnPaint(IVideo *iVideo_Ptr)
 {
- return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DIZZY_WIDTH*39,0,DIZZY_WIDTH,DIZZY_HEIGHT,true,0,0,0)); 
+ //стираем фон
+ uint32_t sky=(0<<24)|(81<<16)|(162<<8)|(243<<0);
+ ClearScreen(iVideo_Ptr,sky);
+ //рисуем карту
+ DrawMap(iVideo_Ptr);
+ //рисуем предметы
+ DrawItemMap(iVideo_Ptr);
+ //рисуем Диззи
+ cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DIZZY_WIDTH*sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
+ //рисуем элементы переднего плана
+ DrawFirstPlaneMap(iVideo_Ptr); 
 }
 //----------------------------------------------------------------------------------------------------
-//проверить столкновение с блоками корпуса Диззи
+//управление от клавиатуры
 //----------------------------------------------------------------------------------------------------
-bool CGame::IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
+void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
 {
- return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DIZZY_WIDTH*40,0,DIZZY_WIDTH,DIZZY_HEIGHT,true,0,0,0)); 
-}
-
-//----------------------------------------------------------------------------------------------------
-//загрузить карту
-//----------------------------------------------------------------------------------------------------
-bool CGame::LoadMap(const std::string &file_name)
-{
- std::ifstream file;
- file.open(file_name,std::ios_base::in|std::ios_base::binary);
- if (file.is_open()==false) return(false);
- int32_t part;
- if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
-
- for(size_t n=0;n<part;n++)
+ if (MoveControl==true)
  {
-  std::shared_ptr<IPart> iPart_Ptr(new CPart());
-  if (iPart_Ptr->Load(file)==false) return(false);
-  cGameState.Map.push_back(iPart_Ptr);
+  if (left==true) dX=-SPEED_X;
+  if (right==true) dX=SPEED_X;
+  if (left==false && right==false) dX=0;
+  if (up==true) 
+  {
+   SmallTickCounter=0;
+   dY=-SPEED_Y;  
+   if (dX==0) sFrame_Ptr=sFrame_Jump_Ptr;
+  } 
+  if (dY<0)
+  {
+   if (dX>0 && sFrame_Ptr->Move!=MOVE_JUMP_RIGHT) 
+   {
+    sFrame_Ptr=sFrame_JumpRight_Ptr;
+   }
+   if (dX<0 && sFrame_Ptr->Move!=MOVE_JUMP_LEFT) 
+   {
+    sFrame_Ptr=sFrame_JumpLeft_Ptr; 
+   }
+   if (dX==0 && sFrame_Ptr->Move!=MOVE_JUMP && sFrame_Ptr->Move!=MOVE_JUMP_RIGHT && sFrame_Ptr->Move!=MOVE_JUMP_LEFT)
+   {
+  	sFrame_Ptr=sFrame_Stop_Ptr;
+   }
+  }
+  else
+  {
+   if (dX>0 && sFrame_Ptr->Move!=MOVE_RIGHT) sFrame_Ptr=sFrame_MoveRight_Ptr; 
+   if (dX<0 && sFrame_Ptr->Move!=MOVE_LEFT) sFrame_Ptr=sFrame_MoveLeft_Ptr;
+   if (dX==0 && dY==0 && sFrame_Ptr->Move!=MOVE_STOP) sFrame_Ptr=sFrame_Stop_Ptr;
+  }
+  if (sFrame_Ptr->Move==MOVE_STOP && fire==true) PressUse();
  }
- return(true);
-}
-//----------------------------------------------------------------------------------------------------
-//нарисовать преграды
-//----------------------------------------------------------------------------------------------------
-void CGame::DrawBarrier(IVideo *iVideo_Ptr)
-{
- //рисуем фон с непроницаемыми объектами
- CSprite &tiles=cSprite_TilesBarrier;
-
- auto drawing_barrier_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
- { 
-  if (iPart_Ptr->Barrier==false) return;
-
-  int32_t block_x=iPart_Ptr->BlockPosX;
-  int32_t block_y=iPart_Ptr->BlockPosY;
-
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
-
-  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
-  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
-
-  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
-  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
-
-  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
- };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_barrier_function);
-}
-//----------------------------------------------------------------------------------------------------
-//нарисовать карту
-//----------------------------------------------------------------------------------------------------
-void CGame::DrawMap(IVideo *iVideo_Ptr)
-{
- //рисуем фон
- CSprite &tiles=cSprite_Tiles;
-
- auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
- { 
-  if (iPart_Ptr->FirstPlane==true) return;//передний план выводится отдельно
-  if (iPart_Ptr->Item==true) return;//предметы выводятся отдельно
-
-  int32_t block_x=iPart_Ptr->BlockPosX;
-  int32_t block_y=iPart_Ptr->BlockPosY;
-
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
-
-  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
-  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
-
-  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
-  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
-
-  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
- };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
-}
-//----------------------------------------------------------------------------------------------------
-//нарисовать карту переднего плана
-//----------------------------------------------------------------------------------------------------
-void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
-{
- //рисуем фон
- CSprite &tiles=cSprite_Tiles;
-
- auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
- { 
-  if (iPart_Ptr->FirstPlane==false) return;//здесь выводится только передний план
-
-  int32_t block_x=iPart_Ptr->BlockPosX;
-  int32_t block_y=iPart_Ptr->BlockPosY;
-
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
-
-  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
-  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
-
-  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
-  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
-
-  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
- };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
-}
-
-//----------------------------------------------------------------------------------------------------
-//нарисовать карту предметов
-//----------------------------------------------------------------------------------------------------
-void CGame::DrawItemMap(IVideo *iVideo_Ptr)
-{
- //рисуем фон
- CSprite &tiles=cSprite_Tiles;
-
- auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
- { 
-  if (iPart_Ptr->Item==false) return;//здесь выводятся только предметы
-
-  int32_t block_x=iPart_Ptr->BlockPosX;
-  int32_t block_y=iPart_Ptr->BlockPosY;
-
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
-
-  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
-  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
-
-  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
-  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
-
-  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
- };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
-}
-
-//----------------------------------------------------------------------------------------------------
-//очистить экран
-//----------------------------------------------------------------------------------------------------
-void CGame::ClearScreen(IVideo *iVideo_Ptr,uint32_t color)
-{
- uint32_t width;
- uint32_t height;
- iVideo_Ptr->GetScreenSize(width,height);
- iVideo_Ptr->FillRectangle(0,0,width,height,color);
-}
-
-//----------------------------------------------------------------------------------------------------
-//создать условные выражения
-//----------------------------------------------------------------------------------------------------
-void CGame::CreateConditionalExpression(void)
-{
- std::shared_ptr<IAction> action_one_ptr;
- std::shared_ptr<IAction> action_two_ptr;
- std::shared_ptr<IConditionalExpression> conditional_ptr;
-
- ConditionalExpression.clear();
-// ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfUse("","",NULL,std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfIntersection("BLOCK",std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
- //добавляем событие взятия бутылки
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE",std::shared_ptr<IAction>(new CActionPickUp()))));
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE WATER",std::shared_ptr<IAction>(new CActionPickUp()))));
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("RING",std::shared_ptr<IAction>(new CActionPickUp()))));
- //добавляем событие наполнения бутылки водой
- action_one_ptr.reset(new CActionChangeName("BOTTLE WATER",std::shared_ptr<IAction>(new CActionSetAnimationStep(1))));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("BOTTLE","WATER",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- //добавляем событие передачи бутылки кошке
- action_one_ptr.reset(new CActionChangePosition(-100,-100));//действие с первым объектом 
- action_two_ptr.reset(new CActionChangeName("LUCKY CAT",std::shared_ptr<IAction>(new CActionCopyPosition("RING","RING_POS"))));//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("BOTTLE WATER","CAT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
 }
 //----------------------------------------------------------------------------------------------------
 //нажата кнопка "использовать"
@@ -384,66 +261,48 @@ void CGame::PressUse(void)
  {
   size=ConditionalExpression.size();
   cGameState.Take.clear();
+  for(size_t n=0;n<size;n++) ConditionalExpression[n]->Init();
   for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
   //перемещаем возможные для взятия объекты в инвентарь
   size=cGameState.Take.size();
   for(size_t n=0;n<size;n++)
-  {
-   cGameState.Take[n]->BlockPosX=-100;
-   cGameState.Take[n]->BlockPosY=-100;
+  {   
+   cGameState.Take[n]->PushInventory();
    cGameState.Inventory.push_back(cGameState.Take[n]);
   }  
  }
  else//если в инвентаре есть предметы, то применяем их или выкладываем
  {
-  //задаём всем предметам координаты Диззи
+  //задаём всем предметам координаты Диззи и применяем правила игры
+  std::vector<std::shared_ptr<IPart> > unit;
+  unit.swap(cGameState.Inventory);
   for(size_t n=0;n<size;n++)
   {
-   cGameState.Inventory[n]->BlockPosX=(X+DIZZY_WIDTH/2)-TILE_WIDTH/2+Map_X;
-   cGameState.Inventory[n]->BlockPosY=(Y+DIZZY_HEIGHT)-TILE_HEIGHT+Map_Y;
+   unit[n]->BlockPosX=(X+DIZZY_WIDTH/2)-TILE_WIDTH/2+Map_X;
+   unit[n]->BlockPosY=(Y+DIZZY_HEIGHT)-TILE_HEIGHT+Map_Y;
    //используем предметы
-   cGameState.UsedObject=cGameState.Inventory[n];
-   size_t size=ConditionalExpression.size();
+   cGameState.UsedObject=unit[n];
+   size_t cond_size=ConditionalExpression.size();
    cGameState.Take.clear();
-   for(size_t m=0;m<size;m++) ConditionalExpression[m]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
+   for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Init();
+   for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
+   unit[n]->PopInventory();//выкладываем объект
+   if (cGameState.UsedObject.get()==NULL)
+   {
+	if (unit[n]->Enabled==true)
+	{
+     unit[n]->PushInventory();//возвращаем объект в инвентарь
+	 cGameState.Inventory.push_back(unit[n]);
+	}
+   }
   }
-  cGameState.Inventory.clear();
- } 
+ }
 }
-
-
-
-
-
-//****************************************************************************************************
-//открытые функции
-//****************************************************************************************************
-
 //----------------------------------------------------------------------------------------------------
-//перерисовать картинку
+//обработка игрового поля
 //----------------------------------------------------------------------------------------------------
-void CGame::OnPaint(IVideo *iVideo_Ptr)
+void CGame::Processing(IVideo *iVideo_Ptr)
 {
- //стираем фон
- uint32_t sky=(0<<24)|(81<<16)|(162<<8)|(243<<0);
- ClearScreen(iVideo_Ptr,sky);
- //рисуем карту
- DrawMap(iVideo_Ptr);
- //рисуем предметы
- DrawItemMap(iVideo_Ptr);
- //рисуем Диззи
- cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DIZZY_WIDTH*sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
- //рисуем элементы переднего плана
- DrawFirstPlaneMap(iVideo_Ptr);
-}
-
-//----------------------------------------------------------------------------------------------------
-//обработка таймера
-//----------------------------------------------------------------------------------------------------
-void CGame::OnTimer(IVideo *iVideo_Ptr)
-{ 
- if (UseDelayCounter>0) UseDelayCounter--;
-
  static int counter=0;
  if (counter==0)
  {
@@ -568,47 +427,344 @@ void CGame::OnTimer(IVideo *iVideo_Ptr)
  //обрабатываем события
  size_t size=ConditionalExpression.size();
  cGameState.Take.clear();
+ for(size_t n=0;n<size;n++) ConditionalExpression[n]->Init();
  for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,false,cGameState);
 }
 
 //----------------------------------------------------------------------------------------------------
-//управление от клавиатуры
+//проверить столкновение с блоками ног Диззи
 //----------------------------------------------------------------------------------------------------
-void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
+bool CGame::IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
- if (MoveControl==true)
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DIZZY_WIDTH*39,0,DIZZY_WIDTH,DIZZY_HEIGHT,true,0,0,0)); 
+}
+//----------------------------------------------------------------------------------------------------
+//проверить столкновение с блоками корпуса Диззи
+//----------------------------------------------------------------------------------------------------
+bool CGame::IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
+{
+ return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DIZZY_WIDTH*40,0,DIZZY_WIDTH,DIZZY_HEIGHT,true,0,0,0)); 
+}
+
+//----------------------------------------------------------------------------------------------------
+//загрузить карту
+//----------------------------------------------------------------------------------------------------
+bool CGame::LoadMap(const std::string &file_name)
+{
+ std::ifstream file;
+ file.open(file_name,std::ios_base::in|std::ios_base::binary);
+ if (file.is_open()==false) return(false);
+ int32_t part;
+ if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
+
+ for(size_t n=0;n<part;n++)
  {
-  if (left==true) dX=-SPEED_X;
-  if (right==true) dX=SPEED_X;
-  if (left==false && right==false) dX=0;
-  if (up==true) 
-  {
-   SmallTickCounter=0;
-   dY=-SPEED_Y;  
-   if (dX==0) sFrame_Ptr=sFrame_Jump_Ptr;
-  } 
-  if (dY<0)
-  {
-   if (dX>0 && sFrame_Ptr->Move!=MOVE_JUMP_RIGHT) 
-   {
-    sFrame_Ptr=sFrame_JumpRight_Ptr;
-   }
-   if (dX<0 && sFrame_Ptr->Move!=MOVE_JUMP_LEFT) 
-   {
-    sFrame_Ptr=sFrame_JumpLeft_Ptr; 
-   }
-   if (dX==0 && sFrame_Ptr->Move!=MOVE_JUMP && sFrame_Ptr->Move!=MOVE_JUMP_RIGHT && sFrame_Ptr->Move!=MOVE_JUMP_LEFT)
-   {
-  	sFrame_Ptr=sFrame_Stop_Ptr;
-   }
-  }
-  else
-  {
-   if (dX>0 && sFrame_Ptr->Move!=MOVE_RIGHT) sFrame_Ptr=sFrame_MoveRight_Ptr; 
-   if (dX<0 && sFrame_Ptr->Move!=MOVE_LEFT) sFrame_Ptr=sFrame_MoveLeft_Ptr;
-   if (dX==0 && dY==0 && sFrame_Ptr->Move!=MOVE_STOP) sFrame_Ptr=sFrame_Stop_Ptr;
-  }
-  if (sFrame_Ptr->Move==MOVE_STOP && fire==true) PressUse();
+  std::shared_ptr<IPart> iPart_Ptr(new CPart());
+  if (iPart_Ptr->Load(file)==false) return(false);
+  cGameState.Map.push_back(iPart_Ptr);
+ }
+ return(true);
+}
+//----------------------------------------------------------------------------------------------------
+//нарисовать преграды
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawBarrier(IVideo *iVideo_Ptr)
+{
+ //рисуем фон с непроницаемыми объектами
+ CSprite &tiles=cSprite_TilesBarrier;
+
+ auto drawing_barrier_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ { 
+  if (iPart_Ptr->Barrier==false) return;//выводятся только непроницаемые объекты
+  if (iPart_Ptr->InInventory==true) return;//предметы в инвентаре не выводятся
+  if (iPart_Ptr->Enabled==false) return;//предмет неактивен
+
+  int32_t block_x=iPart_Ptr->BlockPosX;
+  int32_t block_y=iPart_Ptr->BlockPosY;
+
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
+
+  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
+  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
+
+  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
+  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
+
+  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
+ };
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_barrier_function);
+}
+//----------------------------------------------------------------------------------------------------
+//нарисовать карту
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawMap(IVideo *iVideo_Ptr)
+{
+ //рисуем фон
+ CSprite &tiles=cSprite_Tiles;
+
+ auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ { 
+  if (iPart_Ptr->FirstPlane==true) return;//передний план выводится отдельно
+  if (iPart_Ptr->Item==true) return;//предметы выводятся отдельно
+  if (iPart_Ptr->InInventory==true) return;//предметы в инвентаре не выводятся
+  if (iPart_Ptr->Enabled==false) return;//предмет неактивен
+
+  int32_t block_x=iPart_Ptr->BlockPosX;
+  int32_t block_y=iPart_Ptr->BlockPosY;
+
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
+
+  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
+  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
+
+  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
+  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
+
+  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
+ };
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
+}
+//----------------------------------------------------------------------------------------------------
+//нарисовать карту переднего плана
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
+{
+ //рисуем фон
+ CSprite &tiles=cSprite_Tiles;
+
+ auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ { 
+  if (iPart_Ptr->FirstPlane==false) return;//здесь выводится только передний план
+  if (iPart_Ptr->InInventory==true) return;//предметы в инвентаре не выводятся
+  if (iPart_Ptr->Enabled==false) return;//предмет неактивен
+
+  int32_t block_x=iPart_Ptr->BlockPosX;
+  int32_t block_y=iPart_Ptr->BlockPosY;
+
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
+
+  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
+  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
+
+  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
+  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
+
+  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
+ };
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
+}
+
+//----------------------------------------------------------------------------------------------------
+//нарисовать карту предметов
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawItemMap(IVideo *iVideo_Ptr)
+{
+ //рисуем фон
+ CSprite &tiles=cSprite_Tiles;
+
+ auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
+ { 
+  if (iPart_Ptr->Item==false) return;//здесь выводятся только предметы
+  if (iPart_Ptr->InInventory==true) return;//предметы в инвентаре не выводятся
+  if (iPart_Ptr->Enabled==false) return;//предмет неактивен
+
+  int32_t block_x=iPart_Ptr->BlockPosX;
+  int32_t block_y=iPart_Ptr->BlockPosY;
+
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
+
+  size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
+  CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
+
+  int32_t tx=cTile.X*TILE_WITH_BORDER_WIDTH+TILE_BORDER_WIDTH;
+  int32_t ty=cTile.Y*TILE_WITH_BORDER_HEIGHT+TILE_BORDER_HEIGHT;
+
+  tiles.PutSpriteItem(iVideo_Ptr,screen_x,screen_y,tx,ty,TILE_WIDTH,TILE_HEIGHT,true);
+ };
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),drawing_function);
+}
+
+//----------------------------------------------------------------------------------------------------
+//очистить экран
+//----------------------------------------------------------------------------------------------------
+void CGame::ClearScreen(IVideo *iVideo_Ptr,uint32_t color)
+{
+ uint32_t width;
+ uint32_t height;
+ iVideo_Ptr->GetScreenSize(width,height);
+ iVideo_Ptr->FillRectangle(0,0,width,height,color);
+}
+
+//----------------------------------------------------------------------------------------------------
+//создать условные выражения
+//----------------------------------------------------------------------------------------------------
+void CGame::CreateConditionalExpression(void)
+{
+ std::shared_ptr<IAction> action_one_ptr;
+ std::shared_ptr<IAction> action_two_ptr;
+ std::shared_ptr<IConditionalExpression> conditional_ptr;
+
+ ConditionalExpression.clear();
+// ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfUse("","",NULL,std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfIntersection("BLOCK",std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
+
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfIntersection("CAT", std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("WAIT CAT",std::shared_ptr<IAction>(new CActionMessage("Я ВЧЕРА БУХАЛ... ВАЛЕРЬЯНКОЙ...\nСУШНЯК! МНЕ НУЖНА ВОДА!",30,100))  )) ))) ));
+
+ 
+
+ 
+ //добавляем событие взятия бутылки
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE",std::shared_ptr<IAction>(new CActionPickUp()))));
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE WATER",std::shared_ptr<IAction>(new CActionPickUp()))));
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("RING",std::shared_ptr<IAction>(new CActionPickUp()))));
+ //добавляем событие наполнения бутылки водой
+ action_one_ptr.reset(new CActionChangeNameGlobal("BOTTLE WATER",std::shared_ptr<IAction>(std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionSetAnimationStep(1,std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ НАПОЛНИЛ БУТЫЛКУ ВОДОЙ.",50,100)) )) )) )) );//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("BOTTLE","WATER",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ //добавляем событие разговора с кошкой
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ДА, ВОТ ЭТО Я И ПИЛ...",30,100)) ));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("BOTTLE","WAIT CAT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ //добавляем событие разговора с кошкой
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("БЕРИ! Я ТЕБЕ ЕГО ПОДАРИЛ.",30,70)) ));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("RING","LUCKY CAT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ //добавляем событие применения бутылки к колодцу 
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("МОЖНО БЫ НАБРАТЬ ВОДЫ.\nНО... НЕТ ВЕДРА.",30,80)) ));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("BOTTLE","PIT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("BOTTLE",std::shared_ptr<IAction>(new CActionSetAnimationStep(0,std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ВЫЛИЛ ВОДУ В КОЛОДЕЦ.",40,110)))))) ));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("BOTTLE WATER","PIT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ //добавляем событие передачи бутылки кошке
+ action_one_ptr.reset(new CActionSetEnabled(false));//действие с первым объектом 
+ action_two_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("LUCKY CAT",std::shared_ptr<IAction>(new CActionCopyPosition("RING","RING_POS",std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ДАЛ БУТЫЛКУ ВОДЫ КОТЁНКУ...",30,100,std::shared_ptr<IAction>(new CActionMessage("БУЛЬК-БУЛЬК!\nСПАСИБО! ЗА ЭТО Я ДАМ ТЕБЕ\nКОЛЬЦО. Я ЕГО ГДЕ-ТО СПЁР.",40,80)) )) )) )) ));//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("BOTTLE WATER","WAIT CAT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+}
+
+//----------------------------------------------------------------------------------------------------
+//вывод сообщения
+//----------------------------------------------------------------------------------------------------
+void CGame::PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr)
+{
+ static const int32_t FRAME_ANGLE_WIDTH=16;
+ static const int32_t FRAME_ANGLE_HEIGHT=16;
+ static const int32_t FRAME_VERTICAL_WIDTH=8;
+ static const int32_t FRAME_VERTICAL_HEIGHT=8;
+ static const int32_t FRAME_HORIZONTAL_WIDTH=8;
+ static const int32_t FRAME_HORIZONTAL_HEIGHT=8;
+
+ static const int32_t FRAME_VERTICAL_OFFSET_X=0;
+ static const int32_t FRAME_VERTICAL_OFFSET_Y=8;
+
+ static const int32_t FRAME_HORIZONTAL_OFFSET_X=0;
+ static const int32_t FRAME_HORIZONTAL_OFFSET_Y=0;
+
+ static const int32_t FRAME_ANGLE_LEFT_UP_OFFSET_X=FRAME_HORIZONTAL_OFFSET_X+FRAME_HORIZONTAL_WIDTH;
+ static const int32_t FRAME_ANGLE_LEFT_UP_OFFSET_Y=0;
+
+ static const int32_t FRAME_ANGLE_RIGHT_UP_OFFSET_X=FRAME_ANGLE_LEFT_UP_OFFSET_X+FRAME_ANGLE_WIDTH;
+ static const int32_t FRAME_ANGLE_RIGHT_UP_OFFSET_Y=0;
+ 
+ static const int32_t FRAME_ANGLE_LEFT_DOWN_OFFSET_X=FRAME_ANGLE_RIGHT_UP_OFFSET_X+FRAME_ANGLE_WIDTH;
+ static const int32_t FRAME_ANGLE_LEFT_DOWN_OFFSET_Y=0;
+
+ static const int32_t FRAME_ANGLE_RIGHT_DOWN_OFFSET_X=FRAME_ANGLE_LEFT_DOWN_OFFSET_X+FRAME_ANGLE_WIDTH;
+ static const int32_t FRAME_ANGLE_RIGHT_DOWN_OFFSET_Y=0;
+
+ int32_t symbol_width=cFontPrinter_Ptr->GetFontWidth();
+ int32_t symbol_height=cFontPrinter_Ptr->GetFontHeight();
+
+ int32_t width=(sMessage.InSymbolWidth+2)*symbol_width;
+ int32_t height=(sMessage.InSymbolHeight+2)*symbol_height;
+ size_t size=sMessage.Message.size();
+ int32_t x=sMessage.ScreenX;
+ int32_t y=sMessage.ScreenY;
+
+ int32_t rx1=x-symbol_width;
+ int32_t ry1=y-symbol_height;
+ int32_t rx2=rx1+width-1;
+ int32_t ry2=ry1+height-1;
+ //закрашиваем прямоугольник
+ iVideo_Ptr->FillRectangle(rx1,ry1,rx2,ry2,0x00000000);
+ //рисуем рамку
+ //сначала уголки
+ cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx1-FRAME_ANGLE_WIDTH,ry1-FRAME_ANGLE_HEIGHT,FRAME_ANGLE_LEFT_UP_OFFSET_X,FRAME_ANGLE_LEFT_UP_OFFSET_Y,FRAME_ANGLE_WIDTH,FRAME_ANGLE_HEIGHT,true);
+ cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx2,ry1-FRAME_ANGLE_HEIGHT,FRAME_ANGLE_RIGHT_UP_OFFSET_X,FRAME_ANGLE_RIGHT_UP_OFFSET_Y,FRAME_ANGLE_WIDTH,FRAME_ANGLE_HEIGHT,true);
+ cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx2,ry2,FRAME_ANGLE_RIGHT_DOWN_OFFSET_X,FRAME_ANGLE_RIGHT_DOWN_OFFSET_Y,FRAME_ANGLE_WIDTH,FRAME_ANGLE_HEIGHT,true);
+ cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx1-FRAME_ANGLE_WIDTH,ry2,FRAME_ANGLE_LEFT_DOWN_OFFSET_X,FRAME_ANGLE_LEFT_DOWN_OFFSET_Y,FRAME_ANGLE_WIDTH,FRAME_ANGLE_HEIGHT,true);
+ //заполняем пространство между уголками
+ for(int32_t fx=rx1;fx<rx2;fx+=FRAME_HORIZONTAL_WIDTH)
+ {
+  cSprite_Frame.PutSpriteItem(iVideo_Ptr,fx,ry1-FRAME_HORIZONTAL_HEIGHT,FRAME_HORIZONTAL_OFFSET_X,FRAME_HORIZONTAL_OFFSET_Y,FRAME_HORIZONTAL_WIDTH,FRAME_HORIZONTAL_HEIGHT,true);
+  cSprite_Frame.PutSpriteItem(iVideo_Ptr,fx,ry2-1,FRAME_HORIZONTAL_OFFSET_X,FRAME_HORIZONTAL_OFFSET_Y,FRAME_HORIZONTAL_WIDTH,FRAME_HORIZONTAL_HEIGHT,true);  	  
+ }
+ for(int32_t fy=ry1;fy<ry2;fy+=FRAME_VERTICAL_HEIGHT)
+ {
+  cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx1-FRAME_VERTICAL_WIDTH,fy,FRAME_VERTICAL_OFFSET_X,FRAME_VERTICAL_OFFSET_Y,FRAME_VERTICAL_WIDTH,FRAME_VERTICAL_HEIGHT,true);
+  cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx2-1,fy,FRAME_VERTICAL_OFFSET_X,FRAME_VERTICAL_OFFSET_Y,FRAME_VERTICAL_WIDTH,FRAME_VERTICAL_HEIGHT,true);  	  
+ }
+ //выводим текст
+ for(size_t n=0;n<size;n++,y+=symbol_height)
+ {
+  cFontPrinter_Ptr->PrintAt(x,y,sMessage.Message[n],iVideo_Ptr);
  }
 }
+
+//****************************************************************************************************
+//открытые функции
+//****************************************************************************************************
+
+
+//----------------------------------------------------------------------------------------------------
+//обработка таймера
+//----------------------------------------------------------------------------------------------------
+void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVideo_Ptr)
+{
+ if (UseDelayCounter>0 && fire==false) UseDelayCounter--; 
+
+ //узнаём, есть ли сообщения
+ if (cGameState.Message.size()>0)//если есть сообщения, экран не стираем, чтобы прошлые сообщения не пропали
+ {
+  //выводим сообщение
+  PutMessage(cGameState.Message[0],iVideo_Ptr);
+  if (UseDelayCounter==0)
+  {
+   if (fire==true)//удаляем сообщение
+   {
+    cGameState.Message.erase(cGameState.Message.begin());
+	UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
+   }
+  }
+ }
+ else
+ {
+  KeyboardControl(left,right,up,down,fire);
+  Processing(iVideo_Ptr);
+  OnPaint(iVideo_Ptr);
+ }
+}
+
+
+
+
+ 
+
+
+
 

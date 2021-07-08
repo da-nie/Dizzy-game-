@@ -31,6 +31,9 @@ CPart::CPart(int32_t block_x,int32_t block_y,const CTilesSequence &cTilesSequenc
  FirstPlane=first_plane;
  Item=item;
  Name=name;
+
+ InInventory=false;
+ Enabled=true;
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -115,6 +118,7 @@ bool CPart::Export(std::ofstream &file,int32_t scale_x,int32_t scale_y)
  uint8_t type=0;
  if (Barrier==true) type|=MASK_PART_IS_BARRIER;
  if (FirstPlane==true) type|=MASK_PART_IS_FIRST_PLANE;
+ if (Item==true) type|=MASK_PART_IS_ITEM;
  if (file.write(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
 
  int32_t pos_x=scale_x*BlockPosX;
@@ -178,4 +182,32 @@ void CPart::RemovePart(std::function<bool(std::shared_ptr<IPart>)> callback_func
 std::list<std::shared_ptr<IPart> >* CPart::GetItemPtr(void)
 {
  return(NULL);
+}
+//----------------------------------------------------------------------------------------------------
+//поместить предмет в инвентарь
+//----------------------------------------------------------------------------------------------------
+void CPart::PushInventory(void)
+{
+ InInventory=true;
+}
+//----------------------------------------------------------------------------------------------------
+//забрать предмет из инвентаря
+//----------------------------------------------------------------------------------------------------
+void CPart::PopInventory(void)
+{
+ InInventory=false;
+}
+//----------------------------------------------------------------------------------------------------
+//разрешить использование предмета
+//----------------------------------------------------------------------------------------------------
+void CPart::Enable(void)
+{
+ Enabled=true;
+}
+//----------------------------------------------------------------------------------------------------
+//запретить использование предмета
+//----------------------------------------------------------------------------------------------------
+void CPart::Disable(void)
+{
+ Enabled=false;
 }

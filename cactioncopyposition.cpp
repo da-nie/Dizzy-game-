@@ -28,6 +28,7 @@ CActionCopyPosition::CActionCopyPosition(const std::string &name_one,const std::
  Name_One=name_one;
  Name_Two=name_two;
  iAction_NextPtr=iAction_Ptr;
+ Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -68,4 +69,11 @@ void CActionCopyPosition::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &c
   part_one_ptr->BlockPosY=part_two_ptr->BlockPosY;
  }
  if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
+}
+//----------------------------------------------------------------------------------------------------
+//инициализация
+//----------------------------------------------------------------------------------------------------
+void CActionCopyPosition::Init(void)
+{
+ if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Init();
 }

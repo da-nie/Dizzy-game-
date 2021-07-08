@@ -29,6 +29,7 @@ CConditionalOfUse::CConditionalOfUse(const std::string &name_one,const std::stri
  Name_Two=name_two;
  iAction_OnePtr=iAction_OneSetPtr;
  iAction_TwoPtr=iAction_TwoSetPtr;
+ Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -54,9 +55,11 @@ CConditionalOfUse::~CConditionalOfUse()
 //----------------------------------------------------------------------------------------------------
 void CConditionalOfUse::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState)
 {
- if (use==false) return;
+ if (use==false) return;//режим хадействования не включён
  if (cGameState.UsedObject.get()==NULL) return;//нет используемого предмета
  if (Name_One.compare(cGameState.UsedObject->Name)!=0) return;//имена не совпадают 
+ if (cGameState.UsedObject->InInventory==false) return;//предмет не находится в инвентаре
+ if (cGameState.UsedObject->Enabled==false) return;//предмет неактивен
  
  std::shared_ptr<IAction> iAction_LocalTwoPtr=iAction_TwoPtr;
  bool one_object_is_used=false;
@@ -64,6 +67,8 @@ void CConditionalOfUse::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_
  auto execute_function=[this,&name_two,&one_object_is_used,&cGameState,&iAction_LocalTwoPtr,part_width,part_height](std::shared_ptr<IPart> iPart_Ptr)
  { 
   if (iPart_Ptr->Name.compare(name_two)!=0) return;//имена не совпадают
+  if (iPart_Ptr->InInventory==true) return;//предмет находится в инвентаре и с ним взаимодействовать нельзя
+  if (iPart_Ptr->Enabled==false) return;//предмет неактивен
   //проверяем пересечение
   int32_t x1=iPart_Ptr->BlockPosX;
   int32_t y1=iPart_Ptr->BlockPosY;
@@ -86,7 +91,16 @@ void CConditionalOfUse::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_
  };
  std::for_each(Map.begin(),Map.end(),execute_function);
  if (one_object_is_used==true) 
- {
+ {  
   if (iAction_OnePtr.get()!=NULL) iAction_OnePtr->Execute(cGameState.UsedObject,cGameState);//выполняем действие с первым объектом
+  cGameState.UsedObject.reset();//убираем объект из используемых
  }
+}
+//----------------------------------------------------------------------------------------------------
+//инициализация
+//----------------------------------------------------------------------------------------------------
+void CConditionalOfUse::Init(void)
+{
+ if (iAction_OnePtr.get()!=NULL) iAction_OnePtr->Init();
+ if (iAction_TwoPtr.get()!=NULL) iAction_TwoPtr->Init();
 }

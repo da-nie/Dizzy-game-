@@ -26,6 +26,7 @@ CActionSetAnimationStep::CActionSetAnimationStep(int32_t frame,std::shared_ptr<I
 { 
  Frame=frame;
  iAction_NextPtr=iAction_Ptr;
+ Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -53,4 +54,11 @@ void CActionSetAnimationStep::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameStat
 {
  iPart_Ptr->cTilesSequence.ToTile(Frame);
  if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
+}
+//----------------------------------------------------------------------------------------------------
+//инициализация
+//----------------------------------------------------------------------------------------------------
+void CActionSetAnimationStep::Init(void)
+{
+ if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Init();
 }

@@ -160,10 +160,7 @@ afx_msg void CWnd_Main::OnTimer(UINT nIDEvent)
  if (GetAsyncKeyState(VK_LCONTROL)&32768) fire=true;
  if (GetAsyncKeyState(VK_RCONTROL)&32768) fire=true;
  
- cGame_Ptr->KeyboardControl(left,right,up,down,fire);
-
- cGame_Ptr->OnTimer(iVideo_Ptr.get());
- cGame_Ptr->OnPaint(iVideo_Ptr.get());
+ cGame_Ptr->OnTimer(left,right,up,down,fire,iVideo_Ptr.get());
  InvalidateRect(NULL,FALSE);
 }
 //----------------------------------------------------------------------------------------------------

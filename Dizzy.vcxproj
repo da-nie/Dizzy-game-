@@ -12,13 +12,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cactionchangename.cpp" />
+    <ClCompile Include="cactionchangenameglobal.cpp" />
     <ClCompile Include="cactionchangeposition.cpp" />
     <ClCompile Include="cactioncopyposition.cpp" />
+    <ClCompile Include="cactionmessage.cpp" />
     <ClCompile Include="cactionpickup.cpp" />
     <ClCompile Include="cactionsetanimationstep.cpp" />
+    <ClCompile Include="cactionsetenabled.cpp" />
+    <ClCompile Include="cactionsingle.cpp" />
     <ClCompile Include="cconditionalofintersection.cpp" />
     <ClCompile Include="cconditionalofpickup.cpp" />
     <ClCompile Include="cconditionalofuse.cpp" />
+    <ClCompile Include="cfontprinter.cpp" />
     <ClCompile Include="cgame.cpp" />
     <ClCompile Include="cgamestate.cpp" />
     <ClCompile Include="cpart.cpp" />
@@ -38,13 +43,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cactionchangename.h" />
+    <ClInclude Include="cactionchangenameglobal.h" />
     <ClInclude Include="cactionchangeposition.h" />
     <ClInclude Include="cactioncopyposition.h" />
+    <ClInclude Include="cactionmessage.h" />
     <ClInclude Include="cactionpickup.h" />
     <ClInclude Include="cactionsetanimationstep.h" />
+    <ClInclude Include="cactionsetenabled.h" />
+    <ClInclude Include="cactionsingle.h" />
     <ClInclude Include="cconditionalofintersection.h" />
     <ClInclude Include="cconditionalofpickup.h" />
     <ClInclude Include="cconditionalofuse.h" />
+    <ClInclude Include="cfontprinter.h" />
     <ClInclude Include="cgame.h" />
     <ClInclude Include="cgamestate.h" />
     <ClInclude Include="cpart.h" />
