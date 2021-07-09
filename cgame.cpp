@@ -8,6 +8,8 @@
 #include "cconditionalofpickup.h"
 #include "cactionchangename.h"
 #include "cactionchangenameglobal.h"
+#include "cactionchangedescription.h"
+#include "cactionchangedescriptionglobal.h"
 #include "cactioncopyposition.h"
 #include "cactionchangeposition.h"
 #include "cactionsetanimationstep.h"
@@ -168,10 +170,13 @@ CGame::CGame(void)
  dY=0;
 
  MoveControl=true;
+ InventoryMode=false;
+ InventorySelectedIndex=0;
 
  SmallTickCounter=0;
 
  UseDelayCounter=0;
+ FlashTickCounter=0;
 
  //загружаем карту
  cGameState.Map.clear();
@@ -211,6 +216,30 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
 //----------------------------------------------------------------------------------------------------
 void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
 {
+ if (InventoryMode==true)
+ {
+  if (UseDelayCounter==0)
+  {
+   if (up==true) 
+   {
+    InventorySelectedIndex--;
+	UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
+   }
+   if (down==true)
+   {
+    InventorySelectedIndex++;
+    UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
+   }
+   if (fire==true)
+   {
+    PressUse();
+	UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
+	InventoryMode=false;
+   }
+  }
+  return;
+ }
+
  if (MoveControl==true)
  {
   if (left==true) dX=-SPEED_X;
@@ -243,57 +272,53 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
    if (dX<0 && sFrame_Ptr->Move!=MOVE_LEFT) sFrame_Ptr=sFrame_MoveLeft_Ptr;
    if (dX==0 && dY==0 && sFrame_Ptr->Move!=MOVE_STOP) sFrame_Ptr=sFrame_Stop_Ptr;
   }
-  if (sFrame_Ptr->Move==MOVE_STOP && fire==true) PressUse();
+  if (sFrame_Ptr->Move==MOVE_STOP && fire==true && UseDelayCounter==0)
+  {
+   //перемещаем доступные для взяти предметы в инвентарь
+   size_t size=ConditionalExpression.size();
+   cGameState.Take.clear();
+   for(size_t n=0;n<size;n++) ConditionalExpression[n]->Init();
+   for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
+   //перемещаем возможные для взятия объекты в инвентарь
+   size=cGameState.Take.size();
+   for(size_t n=0;n<size;n++)
+   {   
+    cGameState.Take[n]->PushInventory();
+    cGameState.Inventory.push_back(cGameState.Take[n]);
+   }  
+   InventoryMode=true;
+   InventorySelectedIndex=0;
+   UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
+  }
  }
 }
 //----------------------------------------------------------------------------------------------------
 //нажата кнопка "использовать"
 //----------------------------------------------------------------------------------------------------
 void CGame::PressUse(void)
-{
- if (UseDelayCounter>0) return;//рано
- UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
-
- //обрабатываем события взятия
- size_t size; 
- size=cGameState.Inventory.size();
- if (size==0)//в инвентаре нет предметов
+{ 
+ if (InventorySelectedIndex!=0)//выбрано "использовать"
  {
-  size=ConditionalExpression.size();
+  size_t size=cGameState.Inventory.size();
+  if (InventorySelectedIndex>size) return;//нет такого предмета в инвентаре
+  std::shared_ptr<IPart> unit=cGameState.Inventory[InventorySelectedIndex-1];
+  cGameState.Inventory.erase(cGameState.Inventory.begin()+InventorySelectedIndex-1);//удаляем предмет из инвентаря
+  //задаём предмету координаты Диззи и применяем правила игры
+  unit->BlockPosX=(X+DIZZY_WIDTH/2)-TILE_WIDTH/2+Map_X;
+  unit->BlockPosY=(Y+DIZZY_HEIGHT)-TILE_HEIGHT+Map_Y;
+  //используем предмет
+  cGameState.UsedObject=unit;
+  size_t cond_size=ConditionalExpression.size();
   cGameState.Take.clear();
-  for(size_t n=0;n<size;n++) ConditionalExpression[n]->Init();
-  for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
-  //перемещаем возможные для взятия объекты в инвентарь
-  size=cGameState.Take.size();
-  for(size_t n=0;n<size;n++)
-  {   
-   cGameState.Take[n]->PushInventory();
-   cGameState.Inventory.push_back(cGameState.Take[n]);
-  }  
- }
- else//если в инвентаре есть предметы, то применяем их или выкладываем
- {
-  //задаём всем предметам координаты Диззи и применяем правила игры
-  std::vector<std::shared_ptr<IPart> > unit;
-  unit.swap(cGameState.Inventory);
-  for(size_t n=0;n<size;n++)
+  for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Init();
+  for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
+  unit->PopInventory();//выкладываем объект
+  if (cGameState.UsedObject.get()==NULL)
   {
-   unit[n]->BlockPosX=(X+DIZZY_WIDTH/2)-TILE_WIDTH/2+Map_X;
-   unit[n]->BlockPosY=(Y+DIZZY_HEIGHT)-TILE_HEIGHT+Map_Y;
-   //используем предметы
-   cGameState.UsedObject=unit[n];
-   size_t cond_size=ConditionalExpression.size();
-   cGameState.Take.clear();
-   for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Init();
-   for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
-   unit[n]->PopInventory();//выкладываем объект
-   if (cGameState.UsedObject.get()==NULL)
+   if (unit->Enabled==true)
    {
-	if (unit[n]->Enabled==true)
-	{
-     unit[n]->PushInventory();//возвращаем объект в инвентарь
-	 cGameState.Inventory.push_back(unit[n]);
-	}
+    unit->PushInventory();//возвращаем объект в инвентарь
+	cGameState.Inventory.push_back(unit);
    }
   }
  }
@@ -613,24 +638,35 @@ void CGame::CreateConditionalExpression(void)
  ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfIntersection("BLOCK",std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
 
  ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfIntersection("CAT", std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("WAIT CAT",std::shared_ptr<IAction>(new CActionMessage("Я ВЧЕРА БУХАЛ... ВАЛЕРЬЯНКОЙ...\nСУШНЯК! МНЕ НУЖНА ВОДА!",30,100))  )) ))) ));
-
  
 
  
- //добавляем событие взятия бутылки
+ //добавляем события взятия
  ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE",std::shared_ptr<IAction>(new CActionPickUp()))));
  ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE WATER",std::shared_ptr<IAction>(new CActionPickUp()))));
  ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("RING",std::shared_ptr<IAction>(new CActionPickUp()))));
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("POISON",std::shared_ptr<IAction>(new CActionPickUp()))));
+ ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("PAIL",std::shared_ptr<IAction>(new CActionPickUp()))));
  //добавляем событие наполнения бутылки водой
- action_one_ptr.reset(new CActionChangeNameGlobal("BOTTLE WATER",std::shared_ptr<IAction>(std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionSetAnimationStep(1,std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ НАПОЛНИЛ БУТЫЛКУ ВОДОЙ.",50,100)) )) )) )) );//действие с первым объектом
+ action_one_ptr.reset(new CActionChangeDescriptionGlobal("БУТЫЛКА С ВОДОЙ",std::shared_ptr<IAction>(new CActionChangeNameGlobal("BOTTLE WATER",std::shared_ptr<IAction>(std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionSetAnimationStep(1,std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ НАПОЛНИЛ БУТЫЛКУ ВОДОЙ.",50,100)) )) )) )) )) );//действие с первым объектом
  action_two_ptr.reset();//действие со вторым объектом 
  conditional_ptr.reset(new CConditionalOfUse("BOTTLE","WATER",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ЗАЧЕРПНУЛ ВОДУ ВЕДРОМ.\n...НО ВОДА ВЫЛИЛАСЬ\nЧЕРЕЗ ДЫРКИ В ВЕДРЕ!",50,100) )) );//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("PAIL","WATER",action_one_ptr,action_two_ptr));
  ConditionalExpression.push_back(conditional_ptr);
 
  //добавляем событие разговора с кошкой
  action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ДА, ВОТ ЭТО Я И ПИЛ...",30,100)) ));//действие с первым объектом
  action_two_ptr.reset();//действие со вторым объектом 
  conditional_ptr.reset(new CConditionalOfUse("BOTTLE","WAIT CAT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ОНО ЖЕ ПУСТОЕ!",30,100)) ));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("PAIL","WAIT CAT",action_one_ptr,action_two_ptr));
  ConditionalExpression.push_back(conditional_ptr);
 
  //добавляем событие разговора с кошкой
@@ -645,7 +681,23 @@ void CGame::CreateConditionalExpression(void)
  conditional_ptr.reset(new CConditionalOfUse("BOTTLE","PIT",action_one_ptr,action_two_ptr));
  ConditionalExpression.push_back(conditional_ptr);
 
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("BOTTLE",std::shared_ptr<IAction>(new CActionSetAnimationStep(0,std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ВЫЛИЛ ВОДУ В КОЛОДЕЦ.",40,110)))))) ));//действие с первым объектом
+ //добавляем событие применения ведра к колодцу 
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("НЕ ВЫЙДЕТ. ВЕДРО-ТО ДЫРЯВОЕ...",30,80)) ));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("PAIL","PIT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ УЖЕ ХОТЕЛ ОТРАВИТЬ\n БЕСПОЛЕЗНЫЙ КОЛОДЕЦ,КАК ВДРУГ\nВСПОМНИЛ:ДЕД-ПАРТИЗАН РАССКАЗЫВАЛ,\n ЧТО ТАК ПОСТУПАЛИ ТОЛЬКО ФАШИСТЫ.\nА ФАШИСТОМ ДИЗЗИ БЫТЬ НЕ ХОТЕЛ.",30,80)) ));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("POISON","PIT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+ action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("...ГУМАННЕЕ БУДЕТ ЛОВИТЬ РЫБУ\nДИНАМИТОМ,ПРИШЛО В ГОЛОВУ ДИЗЗИ.",30,80)) ));//действие с первым объектом
+ action_two_ptr.reset();//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("POISON","WATER",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+ 
+ action_one_ptr.reset(new CActionChangeDescriptionGlobal("ПУСТАЯ БУТЫЛКА",std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("BOTTLE",std::shared_ptr<IAction>(new CActionSetAnimationStep(0,std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ВЫЛИЛ ВОДУ В КОЛОДЕЦ.",40,110)))))) )) ));//действие с первым объектом
  action_two_ptr.reset();//действие со вторым объектом 
  conditional_ptr.reset(new CConditionalOfUse("BOTTLE WATER","PIT",action_one_ptr,action_two_ptr));
  ConditionalExpression.push_back(conditional_ptr);
@@ -655,12 +707,44 @@ void CGame::CreateConditionalExpression(void)
  action_two_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("LUCKY CAT",std::shared_ptr<IAction>(new CActionCopyPosition("RING","RING_POS",std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ДАЛ БУТЫЛКУ ВОДЫ КОТЁНКУ...",30,100,std::shared_ptr<IAction>(new CActionMessage("БУЛЬК-БУЛЬК!\nСПАСИБО! ЗА ЭТО Я ДАМ ТЕБЕ\nКОЛЬЦО. Я ЕГО ГДЕ-ТО СПЁР.",40,80)) )) )) )) ));//действие со вторым объектом 
  conditional_ptr.reset(new CConditionalOfUse("BOTTLE WATER","WAIT CAT",action_one_ptr,action_two_ptr));
  ConditionalExpression.push_back(conditional_ptr);
+
+ //добавляем событие передачи колбы с ядом кошке
+ action_one_ptr.reset(new CActionSetEnabled(false));//действие с первым объектом 
+ action_two_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionSetEnabled(false,std::shared_ptr<IAction>(new CActionMessage("В ДЕТСТВЕ ДИЗЗИ МЕЧТАЛ\nСТАВИТЬ ОПЫТЫ НА ЖИВОТНЫХ...",30,100,std::shared_ptr<IAction>(new CActionMessage("КОТЁНОК ВЫПИЛ ЯД И СДОХ.",40,80)) )) )) ));//действие со вторым объектом 
+ conditional_ptr.reset(new CConditionalOfUse("POISON","WAIT CAT",action_one_ptr,action_two_ptr));
+ ConditionalExpression.push_back(conditional_ptr);
+
+
+ SetDescription("BOTTLE","ПУСТАЯ БУТЫЛКА");
+ SetDescription("RING","КОЛЬЦО С ФИАНИТОМ");
+ SetDescription("POISON","КОЛБА С ЯДОМ");
+ SetDescription("PAIL","ВЕДРО");
 }
 
 //----------------------------------------------------------------------------------------------------
 //вывод сообщения
 //----------------------------------------------------------------------------------------------------
 void CGame::PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr)
+{
+ size_t size=sMessage.Message.size();
+ int32_t x=sMessage.ScreenX;
+ int32_t y=sMessage.ScreenY;
+
+ int32_t symbol_width=cFontPrinter_Ptr->GetFontWidth();
+ int32_t symbol_height=cFontPrinter_Ptr->GetFontHeight();
+
+ PutFrame(x,y,sMessage.InSymbolWidth,sMessage.InSymbolHeight,iVideo_Ptr);
+
+ //выводим текст
+ for(size_t n=0;n<size;n++,y+=symbol_height)
+ {
+  cFontPrinter_Ptr->PrintAt(x,y,sMessage.Message[n],iVideo_Ptr);
+ }
+}
+//----------------------------------------------------------------------------------------------------
+//нарисовать рамку с заданным внутренним полем для текста (x,y,text_width,text_height - зона вывода текста)
+//----------------------------------------------------------------------------------------------------
+void CGame::PutFrame(int32_t x,int32_t y,int32_t text_width,int32_t text_height,IVideo *iVideo_Ptr)
 {
  static const int32_t FRAME_ANGLE_WIDTH=16;
  static const int32_t FRAME_ANGLE_HEIGHT=16;
@@ -690,11 +774,8 @@ void CGame::PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr)
  int32_t symbol_width=cFontPrinter_Ptr->GetFontWidth();
  int32_t symbol_height=cFontPrinter_Ptr->GetFontHeight();
 
- int32_t width=(sMessage.InSymbolWidth+2)*symbol_width;
- int32_t height=(sMessage.InSymbolHeight+2)*symbol_height;
- size_t size=sMessage.Message.size();
- int32_t x=sMessage.ScreenX;
- int32_t y=sMessage.ScreenY;
+ int32_t width=(text_width+2)*symbol_width;
+ int32_t height=(text_height+2)*symbol_height;
 
  int32_t rx1=x-symbol_width;
  int32_t ry1=y-symbol_height;
@@ -718,13 +799,77 @@ void CGame::PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr)
  {
   cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx1-FRAME_VERTICAL_WIDTH,fy,FRAME_VERTICAL_OFFSET_X,FRAME_VERTICAL_OFFSET_Y,FRAME_VERTICAL_WIDTH,FRAME_VERTICAL_HEIGHT,true);
   cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx2-1,fy,FRAME_VERTICAL_OFFSET_X,FRAME_VERTICAL_OFFSET_Y,FRAME_VERTICAL_WIDTH,FRAME_VERTICAL_HEIGHT,true);  	  
- }
- //выводим текст
- for(size_t n=0;n<size;n++,y+=symbol_height)
+ } 
+}
+//----------------------------------------------------------------------------------------------------
+//вывести инвентарь
+//----------------------------------------------------------------------------------------------------
+void CGame::PutInventory(IVideo *iVideo_Ptr)
+{
+ static const std::string header("В КОТОМКЕ У ДИЗЗИ");
+ static const std::string action("ВЗЯТЬ И ВЫЙТИ");
+ static const std::string comment("ВЫ МОЖЕТЕ ВЗЯТЬ ИЛИ ВЫЛОЖИТЬ");
+ static const std::string empty("П У С Т О");
+ 
+ int32_t text_width=header.length();
+ if (action.length()>text_width) text_width=action.length();
+ if (comment.length()>text_width) text_width=comment.length();
+ if (empty.length()>text_width) text_width=empty.length();
+
+ int32_t size=cGameState.Inventory.size();
+ for(size_t n=0;n<size;n++)
  {
-  cFontPrinter_Ptr->PrintAt(x,y,sMessage.Message[n],iVideo_Ptr);
+  int32_t l=cGameState.Inventory[n]->Description.length();
+  if (text_width<l) text_width=l;
+ }
+ if (InventorySelectedIndex<0) InventorySelectedIndex+=(size+1);
+ InventorySelectedIndex%=(size+1);
+
+ size_t text_height=8+size;
+ if (size==0) text_height++;
+
+ int32_t symbol_width=cFontPrinter_Ptr->GetFontWidth();
+ int32_t symbol_height=cFontPrinter_Ptr->GetFontHeight();
+ 
+ int32_t x=(SCREEN_WIDTH-text_width*symbol_width)/2;
+ int32_t y=(SCREEN_HEIGHT-text_height*symbol_height)/2;
+
+ PutFrame(x,y,text_width,text_height,iVideo_Ptr);
+
+ cFontPrinter_Ptr->PrintAt(x+symbol_width*(text_width-header.length())/2,y+symbol_height*0,header,iVideo_Ptr);
+
+ if (size==0) cFontPrinter_Ptr->PrintAt(x+symbol_width*(text_width-empty.length())/2,y+symbol_height*3,empty,iVideo_Ptr);
+
+ for(size_t n=0;n<size;n++)
+ {  
+  std::string &name=cGameState.Inventory[n]->Description;
+  if ((n+1)!=InventorySelectedIndex || FlashTickCounter>=3)
+  {
+   cFontPrinter_Ptr->PrintAt(x+symbol_width*(text_width-name.length())/2,y+symbol_height*(n+2),name,iVideo_Ptr);
+  }
+ }
+ 
+ if (InventorySelectedIndex!=0 || FlashTickCounter>=3)
+ {
+  cFontPrinter_Ptr->PrintAt(x+symbol_width*(text_width-action.length())/2,y+symbol_height*(text_height-3),action,iVideo_Ptr);  
+ }
+
+ cFontPrinter_Ptr->PrintAt(x+symbol_width*(text_width-comment.length())/2,y+symbol_height*(text_height-1),comment,iVideo_Ptr);
+}
+//----------------------------------------------------------------------------------------------------
+//задать описание
+//----------------------------------------------------------------------------------------------------
+void CGame::SetDescription(const std::string &name,const std::string &description)
+{
+ size_t size=cGameState.Map.size();
+ for(size_t n=0;n<size;n++)
+ {
+  std::shared_ptr<IPart> iPart_Ptr=cGameState.Map[n];
+  if (iPart_Ptr->Name.compare(name)==0) iPart_Ptr->Description=description;
  }
 }
+
+
 
 //****************************************************************************************************
 //открытые функции
@@ -737,6 +882,8 @@ void CGame::PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr)
 void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVideo_Ptr)
 {
  if (UseDelayCounter>0 && fire==false) UseDelayCounter--; 
+ FlashTickCounter++;
+ FlashTickCounter%=6;
 
  //узнаём, есть ли сообщения
  if (cGameState.Message.size()>0)//если есть сообщения, экран не стираем, чтобы прошлые сообщения не пропали
@@ -755,8 +902,15 @@ void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
  else
  {
   KeyboardControl(left,right,up,down,fire);
-  Processing(iVideo_Ptr);
-  OnPaint(iVideo_Ptr);
+  if (InventoryMode==true)//включён режим просмотра инвентаря
+  {
+   PutInventory(iVideo_Ptr);
+  }
+  else
+  {
+   Processing(iVideo_Ptr);
+   OnPaint(iVideo_Ptr);
+  }
  }
 }
 

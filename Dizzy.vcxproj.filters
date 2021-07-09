@@ -102,6 +102,12 @@
     <ClCompile Include="cactionsingle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cactionchangedescription.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cactionchangedescriptionglobal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -189,6 +195,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cactionchangenameglobal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionchangedescription.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionchangedescriptionglobal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

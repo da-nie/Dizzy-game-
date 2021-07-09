@@ -51,6 +51,7 @@ class IPart:public std::enable_shared_from_this<IPart>
   bool Item;//является ли предметом
   bool Selected;//выбран
   std::string Name;//название
+  std::string Description;//описание
 
   bool InInventory;//предмет находится в инвентаре
   bool Enabled;//разрешён ли к использованию и выводу предмет

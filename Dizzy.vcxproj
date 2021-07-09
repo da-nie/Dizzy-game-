@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cactionchangedescription.cpp" />
+    <ClCompile Include="cactionchangedescriptionglobal.cpp" />
     <ClCompile Include="cactionchangename.cpp" />
     <ClCompile Include="cactionchangenameglobal.cpp" />
     <ClCompile Include="cactionchangeposition.cpp" />
@@ -42,6 +44,8 @@
     <ClCompile Include="tga.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cactionchangedescription.h" />
+    <ClInclude Include="cactionchangedescriptionglobal.h" />
     <ClInclude Include="cactionchangename.h" />
     <ClInclude Include="cactionchangenameglobal.h" />
     <ClInclude Include="cactionchangeposition.h" />

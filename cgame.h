@@ -58,9 +58,7 @@ class CGame
   static const int32_t USE_DELAY_COUNTER_MAX_VALUE=10;//максимальное значнение счётчика задержки до следующего нажатия кнопки "использовать"
  private:
   //-переменные-----------------------------------------------------------------------------------------
-
-  //карта  
-
+	   
   int32_t Map_X;//координаты левого верхнего угла карты
   int32_t Map_Y;
 
@@ -70,16 +68,11 @@ class CGame
   CSprite cSprite_Tiles;//тайлы
   CSprite cSprite_TilesBarrier;//непроницаемость тайлов
   
-  int32_t X;//координаты
+  int32_t X;//координаты Диззи
   int32_t Y;
 
-  int32_t dX;//скорости
+  int32_t dX;//скорости Диззи
   int32_t dY;
-
-  int32_t FrameFall;
-  int32_t FrameJumpUp;
-  int32_t FrameJumpLeft;
-  int32_t FrameJumpRight;
 
   //режимы движения
   enum MOVE
@@ -122,6 +115,7 @@ class CGame
   std::vector<SFrame> sFrame_Array;//набор кадров для анимации
 
   int32_t SmallTickCounter;//счётчик малого такта
+  int32_t FlashTickCounter;//счётчик мигания
   
   std::vector<std::shared_ptr<IConditionalExpression> > ConditionalExpression;//набор условных выражений игровой логики
   std::shared_ptr<CFontPrinter> cFontPrinter_Ptr;//указатель на класс работы со шрифтами
@@ -129,6 +123,9 @@ class CGame
   CGameState cGameState;//состояние игры
 
   uint32_t UseDelayCounter;//счётчик до следующего нажатия кнопки "использовать"
+  
+  bool InventoryMode;//режим работы с инвентарём
+  int32_t InventorySelectedIndex;//выбранная позиция в инвентаре
  public:
   //-конструктор----------------------------------------------------------------------------------------
   CGame(void);
@@ -153,6 +150,9 @@ class CGame
   void ClearScreen(IVideo *iVideo_Ptr,uint32_t color);//очистить экран
   void CreateConditionalExpression(void);//создать условные выражения
   void PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr);//вывод сообщения
+  void PutFrame(int32_t x,int32_t y,int32_t text_width,int32_t text_height,IVideo *iVideo_Ptr);//нарисовать рамку с заданным внутренним полем для текста (x,y,text_width,text_height - зона вывода текста)
+  void PutInventory(IVideo *iVideo_Ptr);//вывести инвентарь
+  void SetDescription(const std::string &name,const std::string &description);//задать описание
 };
 
 #endif
