@@ -48,9 +48,9 @@ class CConditionalOfUse:public IConditionalExpression
  public:
   //-открытые функции-----------------------------------------------------------------------------------
   void Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState);//проверить условие и выполнить действие
-  void Init(void);//инициализация
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
+  void Init(void);//инициализация
 };
 
 #endif

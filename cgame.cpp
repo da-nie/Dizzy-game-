@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <memory>
 
-
 //****************************************************************************************************
 //глобальные переменные
 //****************************************************************************************************
@@ -45,18 +44,18 @@ static const int32_t SPEED_Y=2;//скорость Диззи по Y
 CGame::CGame(void)
 { 
  cSprite_Dizzy.Load("Sprites\\dizzy.tga");
- cSprite_Dizzy.SetAlpha(0,81,162,243);
+ cSprite_Dizzy.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
 
  cSprite_Tiles.Load("Tiles\\tiles.tga");
- cSprite_Tiles.SetAlpha(0,81,162,243);
+ cSprite_Tiles.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
 
  cSprite_TilesBarrier.Load("Tiles\\tiles_barrier.tga");
- cSprite_TilesBarrier.SetAlpha(0,0,0,0);
+ cSprite_TilesBarrier.SetAlpha(0,NO_BARRIER_COLOR_R,NO_BARRIER_COLOR_G,NO_BARRIER_COLOR_B);
 
  cSprite_Frame.Load("Sprites\\frame.tga");
- cSprite_Frame.SetAlpha(0,81,162,243);
+ cSprite_Frame.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
 
- cFontPrinter_Ptr.reset(new CFontPrinter("Sprites\\font.tga",8,8,81,162,243));
+ cFontPrinter_Ptr.reset(new CFontPrinter("Sprites\\font.tga",8,8,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B));
 
  //Dizzy стоит
  sFrame_Array.push_back(SFrame(0,MOVE_STOP,false,NULL));//0 
@@ -173,7 +172,9 @@ CGame::CGame(void)
  InventoryMode=false;
  InventorySelectedIndex=0;
 
- SmallTickCounter=0;
+ TilesAnimationTickCounter=0;
+ DizzyAnimationTickCounter=0;
+ MoveTickCounter=0;
 
  UseDelayCounter=0;
  FlashTickCounter=0;
@@ -200,8 +201,7 @@ CGame::~CGame()
 void CGame::OnPaint(IVideo *iVideo_Ptr)
 {
  //стираем фон
- uint32_t sky=(0<<24)|(81<<16)|(162<<8)|(243<<0);
- ClearScreen(iVideo_Ptr,sky);
+ ClearScreen(iVideo_Ptr,SKY_COLOR);
  //рисуем карту
  DrawMap(iVideo_Ptr);
  //рисуем предметы
@@ -247,7 +247,7 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
   if (left==false && right==false) dX=0;
   if (up==true) 
   {
-   SmallTickCounter=0;
+   MoveTickCounter=0;
    dY=-SPEED_Y;  
    if (dX==0) sFrame_Ptr=sFrame_Jump_Ptr;
   } 
@@ -276,15 +276,13 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
   {
    //перемещаем доступные для взяти предметы в инвентарь
    size_t size=ConditionalExpression.size();
-   cGameState.Take.clear();
-   for(size_t n=0;n<size;n++) ConditionalExpression[n]->Init();
+   cGameState.Take.clear();   
    for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
    //перемещаем возможные для взятия объекты в инвентарь
    size=cGameState.Take.size();
    for(size_t n=0;n<size;n++)
-   {   
-    cGameState.Take[n]->PushInventory();
-    cGameState.Inventory.push_back(cGameState.Take[n]);
+   {
+    PushInventory(cGameState.Take[n]);
    }  
    InventoryMode=true;
    InventorySelectedIndex=0;
@@ -301,52 +299,61 @@ void CGame::PressUse(void)
  {
   size_t size=cGameState.Inventory.size();
   if (InventorySelectedIndex>size) return;//нет такого предмета в инвентаре
-  std::shared_ptr<IPart> unit=cGameState.Inventory[InventorySelectedIndex-1];
-  cGameState.Inventory.erase(cGameState.Inventory.begin()+InventorySelectedIndex-1);//удаляем предмет из инвентаря
+  //получаем прдемет из инвентаря
+  //использование предметов возможно, только если они находятся в инвентаре.
+  //поэтому выкладываем предмет мы уже после использования и никак иначе.
+  std::shared_ptr<IPart> unit=cGameState.Inventory[InventorySelectedIndex-1];  
   //задаём предмету координаты Диззи и применяем правила игры
   unit->BlockPosX=(X+DIZZY_WIDTH/2)-TILE_WIDTH/2+Map_X;
   unit->BlockPosY=(Y+DIZZY_HEIGHT)-TILE_HEIGHT+Map_Y;
-  //используем предмет
+  //указываем, какой предмет мы будем использовать
   cGameState.UsedObject=unit;
+  //проверяем условия использования
   size_t cond_size=ConditionalExpression.size();
-  cGameState.Take.clear();
-  for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Init();
+  cGameState.Take.clear();  
   for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
-  unit->PopInventory();//выкладываем объект
-  if (cGameState.UsedObject.get()==NULL)
+  //выкладываем предмет из инвентаря
+  PopInventory(InventorySelectedIndex-1);
+  //если UsedObject был использован, указатель станет NULL.
+  if (cGameState.UsedObject.get()==NULL)//предмет был использован
   {
-   if (unit->Enabled==true)
-   {
-    unit->PushInventory();//возвращаем объект в инвентарь
-	cGameState.Inventory.push_back(unit);
-   }
+   if (unit->Enabled==true) PushInventory(unit);//предмет после использования не был удалён из игры, поэтому, возвращаем его обратно в инвентарь
   }
  }
 }
+
 //----------------------------------------------------------------------------------------------------
-//обработка игрового поля
+//выполнить анимацию Диззи
 //----------------------------------------------------------------------------------------------------
-void CGame::Processing(IVideo *iVideo_Ptr)
-{
- static int counter=0;
- if (counter==0)
+void CGame::DizzyAnimation(void)
+{ 
+ if (DizzyAnimationTickCounter==0)
  {
   if (sFrame_Ptr->sFrame_Next_Ptr!=NULL) sFrame_Ptr=sFrame_Ptr->sFrame_Next_Ptr;
                                     else sFrame_Ptr=sFrame_Stop_Ptr;
  }
- counter++;
- counter%=3;
+ DizzyAnimationTickCounter++;
+ DizzyAnimationTickCounter%=DIZZY_ANIMATION_TICK_COUNTER_DIVIDER;
+}
+
+//----------------------------------------------------------------------------------------------------
+//обработка движения Диззи
+//----------------------------------------------------------------------------------------------------
+void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
+{
+ //отрабатываем физику взаимодействия
+
+ MoveTickCounter++;
+ MoveTickCounter%=MOVE_TICK_COUNTER_DIVIDER;
 
  //стираем фон
  uint32_t width;
  uint32_t height;
  iVideo_Ptr->GetScreenSize(width,height);
  
- ClearScreen(iVideo_Ptr,0x00000000); 
+ ClearScreen(iVideo_Ptr,NO_BARRIER_COLOR); 
+ //рисуем препятствия 
  DrawBarrier(iVideo_Ptr);
- 
- SmallTickCounter++;
- SmallTickCounter%=7;
 
  int32_t step_x=abs(dX);
  int32_t step_y=abs(dY);
@@ -428,7 +435,7 @@ void CGame::Processing(IVideo *iVideo_Ptr)
 
  if (IsCollizionLegs(iVideo_Ptr,X,Y+1)==false)//можно падать
  {
-  if (SmallTickCounter==0)
+  if (MoveTickCounter==0)
   {
    if (dY<SPEED_Y) dY++;
   }
@@ -442,18 +449,41 @@ void CGame::Processing(IVideo *iVideo_Ptr)
   }
   else MoveControl=true;
  }
+}
+
+//----------------------------------------------------------------------------------------------------
+//анимация всех тайлов
+//----------------------------------------------------------------------------------------------------
+void CGame::TilesAnimation(void)
+{
+ TilesAnimationTickCounter++;
+ TilesAnimationTickCounter%=TILES_ANIMATION_TICK_COUNTER_DIVIDER;
+
  //выполняем анимацию
- if (SmallTickCounter==0)
+ if (TilesAnimationTickCounter==0)
  { 
   size_t size=cGameState.Map.size();
   for(size_t n=0;n<size;n++) cGameState.Map[n]->AnimationTiles();
  }
-
- //обрабатываем события
+}
+//----------------------------------------------------------------------------------------------------
+//выполнить обработку событий
+//----------------------------------------------------------------------------------------------------
+void CGame::ConditionalProcessing(void)
+{
  size_t size=ConditionalExpression.size();
- cGameState.Take.clear();
- for(size_t n=0;n<size;n++) ConditionalExpression[n]->Init();
+ cGameState.Take.clear(); 
  for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,false,cGameState);
+}
+//----------------------------------------------------------------------------------------------------
+//обработка игрового поля
+//----------------------------------------------------------------------------------------------------
+void CGame::Processing(IVideo *iVideo_Ptr)
+{
+ DizzyAnimation();//выполняем анимацию Диззи
+ DizzyMoveProcessing(iVideo_Ptr);//выполняем обработку движения Диззи
+ TilesAnimation();//выполняем анимацию всех тайлов
+ ConditionalProcessing();//выполняем обработку событий
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -868,6 +898,27 @@ void CGame::SetDescription(const std::string &name,const std::string &descriptio
   if (iPart_Ptr->Name.compare(name)==0) iPart_Ptr->Description=description;
  }
 }
+//----------------------------------------------------------------------------------------------------
+//положить в инвентарь
+//----------------------------------------------------------------------------------------------------
+void CGame::PushInventory(std::shared_ptr<IPart> iPart_Ptr)
+{
+ iPart_Ptr->PushInventory();//возвращаем объект в инвентарь
+ cGameState.Inventory.push_back(iPart_Ptr);
+}
+//----------------------------------------------------------------------------------------------------
+//вынуть из инвентаря
+//----------------------------------------------------------------------------------------------------
+std::shared_ptr<IPart> CGame::PopInventory(size_t index)
+{
+ std::shared_ptr<IPart> iPart_Ptr=cGameState.Inventory[index];
+ cGameState.Inventory.erase(cGameState.Inventory.begin()+index);//удаляем предмет из инвентаря
+ iPart_Ptr->PopInventory();//выкладываем объект
+ return(iPart_Ptr);
+}
+
+
+
 
 
 

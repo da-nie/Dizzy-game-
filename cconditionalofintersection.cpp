@@ -41,8 +41,12 @@ CConditionalOfIntersection::~CConditionalOfIntersection()
 //****************************************************************************************************
 
 //----------------------------------------------------------------------------------------------------
-//
+//инициализация
 //----------------------------------------------------------------------------------------------------
+void CConditionalOfIntersection::Init(void)
+{
+ if (iAction_Ptr.get()!=NULL) iAction_Ptr->Init();
+}
 
 //****************************************************************************************************
 //открытые функции
@@ -53,6 +57,8 @@ CConditionalOfIntersection::~CConditionalOfIntersection()
 //----------------------------------------------------------------------------------------------------
 void CConditionalOfIntersection::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState)
 {
+ Init();
+
  std::shared_ptr<IAction> iAction_LocalPtr=iAction_Ptr;
  auto execute_function=[this,&cGameState,&iAction_LocalPtr,part_width,part_height,dizzy_x,dizzy_y,dizzy_width,dizzy_height](std::shared_ptr<IPart> iPart_Ptr)
  {  
@@ -80,11 +86,4 @@ void CConditionalOfIntersection::Execute(std::vector<std::shared_ptr<IPart> > &M
   if (iAction_LocalPtr.get()!=NULL) iAction_LocalPtr->Execute(iPart_Ptr,cGameState);
  };
  std::for_each(Map.begin(),Map.end(),execute_function);
-}
-//----------------------------------------------------------------------------------------------------
-//инициализация
-//----------------------------------------------------------------------------------------------------
-void CConditionalOfIntersection::Init(void)
-{
- if (iAction_Ptr.get()!=NULL) iAction_Ptr->Init();
 }

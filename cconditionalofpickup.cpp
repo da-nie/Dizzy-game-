@@ -41,8 +41,12 @@ CConditionalOfPickUp::~CConditionalOfPickUp()
 //****************************************************************************************************
 
 //----------------------------------------------------------------------------------------------------
-//
+//инициализация
 //----------------------------------------------------------------------------------------------------
+void CConditionalOfPickUp::Init(void)
+{
+ if (iAction_Ptr.get()!=NULL) iAction_Ptr->Init();
+}
 
 //****************************************************************************************************
 //открытые функции
@@ -53,6 +57,8 @@ CConditionalOfPickUp::~CConditionalOfPickUp()
 //----------------------------------------------------------------------------------------------------
 void CConditionalOfPickUp::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState)
 {
+ Init();
+
  if (use==false) return;
 
  std::shared_ptr<IAction> iAction_LocalPtr=iAction_Ptr;
@@ -82,11 +88,4 @@ void CConditionalOfPickUp::Execute(std::vector<std::shared_ptr<IPart> > &Map,int
   if (iAction_LocalPtr.get()!=NULL) iAction_LocalPtr->Execute(iPart_Ptr,cGameState);
  };
  std::for_each(Map.begin(),Map.end(),execute_function);
-}
-//----------------------------------------------------------------------------------------------------
-//инициализация
-//----------------------------------------------------------------------------------------------------
-void CConditionalOfPickUp::Init(void)
-{
- if (iAction_Ptr.get()!=NULL) iAction_Ptr->Init();
 }

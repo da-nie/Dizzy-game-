@@ -43,8 +43,13 @@ CConditionalOfUse::~CConditionalOfUse()
 //****************************************************************************************************
 
 //----------------------------------------------------------------------------------------------------
-//
+//инициализация
 //----------------------------------------------------------------------------------------------------
+void CConditionalOfUse::Init(void)
+{
+ if (iAction_OnePtr.get()!=NULL) iAction_OnePtr->Init();
+ if (iAction_TwoPtr.get()!=NULL) iAction_TwoPtr->Init();
+}
 
 //****************************************************************************************************
 //открытые функции
@@ -55,6 +60,8 @@ CConditionalOfUse::~CConditionalOfUse()
 //----------------------------------------------------------------------------------------------------
 void CConditionalOfUse::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState)
 {
+ Init();
+
  if (use==false) return;//режим хадействования не включён
  if (cGameState.UsedObject.get()==NULL) return;//нет используемого предмета
  if (Name_One.compare(cGameState.UsedObject->Name)!=0) return;//имена не совпадают 
@@ -95,12 +102,4 @@ void CConditionalOfUse::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_
   if (iAction_OnePtr.get()!=NULL) iAction_OnePtr->Execute(cGameState.UsedObject,cGameState);//выполняем действие с первым объектом
   cGameState.UsedObject.reset();//убираем объект из используемых
  }
-}
-//----------------------------------------------------------------------------------------------------
-//инициализация
-//----------------------------------------------------------------------------------------------------
-void CConditionalOfUse::Init(void)
-{
- if (iAction_OnePtr.get()!=NULL) iAction_OnePtr->Init();
- if (iAction_TwoPtr.get()!=NULL) iAction_TwoPtr->Init();
 }

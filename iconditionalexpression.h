@@ -43,7 +43,6 @@ class IConditionalExpression
  public:
   //-открытые функции-----------------------------------------------------------------------------------
   virtual void Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState)=0;//проверить условие и выполнить действие
-  virtual void Init(void)=0;//инициализация
   //-открытые статические функции-----------------------------------------------------------------------
 };
 
