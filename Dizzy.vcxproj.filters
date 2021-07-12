@@ -108,6 +108,18 @@
     <ClCompile Include="cactionchangedescriptionglobal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cautomath.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="clexeme.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="clexicalanalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="csyntaxanalyzer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -201,6 +213,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cactionchangedescriptionglobal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="csyntaxanalyzer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cautomath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="clexeme.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="clexicalanalyzer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

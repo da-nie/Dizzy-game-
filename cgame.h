@@ -71,6 +71,8 @@ class CGame
   static const int32_t TILE_WITH_BORDER_HEIGHT=TILE_HEIGHT+TILE_BORDER_HEIGHT+TILE_BORDER_HEIGHT;//высота тайла с рамкой
 
   static const int32_t USE_DELAY_COUNTER_MAX_VALUE=5;//максимальное значнение счётчика задержки до следующего нажатия кнопки "использовать"
+
+  static const int32_t MAX_INVENTORY_SIZE=3;//максимальное количество предметов в инвентаре
  private:
   //-переменные-----------------------------------------------------------------------------------------
 	   
@@ -169,13 +171,13 @@ class CGame
   void DrawFirstPlaneMap(IVideo *iVideo_Ptr);//нарисовать карту переднего плана
   void DrawItemMap(IVideo *iVideo_Ptr);//нарисовать карту предметов
   void ClearScreen(IVideo *iVideo_Ptr,uint32_t color);//очистить экран
-  void CreateConditionalExpression(void);//создать условные выражения
   void PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr);//вывод сообщения
   void PutFrame(int32_t x,int32_t y,int32_t text_width,int32_t text_height,IVideo *iVideo_Ptr);//нарисовать рамку с заданным внутренним полем для текста (x,y,text_width,text_height - зона вывода текста)
   void PutInventory(IVideo *iVideo_Ptr);//вывести инвентарь
   void SetDescription(const std::string &name,const std::string &description);//задать описание
   void PushInventory(std::shared_ptr<IPart> iPart_Ptr);//положить в инвентарь
   std::shared_ptr<IPart> PopInventory(size_t index);//вынуть из инвентаря
+  bool LoadConditional(const std::string &file_name);//загрузить условия игры
 };
 
 #endif

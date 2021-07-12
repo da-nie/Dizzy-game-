@@ -1,0 +1,212 @@
+//ЯНАШРХЪ ОЕПЕЯЕВЕМХЪ
+
+ SetDescription("BOTTLE","осярюъ асршкйю")
+ SetDescription("RING","йнкэжн я тхюмхрнл")
+ SetDescription("POISON","йнкаю я ъднл")
+ SetDescription("PAIL","бедпн")
+
+IfIntersection("BLOCK")
+ActionBegin
+ ActionSetAnimationStep(1)
+ActionEnd
+
+IfIntersection("CAT")
+ActionBegin
+ ActionSingle()
+ ActionChangeGlobalName("WAIT CAT")
+ ActionMessage(30,100,"ъ бвепю асуюк... бюкепэъмйни...\ясьмъй! лме мсфмю бндю!")
+ActionEnd
+
+ //ЯНАШРХЪ БГЪРХЪ
+
+IfPickUp("BOTTLE")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+IfPickUp("BOTTLE WATER")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+IfPickUp("RING")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+IfPickUp("POISON")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+IfPickUp("PAIL")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+//ЯНАШРХЪ БГЮХЛНДЕИЯРБХЪ
+
+IfUse("BOTTLE","WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionChangeGlobalDescription("асршкйю я бндни")
+ ActionChangeGlobalName("BOTTLE WATER")
+ ActionSetAnimationStep(1)
+ ActionMessage(50,100,"дхггх мюонкмхк асршкйс бндни.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("PAIL","WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(50,100,"дхггх гювепомск бндс бедпнл.\...мн бндю бшкхкюяэ\вепег дшпйх б бедпе!")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("BOTTLE","WAIT CAT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,100,"дю, бнр щрн ъ х охк...")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("PAIL","WAIT CAT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,100,"нмн фе осярне!")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("RING","LUCKY CAT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,70,"аепх! ъ реае ецн ондюпхк.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("BOTTLE","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"лнфмн аш мюапюрэ бндш.\мн... мер бедпю.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("PAIL","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"ме бшидер. бедпн-рн дшпъбне...")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("POISON","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(25,80,"дхггх сфе унрек нрпюбхрэ\аеяонкегмши йнкндеж,йюй бдпсц\бяонлмхк:дед-оюпрхгюм пюяяйюгшбюк,\врн рюй онярсоюкх рнкэйн тюьхярш.\ю тюьхярнл дхггх ашрэ ме унрек.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("POISON","WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"...цслюммее асдер кнбхрэ пшас\дхмюлхрнл,опхькн б цнкнбс дхггх.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("BOTTLE WATER","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionChangeGlobalDescription("осярюъ асршкйю")
+ ActionChangeGlobalName("BOTTLE")
+ ActionSetAnimationStep(0)
+ ActionMessage(40,100,"дхггх бшкхк бндс б йнкндеж.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+
+IfUse("BOTTLE WATER","WAIT CAT")
+ActionFirstBegin
+ ActionChangeGlobalDescription("осярюъ асршкйю")
+ ActionChangeGlobalName("BOTTLE")
+ ActionSetAnimationStep(0)
+ActionFirstEnd
+ActionSecondBegin
+ ActionSingle()
+ ActionChangeGlobalName("LUCKY CAT")
+ ActionCopyPosition("RING","RING_POS")
+ ActionMessage(30,100,"дхггх дюк асршкйс бндш йнр╗мйс...")
+ ActionMessage(40,80,"аскэй-аскэй!\яоюяхан! гю щрн ъ дюл реае\йнкэжн. ъ ецн цде-рн яо╗п.")
+ActionSecondEnd
+
+IfUse("POISON","WAIT CAT")
+ActionFirstBegin
+ ActionSetEnabled(false)
+ActionFirstEnd
+ActionSecondBegin
+ ActionSingle()
+ ActionSetEnabled(false)
+ ActionMessage(30,100,"б дерярбе дхггх леврюк\ярюбхрэ ношрш мю фхбнрмшу...")
+ ActionMessage(40,80,"йнр╗мнй бшохк ъд х ядну.")
+ActionSecondEnd
+
+IfUse("RING","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionSetEnabled(false)
+ ActionMessage(25,80,"дхггх бшапняхк йнкэжн б йнкндеж.")
+ ActionMessage(40,120,"мю врн нм мюдеъкяъ?")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("RING","WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"ме онлмч яйюгйх, цде\рпеанбюкняэ аш йхдюрэ\йнкэжн б лнпе.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("POISON","LUCKY CAT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,120,"ме-ме, ъ рюйне лнцс\бшохрэ рнкэйн я онулекэъ.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("PAIL","LUCKY CAT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,110,"ю мюдемэ ецн яеае мю цнкнбс!\рхою рш пшжюпэ!")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("BOTTLE","LUCKY CAT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"щу, унпньн днцмюкяъ...\онбрнпхрэ аш...")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("BOTTLE WATER","LUCKY CAT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,90,"аскэ-аскэ.\бндю-щрн фхгмэ!")
+ ActionChangeGlobalDescription("осярюъ асршкйю")
+ ActionChangeGlobalName("BOTTLE")
+ ActionSetAnimationStep(0)
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd

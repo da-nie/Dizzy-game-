@@ -73,8 +73,8 @@ void CGameState::AddMessage(const std::string &message,int32_t screen_x,int32_t 
  for(size_t n=0;n<length;n++,ptr++)
  {
   uint8_t symbol=static_cast<uint8_t>(*ptr);  
-  if (symbol!=static_cast<uint8_t>('\n')) line+=(*ptr);
-  if (symbol==static_cast<uint8_t>('\n') || n==length-1)
+  if (symbol!=static_cast<uint8_t>('\\')) line+=(*ptr);
+  if (symbol==static_cast<uint8_t>('\\') || n==length-1)
   {
    size_t line_width=line.length();
    if (line_width>sMessage.InSymbolWidth) sMessage.InSymbolWidth=line_width;

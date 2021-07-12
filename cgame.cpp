@@ -17,6 +17,8 @@
 #include "cactionsingle.h"
 #include "cactionsetenabled.h"
 #include "cactionpickup.h"
+#include "csyntaxanalyzer.h"
+
 #include <algorithm>
 #include <memory>
 
@@ -182,8 +184,8 @@ CGame::CGame(void)
  //загружаем карту
  cGameState.Map.clear();
  if (LoadMap("map.gam")==false) MessageBox(NULL,"Ошибка загрузки файла карты!","Ошибка",MB_OK);
- //создаём условные выражения
- CreateConditionalExpression(); 
+ //загружаем условные выражения
+ LoadConditional("conditional.txt");
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -274,14 +276,14 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
   }
   if (sFrame_Ptr->Move==MOVE_STOP && fire==true && UseDelayCounter==0)
   {
-   //перемещаем доступные для взяти предметы в инвентарь
+   //перемещаем доступные для взятия предметы в инвентарь
    size_t size=ConditionalExpression.size();
    cGameState.Take.clear();   
    for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
    //перемещаем возможные для взятия объекты в инвентарь
    size=cGameState.Take.size();
    for(size_t n=0;n<size;n++)
-   {
+   {    
     PushInventory(cGameState.Take[n]);
    }  
    InventoryMode=true;
@@ -655,103 +657,6 @@ void CGame::ClearScreen(IVideo *iVideo_Ptr,uint32_t color)
 }
 
 //----------------------------------------------------------------------------------------------------
-//создать условные выражения
-//----------------------------------------------------------------------------------------------------
-void CGame::CreateConditionalExpression(void)
-{
- std::shared_ptr<IAction> action_one_ptr;
- std::shared_ptr<IAction> action_two_ptr;
- std::shared_ptr<IConditionalExpression> conditional_ptr;
-
- ConditionalExpression.clear();
-// ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfUse("","",NULL,std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfIntersection("BLOCK",std::shared_ptr<IAction>(new CActionSetAnimationStep(1)))));
-
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfIntersection("CAT", std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("WAIT CAT",std::shared_ptr<IAction>(new CActionMessage("Я ВЧЕРА БУХАЛ... ВАЛЕРЬЯНКОЙ...\nСУШНЯК! МНЕ НУЖНА ВОДА!",30,100))  )) ))) ));
- 
-
- 
- //добавляем события взятия
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE",std::shared_ptr<IAction>(new CActionPickUp()))));
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("BOTTLE WATER",std::shared_ptr<IAction>(new CActionPickUp()))));
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("RING",std::shared_ptr<IAction>(new CActionPickUp()))));
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("POISON",std::shared_ptr<IAction>(new CActionPickUp()))));
- ConditionalExpression.push_back(std::shared_ptr<IConditionalExpression>(new CConditionalOfPickUp("PAIL",std::shared_ptr<IAction>(new CActionPickUp()))));
- //добавляем событие наполнения бутылки водой
- action_one_ptr.reset(new CActionChangeDescriptionGlobal("БУТЫЛКА С ВОДОЙ",std::shared_ptr<IAction>(new CActionChangeNameGlobal("BOTTLE WATER",std::shared_ptr<IAction>(std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionSetAnimationStep(1,std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ НАПОЛНИЛ БУТЫЛКУ ВОДОЙ.",50,100)) )) )) )) )) );//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("BOTTLE","WATER",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ЗАЧЕРПНУЛ ВОДУ ВЕДРОМ.\n...НО ВОДА ВЫЛИЛАСЬ\nЧЕРЕЗ ДЫРКИ В ВЕДРЕ!",50,100) )) );//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("PAIL","WATER",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- //добавляем событие разговора с кошкой
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ДА, ВОТ ЭТО Я И ПИЛ...",30,100)) ));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("BOTTLE","WAIT CAT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ОНО ЖЕ ПУСТОЕ!",30,100)) ));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("PAIL","WAIT CAT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- //добавляем событие разговора с кошкой
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("БЕРИ! Я ТЕБЕ ЕГО ПОДАРИЛ.",30,70)) ));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("RING","LUCKY CAT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- //добавляем событие применения бутылки к колодцу 
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("МОЖНО БЫ НАБРАТЬ ВОДЫ.\nНО... НЕТ ВЕДРА.",30,80)) ));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("BOTTLE","PIT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- //добавляем событие применения ведра к колодцу 
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("НЕ ВЫЙДЕТ. ВЕДРО-ТО ДЫРЯВОЕ...",30,80)) ));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("PAIL","PIT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ УЖЕ ХОТЕЛ ОТРАВИТЬ\n БЕСПОЛЕЗНЫЙ КОЛОДЕЦ,КАК ВДРУГ\nВСПОМНИЛ:ДЕД-ПАРТИЗАН РАССКАЗЫВАЛ,\n ЧТО ТАК ПОСТУПАЛИ ТОЛЬКО ФАШИСТЫ.\nА ФАШИСТОМ ДИЗЗИ БЫТЬ НЕ ХОТЕЛ.",30,80)) ));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("POISON","PIT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- action_one_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionMessage("...ГУМАННЕЕ БУДЕТ ЛОВИТЬ РЫБУ\nДИНАМИТОМ,ПРИШЛО В ГОЛОВУ ДИЗЗИ.",30,80)) ));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("POISON","WATER",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
- 
- action_one_ptr.reset(new CActionChangeDescriptionGlobal("ПУСТАЯ БУТЫЛКА",std::shared_ptr<IAction>(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("BOTTLE",std::shared_ptr<IAction>(new CActionSetAnimationStep(0,std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ВЫЛИЛ ВОДУ В КОЛОДЕЦ.",40,110)))))) )) ));//действие с первым объектом
- action_two_ptr.reset();//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("BOTTLE WATER","PIT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- //добавляем событие передачи бутылки кошке
- action_one_ptr.reset(new CActionSetEnabled(false));//действие с первым объектом 
- action_two_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionChangeNameGlobal("LUCKY CAT",std::shared_ptr<IAction>(new CActionCopyPosition("RING","RING_POS",std::shared_ptr<IAction>(new CActionMessage("ДИЗЗИ ДАЛ БУТЫЛКУ ВОДЫ КОТЁНКУ...",30,100,std::shared_ptr<IAction>(new CActionMessage("БУЛЬК-БУЛЬК!\nСПАСИБО! ЗА ЭТО Я ДАМ ТЕБЕ\nКОЛЬЦО. Я ЕГО ГДЕ-ТО СПЁР.",40,80)) )) )) )) ));//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("BOTTLE WATER","WAIT CAT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
- //добавляем событие передачи колбы с ядом кошке
- action_one_ptr.reset(new CActionSetEnabled(false));//действие с первым объектом 
- action_two_ptr.reset(new CActionSingle(std::shared_ptr<IAction>(new CActionSetEnabled(false,std::shared_ptr<IAction>(new CActionMessage("В ДЕТСТВЕ ДИЗЗИ МЕЧТАЛ\nСТАВИТЬ ОПЫТЫ НА ЖИВОТНЫХ...",30,100,std::shared_ptr<IAction>(new CActionMessage("КОТЁНОК ВЫПИЛ ЯД И СДОХ.",40,80)) )) )) ));//действие со вторым объектом 
- conditional_ptr.reset(new CConditionalOfUse("POISON","WAIT CAT",action_one_ptr,action_two_ptr));
- ConditionalExpression.push_back(conditional_ptr);
-
-
- SetDescription("BOTTLE","ПУСТАЯ БУТЫЛКА");
- SetDescription("RING","КОЛЬЦО С ФИАНИТОМ");
- SetDescription("POISON","КОЛБА С ЯДОМ");
- SetDescription("PAIL","ВЕДРО");
-}
-
-//----------------------------------------------------------------------------------------------------
 //вывод сообщения
 //----------------------------------------------------------------------------------------------------
 void CGame::PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr)
@@ -887,22 +792,12 @@ void CGame::PutInventory(IVideo *iVideo_Ptr)
  cFontPrinter_Ptr->PrintAt(x+symbol_width*(text_width-comment.length())/2,y+symbol_height*(text_height-1),comment,iVideo_Ptr);
 }
 //----------------------------------------------------------------------------------------------------
-//задать описание
-//----------------------------------------------------------------------------------------------------
-void CGame::SetDescription(const std::string &name,const std::string &description)
-{
- size_t size=cGameState.Map.size();
- for(size_t n=0;n<size;n++)
- {
-  std::shared_ptr<IPart> iPart_Ptr=cGameState.Map[n];
-  if (iPart_Ptr->Name.compare(name)==0) iPart_Ptr->Description=description;
- }
-}
-//----------------------------------------------------------------------------------------------------
 //положить в инвентарь
 //----------------------------------------------------------------------------------------------------
 void CGame::PushInventory(std::shared_ptr<IPart> iPart_Ptr)
 {
+ if (cGameState.Inventory.size()>=MAX_INVENTORY_SIZE) return;//инвентарь заполнен
+
  iPart_Ptr->PushInventory();//возвращаем объект в инвентарь
  cGameState.Inventory.push_back(iPart_Ptr);
 }
@@ -916,7 +811,70 @@ std::shared_ptr<IPart> CGame::PopInventory(size_t index)
  iPart_Ptr->PopInventory();//выкладываем объект
  return(iPart_Ptr);
 }
+//----------------------------------------------------------------------------------------------------
+//загрузить условия игры
+//----------------------------------------------------------------------------------------------------
+bool CGame::LoadConditional(const std::string &file_name)
+{ 
+ ConditionalExpression.clear();
 
+ FILE *file_log=fopen("log.txt","wb");
+
+ //загружаем команды
+ CSyntaxAnalyzer cSyntaxAnalyzer;
+ std::string message;
+ FILE *file=fopen(file_name.c_str(),"rb");
+ std::string line;
+ int32_t line_index=0;
+ bool error=false;
+ if (file!=NULL)
+ {
+  bool done=false; 	
+  while(done==false)
+  {
+   char s;
+   if (fread(&s,sizeof(char),1,file)==0)
+   {
+    done=true;
+    s='\r';
+   }
+   bool new_line;
+   bool res=cSyntaxAnalyzer.Processing(s,line_index,message,new_line,ConditionalExpression,cGameState.Map);
+   if (res==false)
+   {   	   	
+   	std::string str;
+   	if (line.length()!=0) str=line+" ";
+   	line="";
+   	str=str+message;
+	fprintf(file_log,"%s\r\n",str.c_str());
+   	error=true;
+    break;
+   }
+   if (message.length()!=0)
+   {
+    line=line+message;
+   }
+   if (new_line==true)
+   {
+   	if (line.length()!=0) 
+   	{
+     fprintf(file_log,"%s\r\n",line.c_str());
+   	 line_index++;
+   	}
+    line="";
+   }  
+  } 	
+  fclose(file);
+  //запускаем выполнение программы
+  if (error==false)
+  {
+   fprintf(file_log,"Условия игры приняты.");
+  }
+ }
+ else fprintf(file_log,"Не могу открыть файл условий.");
+ fclose(file_log);
+ return(true);
+}
 
 
 
