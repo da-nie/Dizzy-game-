@@ -169,6 +169,7 @@ class CGame
   void DizzyMoveProcessing(IVideo *iVideo_Ptr);//обработка движения Диззи
   void TilesAnimation(void);//анимация всех тайлов
   void ConditionalProcessing(void);//выполнить обработку событий
+  void DizzyEnergyProcessing(IVideo *iVideo_Ptr);//выполнить обработку энергии Диззи
   void Processing(IVideo *iVideo_Ptr);//обработка игрового поля
   bool IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками ног Диззи
   bool IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками корпуса Диззи
@@ -186,6 +187,7 @@ class CGame
   bool LoadConditionalFile(const std::string &file_name,std::vector<std::string> &log);//загрузить файл условий игры
   bool LoadMap(const std::string &file_name);//загрузить карту
   void DrawScreenFrame(IVideo *iVideo_Ptr);//нарисовать экранную рамку
+  bool MoveMap(int32_t width,int32_t height,int32_t offset_y);//выполнить перемещение карты, если требуется
 };
 
 #endif

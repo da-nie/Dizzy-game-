@@ -312,12 +312,14 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
  MoveTickCounter%=MOVE_TICK_COUNTER_DIVIDER;
 
  //стираем фон
- uint32_t width;
- uint32_t height;
- iVideo_Ptr->GetScreenSize(width,height);
+ uint32_t w;
+ uint32_t h;
+ iVideo_Ptr->GetScreenSize(w,h);
+ int32_t width=w;
+ int32_t height=h;
  int32_t offset_y=cSprite_Header.GetHeight();
- height-=offset_y;
- 
+ height-=offset_y; 
+
  iVideo_Ptr->ClearScreen(NO_BARRIER_COLOR); 
  //рисуем препятствия 
  DrawBarrier(iVideo_Ptr);
@@ -363,35 +365,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    dY=0;
   }
 
-  bool redraw_barrier=false;
-  if (X<width/4 && Map_X>=2)
-  {
-   Map_X-=2;
-   //Map_X-=width/8;
-   //X+=width/8;
-   X+=2;
-   redraw_barrier=true;
-  }
-  if (X>=3*width/4)
-  {
-   Map_X+=2;
-   X-=2;
-   //X-=7*width/8;
-   //Map_X+=7*width/8;
-   redraw_barrier=true;
-  }
-  if (Y>=(3*height/4+offset_y))
-  {
-   Y-=2;
-   Map_Y+=2;
-   redraw_barrier=true;
-  }
-  if (Y<(height/4+offset_y) && Map_Y>=2)
-  {
-   Y+=2;
-   Map_Y-=2;
-   redraw_barrier=true;
-  }
+  bool redraw_barrier=MoveMap(width,height,offset_y);
 
   if (redraw_barrier==true)
   {
@@ -443,6 +417,58 @@ void CGame::ConditionalProcessing(void)
  for(size_t n=0;n<size;n++) cGameState.ConditionalExpression[n]->Execute(X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,false,true,cGameState);
 }
 //----------------------------------------------------------------------------------------------------
+//выполнить обработку энергии Диззи
+//----------------------------------------------------------------------------------------------------
+void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
+{
+ if (cGameState.Energy==0)//Диззи погиб
+ {
+  cGameState.AddMessage("ДИЗЗИ ПОГИБ!\\ВЫ ПОТЕРЯЛИ ЖИЗНЬ",100,120);
+  //ищем ближайшую точку восстановления
+  float min_distance=0;
+  int32_t y=0;
+  int32_t x=0;  
+  size_t size=cGameState.Map.size();
+  bool first=true;
+  for(size_t n=0;n<size;n++)
+  {
+   std::shared_ptr<IPart> iPart_Ptr=cGameState.Map[n];
+   if (iPart_Ptr->Name.compare("RESPAWN")!=0) continue;
+
+   float dx=((X+Map_X)-iPart_Ptr->BlockPosX)/TILE_WIDTH;
+   float dy=((Y+Map_Y)-iPart_Ptr->BlockPosY)/TILE_HEIGHT;
+   float distance=dx*dx+dy*dy;
+   if (first==true || min_distance>distance)
+   {
+    min_distance=distance;
+	x=iPart_Ptr->BlockPosX;
+	y=iPart_Ptr->BlockPosY;
+   }
+   first=false;
+  }
+  cGameState.Energy=100;
+  X=x-Map_X;
+  Y=y-Map_Y;
+  dX=0;
+  dY=0;
+  sFrame_Ptr=sFrame_Stop_Ptr;
+  //перемещаем карту
+  uint32_t w;
+  uint32_t h;
+  iVideo_Ptr->GetScreenSize(w,h);
+  int32_t width=w;
+  int32_t height=h;
+  int32_t offset_y=cSprite_Header.GetHeight();
+  height-=offset_y; 
+  while(1) 
+  {
+   if (MoveMap(width,height,offset_y)==false) break;
+  }
+ }
+}
+
+
+//----------------------------------------------------------------------------------------------------
 //обработка игрового поля
 //----------------------------------------------------------------------------------------------------
 void CGame::Processing(IVideo *iVideo_Ptr)
@@ -451,6 +477,7 @@ void CGame::Processing(IVideo *iVideo_Ptr)
  DizzyMoveProcessing(iVideo_Ptr);//выполняем обработку движения Диззи
  TilesAnimation();//выполняем анимацию всех тайлов
  ConditionalProcessing();//выполняем обработку событий
+ DizzyEnergyProcessing(iVideo_Ptr);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -972,18 +999,52 @@ void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
   }
  }
 }
+//----------------------------------------------------------------------------------------------------
+//выполнить перемещение карты, если требуется
+//----------------------------------------------------------------------------------------------------
+bool CGame::MoveMap(int32_t width,int32_t height,int32_t offset_y)
+{
+ bool update=false;
+ if (X<width/4 && Map_X>=2)
+ {
+  Map_X-=2;
+  X+=2;
+  update=true;
+ }
+ if (X>=3*width/4)
+ {
+  Map_X+=2;
+  X-=2;
+  update=true;
+ }
+ if (Y>=(3*height/4+offset_y))
+ {
+  Y-=2;
+  Map_Y+=2;
+  update=true;
+ }
+ if (Y<(height/4+offset_y) && Map_Y>=2)
+ {
+  Y+=2;
+  Map_Y-=2;
+  update=true;
+ }
+ return(update);
+}
 
 //----------------------------------------------------------------------------------------------------
 //инициализация
 //----------------------------------------------------------------------------------------------------
 bool CGame::Init(IVideo *iVideo_Ptr)
 {
+ sFrame_Ptr=sFrame_Stop_Ptr;
+
  X=160;
  Y=5;
 
  Map_X=0;
  Map_Y=0;
-
+ 
  dX=0;
  dY=0;
 
