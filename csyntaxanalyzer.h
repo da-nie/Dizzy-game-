@@ -12,6 +12,7 @@
 #include "cautomath.h"
 #include "iconditionalexpression.h"
 #include "iaction.h"
+#include "cgamestate.h"
 #include <vector>
 #include <string>
 
@@ -51,10 +52,13 @@ class CSyntaxAnalyzer
    ID_LEXEME_TYPE_ACTION_SET_ANIMATION_STEP,
    ID_LEXEME_TYPE_ACTION_SET_ENABLED, 
    ID_LEXEME_TYPE_ACTION_SINGLE, 
+   ID_LEXEME_TYPE_ACTION_MOVE,
    //команды условий
    ID_LEXEME_TYPE_IF_INTERSECTION,
+   ID_LEXEME_TYPE_IF_DIZZY_INTERSECTION,
    ID_LEXEME_TYPE_IF_PICK_UP,
    ID_LEXEME_TYPE_IF_USE,
+   ID_LEXEME_TYPE_IF_TIMER,
 
    ID_LEXEME_TYPE_ACTION_FIRST_BEGIN,
    ID_LEXEME_TYPE_ACTION_FIRST_END,
@@ -95,7 +99,7 @@ class CSyntaxAnalyzer
   ~CSyntaxAnalyzer();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  bool Processing(char symbol,int32_t line_index,std::string &message,bool &new_line,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression,std::vector<std::shared_ptr<IPart> > &Map);//создать цепочку команд
+  bool Processing(char symbol,int32_t line_index,std::string &message,bool &new_line,CGameState &cGameState);//создать цепочку команд
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
   double ConvertAngleToSec(const char *string);//получить угол по строке формата a'b'c

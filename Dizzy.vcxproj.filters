@@ -120,6 +120,18 @@
     <ClCompile Include="csyntaxanalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="system.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cactionmove.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cconditionaloftimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cconditionalofdizzyintersection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -225,6 +237,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="clexicalanalyzer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="system.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionmove.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cconditionaloftimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cconditionalofdizzyintersection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,0 +1,46 @@
+//БГЮХЛНДЕИЯРБХЕ Я ЙНКНДЖЕЛ
+
+IfUse("BOTTLE","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"лнфмн аш мюапюрэ бндш.\мн... мер бедпю.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("PAIL","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"ме бшидер. бедпн-рн дшпъбне...")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("POISON","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(25,80,"дхггх сфе унрек нрпюбхрэ\аеяонкегмши йнкндеж,йюй бдпсц\бяонлмхк:дед-оюпрхгюм пюяяйюгшбюк,\врн рюй онярсоюкх рнкэйн тюьхярш.\ю тюьхярнл дхггх ашрэ ме унрек.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("BOTTLE WATER","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionChangeGlobalDescription("осярюъ асршкйю")
+ ActionChangeGlobalName("BOTTLE")
+ ActionSetAnimationStep(0)
+ ActionMessage(40,100,"дхггх бшкхк бндс б йнкндеж.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("RING","PIT")
+ActionFirstBegin
+ ActionSingle()
+ ActionSetEnabled(false)
+ ActionMessage(25,80,"дхггх бшапняхк йнкэжн б йнкндеж.")
+ ActionMessage(40,120,"мю врн нм мюдеъкяъ?")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd

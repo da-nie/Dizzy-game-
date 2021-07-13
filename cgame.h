@@ -42,6 +42,9 @@ class CGame
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
+  static const uint32_t BLACK_COLOR=(0<<24)|(0<<16)|(0<<8)|(0<<0);//чёрный цвет
+  static const uint32_t YELLOW_COLOR=(0<<24)|(255<<16)|(255<<8)|(0<<0);//жёлтый цвет цвет
+
   static const uint32_t SKY_COLOR=(0<<24)|(81<<16)|(162<<8)|(243<<0);//цвет неба
   static const uint32_t BLEND_COLOR=(00<<24)|(81<<16)|(162<<8)|(243<<0);//прозрачный цвет
   static const uint8_t BLEND_COLOR_R=81;//прозрачный цвет, компонент R
@@ -73,6 +76,9 @@ class CGame
   static const int32_t USE_DELAY_COUNTER_MAX_VALUE=5;//максимальное значнение счётчика задержки до следующего нажатия кнопки "использовать"
 
   static const int32_t MAX_INVENTORY_SIZE=3;//максимальное количество предметов в инвентаре
+
+  static const int32_t SPEED_X=2;//скорость Диззи по X
+  static const int32_t SPEED_Y=2;//скорость Диззи по Y
  private:
   //-переменные-----------------------------------------------------------------------------------------
 	   
@@ -136,7 +142,6 @@ class CGame
   int32_t FlashTickCounter;//счётчик мигания надписи в инвентаре
   int32_t MoveTickCounter;//счётчик перемещения Диззи
   
-  std::vector<std::shared_ptr<IConditionalExpression> > ConditionalExpression;//набор условных выражений игровой логики
   std::shared_ptr<CFontPrinter> cFontPrinter_Ptr;//указатель на класс работы со шрифтами
 
   CGameState cGameState;//состояние игры
@@ -153,6 +158,7 @@ class CGame
  public:
   //-открытые функции-----------------------------------------------------------------------------------
   void OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVideo_Ptr);//обработка таймера  
+  bool Init(IVideo *iVideo_Ptr);//инициализация
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
   void OnPaint(IVideo *iVideo_Ptr);//отрисовать картинку  
@@ -170,14 +176,14 @@ class CGame
   void DrawMap(IVideo *iVideo_Ptr);//нарисовать карту
   void DrawFirstPlaneMap(IVideo *iVideo_Ptr);//нарисовать карту переднего плана
   void DrawItemMap(IVideo *iVideo_Ptr);//нарисовать карту предметов
-  void ClearScreen(IVideo *iVideo_Ptr,uint32_t color);//очистить экран
   void PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr);//вывод сообщения
   void PutFrame(int32_t x,int32_t y,int32_t text_width,int32_t text_height,IVideo *iVideo_Ptr);//нарисовать рамку с заданным внутренним полем для текста (x,y,text_width,text_height - зона вывода текста)
   void PutInventory(IVideo *iVideo_Ptr);//вывести инвентарь
   void SetDescription(const std::string &name,const std::string &description);//задать описание
   void PushInventory(std::shared_ptr<IPart> iPart_Ptr);//положить в инвентарь
   std::shared_ptr<IPart> PopInventory(size_t index);//вынуть из инвентаря
-  bool LoadConditional(const std::string &file_name);//загрузить условия игры
+  bool LoadConditional(const std::string &path,std::vector<std::string> &log);//загрузить условия игры
+  bool LoadConditionalFile(const std::string &file_name,std::vector<std::string> &log);//загрузить файл условий игры
 };
 
 #endif

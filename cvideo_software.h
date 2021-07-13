@@ -43,12 +43,14 @@ class CVideo_Software:public IVideo
   void GetLineSize(uint32_t &linesize) const;//получить размер строки в пикселях
   void PutSymbol(int64_t x,int64_t y,char symbol,uint32_t color);//вывод символа в позицию
   void PutString(int64_t x,int64_t y,const char *string,uint32_t color);//вывод строчки в позицию
+   void PutStringWithIncrementHeight(int64_t x,int64_t &y,const char *string,uint32_t color);//вывод строчки в позицию с инкрементом координаты Y
   void DrawPoint(int64_t x,int64_t y,uint32_t color);//рисование точки
   void DrawLine(int64_t x1,int64_t y1,int64_t x2,int64_t y2,uint32_t color,uint32_t thickness,LINE_TYPE line_type);//рисование линии
   void GetStringImageSize(const char *string,uint32_t &width,uint32_t &height);//получить размер строки в пикселях  
   void FillRectangle(int64_t x1,int64_t y1,int64_t x2,int64_t y2,uint32_t color);//нарисовать закрашенный прямоугольник
   void SaveScreen(void);//сохранить изображение в память
   void RestoreScreen(void);//восстановить изображение из памяти
+  void ClearScreen(uint32_t color);//очистить экран
  private:
   //-закрытые функции-----------------------------------------------------------------------------------
 };

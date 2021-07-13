@@ -39,6 +39,7 @@ class CLexicalAnalyzer
   //-переменные-----------------------------------------------------------------------------------------
   CAutomath cAutomath_PrimaryLevel;//автомат первичного уровня разбора
   CAutomath cAutomath_NaturalNumber;//автомат натурального числа
+  CAutomath cAutomath_NegativeNaturalNumber;//автомат отрицательного натурального числа
   CAutomath cAutomath_FloatNumber;//автомат числа с плавающей точкой
   CAutomath cAutomath_AngleNumber;//автомат угла
   std::vector<CLexeme> vector_CLexeme;//набор распознаваемых лексем  

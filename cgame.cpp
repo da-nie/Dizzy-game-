@@ -18,6 +18,7 @@
 #include "cactionsetenabled.h"
 #include "cactionpickup.h"
 #include "csyntaxanalyzer.h"
+#include "system.h"
 
 #include <algorithm>
 #include <memory>
@@ -29,8 +30,7 @@
 //****************************************************************************************************
 //константы
 //****************************************************************************************************
-static const int32_t SPEED_X=2;//скорость Диззи по X
-static const int32_t SPEED_Y=2;//скорость Диззи по Y
+static const char MAP_FILE_NAME[]="map.gam";//имя файла карты
 
 //****************************************************************************************************
 //макроопределения
@@ -180,12 +180,6 @@ CGame::CGame(void)
 
  UseDelayCounter=0;
  FlashTickCounter=0;
-
- //загружаем карту
- cGameState.Map.clear();
- if (LoadMap("map.gam")==false) MessageBox(NULL,"Ошибка загрузки файла карты!","Ошибка",MB_OK);
- //загружаем условные выражения
- LoadConditional("conditional.txt");
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -203,7 +197,7 @@ CGame::~CGame()
 void CGame::OnPaint(IVideo *iVideo_Ptr)
 {
  //стираем фон
- ClearScreen(iVideo_Ptr,SKY_COLOR);
+ iVideo_Ptr->ClearScreen(SKY_COLOR);
  //рисуем карту
  DrawMap(iVideo_Ptr);
  //рисуем предметы
@@ -277,9 +271,9 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
   if (sFrame_Ptr->Move==MOVE_STOP && fire==true && UseDelayCounter==0)
   {
    //перемещаем доступные для взятия предметы в инвентарь
-   size_t size=ConditionalExpression.size();
+   size_t size=cGameState.ConditionalExpression.size();
    cGameState.Take.clear();   
-   for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
+   for(size_t n=0;n<size;n++) cGameState.ConditionalExpression[n]->Execute(X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,false,cGameState);
    //перемещаем возможные для взятия объекты в инвентарь
    size=cGameState.Take.size();
    for(size_t n=0;n<size;n++)
@@ -311,9 +305,9 @@ void CGame::PressUse(void)
   //указываем, какой предмет мы будем использовать
   cGameState.UsedObject=unit;
   //проверяем условия использования
-  size_t cond_size=ConditionalExpression.size();
+  size_t cond_size=cGameState.ConditionalExpression.size();
   cGameState.Take.clear();  
-  for(size_t m=0;m<cond_size;m++) ConditionalExpression[m]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,cGameState);
+  for(size_t m=0;m<cond_size;m++) cGameState.ConditionalExpression[m]->Execute(X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,false,cGameState);
   //выкладываем предмет из инвентаря
   PopInventory(InventorySelectedIndex-1);
   //если UsedObject был использован, указатель станет NULL.
@@ -353,7 +347,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
  uint32_t height;
  iVideo_Ptr->GetScreenSize(width,height);
  
- ClearScreen(iVideo_Ptr,NO_BARRIER_COLOR); 
+ iVideo_Ptr->ClearScreen(NO_BARRIER_COLOR); 
  //рисуем препятствия 
  DrawBarrier(iVideo_Ptr);
 
@@ -430,7 +424,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
 
   if (redraw_barrier==true)
   {
-   ClearScreen(iVideo_Ptr,0x00000000); 
+   iVideo_Ptr->ClearScreen(NO_BARRIER_COLOR); 
    DrawBarrier(iVideo_Ptr);
   }
  }
@@ -473,9 +467,9 @@ void CGame::TilesAnimation(void)
 //----------------------------------------------------------------------------------------------------
 void CGame::ConditionalProcessing(void)
 {
- size_t size=ConditionalExpression.size();
+ size_t size=cGameState.ConditionalExpression.size();
  cGameState.Take.clear(); 
- for(size_t n=0;n<size;n++) ConditionalExpression[n]->Execute(cGameState.Map,X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,false,cGameState);
+ for(size_t n=0;n<size;n++) cGameState.ConditionalExpression[n]->Execute(X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,false,true,cGameState);
 }
 //----------------------------------------------------------------------------------------------------
 //обработка игрового поля
@@ -646,17 +640,6 @@ void CGame::DrawItemMap(IVideo *iVideo_Ptr)
 }
 
 //----------------------------------------------------------------------------------------------------
-//очистить экран
-//----------------------------------------------------------------------------------------------------
-void CGame::ClearScreen(IVideo *iVideo_Ptr,uint32_t color)
-{
- uint32_t width;
- uint32_t height;
- iVideo_Ptr->GetScreenSize(width,height);
- iVideo_Ptr->FillRectangle(0,0,width,height,color);
-}
-
-//----------------------------------------------------------------------------------------------------
 //вывод сообщения
 //----------------------------------------------------------------------------------------------------
 void CGame::PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr)
@@ -814,12 +797,38 @@ std::shared_ptr<IPart> CGame::PopInventory(size_t index)
 //----------------------------------------------------------------------------------------------------
 //загрузить условия игры
 //----------------------------------------------------------------------------------------------------
-bool CGame::LoadConditional(const std::string &file_name)
-{ 
- ConditionalExpression.clear();
-
- FILE *file_log=fopen("log.txt","wb");
-
+bool CGame::LoadConditional(const std::string &path,std::vector<std::string> &log)
+{
+ cGameState.ConditionalExpression.clear();
+ log.clear();
+ log.push_back(std::string("Отсутствуют файлы условий"));
+ std::vector<std::string> file_list;
+ CreateFileList(path,file_list);
+ //обрабатываем файлы
+ size_t size=file_list.size();
+ for(size_t n=0;n<size;n++)
+ {
+  std::string &file_name=file_list[n];
+  //проверяем расширение
+  size_t length=file_name.length();
+  if (length<4) continue;
+  if (file_name[length-4]!='.') continue;
+  if (file_name[length-3]!='t' && file_name[length-3]!='T')  continue;
+  if (file_name[length-2]!='x' && file_name[length-2]!='X') continue;
+  if (file_name[length-1]!='t' && file_name[length-1]!='T') continue;
+  //отправляем файл на обработку
+  log.clear();
+  log.push_back(std::string("Файл: ")+file_name);
+  log.push_back("");
+  if (LoadConditionalFile(path+GetPathDivider()+file_name,log)==false) return(false);//ошибка загрузки
+ }
+ return(true);
+}
+//----------------------------------------------------------------------------------------------------
+//загрузить файл условий игры
+//----------------------------------------------------------------------------------------------------
+bool CGame::LoadConditionalFile(const std::string &file_name,std::vector<std::string> &log)
+{
  //загружаем команды
  CSyntaxAnalyzer cSyntaxAnalyzer;
  std::string message;
@@ -839,14 +848,14 @@ bool CGame::LoadConditional(const std::string &file_name)
     s='\r';
    }
    bool new_line;
-   bool res=cSyntaxAnalyzer.Processing(s,line_index,message,new_line,ConditionalExpression,cGameState.Map);
+   bool res=cSyntaxAnalyzer.Processing(s,line_index,message,new_line,cGameState);
    if (res==false)
    {   	   	
    	std::string str;
    	if (line.length()!=0) str=line+" ";
    	line="";
    	str=str+message;
-	fprintf(file_log,"%s\r\n",str.c_str());
+	log.push_back(str);
    	error=true;
     break;
    }
@@ -856,11 +865,8 @@ bool CGame::LoadConditional(const std::string &file_name)
    }
    if (new_line==true)
    {
-   	if (line.length()!=0) 
-   	{
-     fprintf(file_log,"%s\r\n",line.c_str());
-   	 line_index++;
-   	}
+   	if (line.length()!=0) log.push_back(std::to_string((_Longlong)line_index)+": "+line);   	 
+	line_index++;
     line="";
    }  
   } 	
@@ -868,22 +874,22 @@ bool CGame::LoadConditional(const std::string &file_name)
   //запускаем выполнение программы
   if (error==false)
   {
-   fprintf(file_log,"Условия игры приняты.");
+   log.push_back("Условия загружены успешно.");
+   return(true);
   }
+  else return(false);//произошла ошибка
  }
- else fprintf(file_log,"Не могу открыть файл условий.");
- fclose(file_log);
+ else 
+ {
+  log.push_back("Не могу открыть файл условий.");
+  return(false);
+ }
  return(true);
 }
-
-
-
-
 
 //****************************************************************************************************
 //открытые функции
 //****************************************************************************************************
-
 
 //----------------------------------------------------------------------------------------------------
 //обработка таймера
@@ -923,6 +929,42 @@ void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
  }
 }
 
+//----------------------------------------------------------------------------------------------------
+//инициализация
+//----------------------------------------------------------------------------------------------------
+bool CGame::Init(IVideo *iVideo_Ptr)
+{
+ iVideo_Ptr->ClearScreen(BLACK_COLOR);
+ //загружаем карту
+ cGameState.Map.clear();
+ if (LoadMap(MAP_FILE_NAME)==false)
+ {
+  std::string message="Не могу открыть файл карты "+std::string(MAP_FILE_NAME)+" !";  
+  iVideo_Ptr->PutString(0,0,message.c_str(),YELLOW_COLOR);
+  return(false);
+ }
+ //загружаем условные выражения
+ std::vector<std::string> log;
+ int64_t y=0;
+ uint32_t width;
+ uint32_t height;
+ iVideo_Ptr->GetStringImageSize(" ",width,height);
+ if (LoadConditional("./ScreenPlay",log)==false)
+ {  
+  if (log.size()<2) return(false);
+  iVideo_Ptr->PutStringWithIncrementHeight(0,y,"Произошла ошибка трансляции файла",YELLOW_COLOR);
+  iVideo_Ptr->PutStringWithIncrementHeight(0,y,log[0].c_str(),YELLOW_COLOR);
+  iVideo_Ptr->PutStringWithIncrementHeight(0,y," ",YELLOW_COLOR);  
+  int32_t index=static_cast<int32_t>(log.size())-(static_cast<int32_t>(SCREEN_HEIGHT/height)-3);
+  if (index<2) index=2;  
+  for(size_t n=index;n<log.size();n++)
+  {
+   iVideo_Ptr->PutStringWithIncrementHeight(0,y,log[n].c_str(),YELLOW_COLOR);
+  }
+  return(false);
+ }
+ return(true);
+}
 
 
 

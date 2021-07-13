@@ -18,13 +18,16 @@
     <ClCompile Include="cactionchangeposition.cpp" />
     <ClCompile Include="cactioncopyposition.cpp" />
     <ClCompile Include="cactionmessage.cpp" />
+    <ClCompile Include="cactionmove.cpp" />
     <ClCompile Include="cactionpickup.cpp" />
     <ClCompile Include="cactionsetanimationstep.cpp" />
     <ClCompile Include="cactionsetenabled.cpp" />
     <ClCompile Include="cactionsingle.cpp" />
     <ClCompile Include="cautomath.cpp" />
+    <ClCompile Include="cconditionalofdizzyintersection.cpp" />
     <ClCompile Include="cconditionalofintersection.cpp" />
     <ClCompile Include="cconditionalofpickup.cpp" />
+    <ClCompile Include="cconditionaloftimer.cpp" />
     <ClCompile Include="cconditionalofuse.cpp" />
     <ClCompile Include="cfontprinter.cpp" />
     <ClCompile Include="cgame.cpp" />
@@ -45,6 +48,7 @@
     <ClCompile Include="ipart.cpp" />
     <ClCompile Include="ivideo.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="system.cpp" />
     <ClCompile Include="tga.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -55,13 +59,16 @@
     <ClInclude Include="cactionchangeposition.h" />
     <ClInclude Include="cactioncopyposition.h" />
     <ClInclude Include="cactionmessage.h" />
+    <ClInclude Include="cactionmove.h" />
     <ClInclude Include="cactionpickup.h" />
     <ClInclude Include="cactionsetanimationstep.h" />
     <ClInclude Include="cactionsetenabled.h" />
     <ClInclude Include="cactionsingle.h" />
     <ClInclude Include="cautomath.h" />
+    <ClInclude Include="cconditionalofdizzyintersection.h" />
     <ClInclude Include="cconditionalofintersection.h" />
     <ClInclude Include="cconditionalofpickup.h" />
+    <ClInclude Include="cconditionaloftimer.h" />
     <ClInclude Include="cconditionalofuse.h" />
     <ClInclude Include="cfontprinter.h" />
     <ClInclude Include="cgame.h" />
@@ -82,6 +89,7 @@
     <ClInclude Include="ipart.h" />
     <ClInclude Include="ivideo.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="system.h" />
     <ClInclude Include="tga.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

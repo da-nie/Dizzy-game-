@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include "ipart.h"
+#include "iconditionalexpression.h"
 
 //****************************************************************************************************
 //макроопределения
@@ -51,6 +52,8 @@ class CGameState
   std::vector<std::shared_ptr<IPart> > Map;//карта
 
   std::vector<SMessage> Message;//список сообщений
+
+  std::vector<std::shared_ptr<IConditionalExpression> > ConditionalExpression;//набор условных выражений игровой логики
  private:
   //-переменные-----------------------------------------------------------------------------------------  
  public:

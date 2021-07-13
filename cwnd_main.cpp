@@ -41,6 +41,8 @@ CWnd_Main::CWnd_Main(void)
  iVideo_Ptr->Init();
 
  cGame_Ptr.reset(new CGame()); 
+
+ Enabled=false;
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -87,6 +89,8 @@ afx_msg int CWnd_Main::OnCreate(LPCREATESTRUCT lpCreateStruct)
  cRect.bottom=cRect.top+rect.bottom-rect.top;
  
  MoveWindow(&cRect,TRUE);
+
+ Enabled=cGame_Ptr->Init(iVideo_Ptr.get());
  SetTimer(ID_TIMER_MAIN,30,NULL);
  return(0);
 }
@@ -146,6 +150,9 @@ afx_msg void CWnd_Main::OnTimer(UINT nIDEvent)
   CWnd::OnTimer(nIDEvent);
   return;
  }
+
+ if (Enabled==false) return;
+
  bool left=false;
  bool right=false;
  bool up=false;

@@ -58,11 +58,11 @@ void CConditionalOfUse::Init(void)
 //----------------------------------------------------------------------------------------------------
 //проверить условие и выполнить действие
 //----------------------------------------------------------------------------------------------------
-void CConditionalOfUse::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState)
+void CConditionalOfUse::Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,bool timer,CGameState &cGameState)
 {
  Init();
 
- if (use==false) return;//режим хадействования не включён
+ if (use==false) return;//режим задействования не включён
  if (cGameState.UsedObject.get()==NULL) return;//нет используемого предмета
  if (Name_One.compare(cGameState.UsedObject->Name)!=0) return;//имена не совпадают 
  if (cGameState.UsedObject->InInventory==false) return;//предмет не находится в инвентаре
@@ -96,7 +96,7 @@ void CConditionalOfUse::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_
   if (iAction_LocalTwoPtr.get()!=NULL) iAction_LocalTwoPtr->Execute(iPart_Ptr,cGameState);
   one_object_is_used=true;
  };
- std::for_each(Map.begin(),Map.end(),execute_function);
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),execute_function);
  if (one_object_is_used==true) 
  {  
   if (iAction_OnePtr.get()!=NULL) iAction_OnePtr->Execute(cGameState.UsedObject,cGameState);//выполняем действие с первым объектом

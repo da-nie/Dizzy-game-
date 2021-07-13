@@ -1,0 +1,4 @@
+IfDizzyIntersection("BLOCK")
+ActionBegin
+ ActionSetAnimationStep(1)
+ActionEnd

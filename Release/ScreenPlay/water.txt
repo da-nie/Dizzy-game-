@@ -1,0 +1,36 @@
+//БГЮХЛНДЕИЯРБХЕ Я БНДНИ
+
+IfUse("BOTTLE","WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionChangeGlobalDescription("асршкйю я бндни")
+ ActionChangeGlobalName("BOTTLE WATER")
+ ActionSetAnimationStep(1)
+ ActionMessage(50,100,"дхггх мюонкмхк асршкйс бндни.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("PAIL","WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(50,100,"дхггх гювепомск бндс бедпнл.\...мн бндю бшкхкюяэ\вепег дшпйх б бедпе!")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("POISON","WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"...цслюммее асдер кнбхрэ пшас\дхмюлхрнл,опхькн б цнкнбс дхггх.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("RING","WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"ме онлмч яйюгйх, цде\рпеанбюкняэ аш йхдюрэ\йнкэжн б лнпе.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd

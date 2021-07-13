@@ -1,0 +1,24 @@
+IfTimer("FIRE_LEFT")
+ActionBegin
+ ActionMove(-2,0) 
+ActionEnd
+
+IfTimer("FIRE_RIGHT")
+ActionBegin
+ ActionMove(2,0) 
+ActionEnd
+
+IfIntersection("FIRE_LEFT","FIRE_LEFT_BORDER")
+ActionFirstBegin
+ ActionChangeName("FIRE_RIGHT")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfIntersection("FIRE_RIGHT","FIRE_RIGHT_BORDER")
+ActionFirstBegin
+ ActionChangeName("FIRE_LEFT")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+

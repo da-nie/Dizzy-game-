@@ -55,7 +55,7 @@ void CConditionalOfPickUp::Init(void)
 //----------------------------------------------------------------------------------------------------
 //проверить условие и выполнить действие
 //----------------------------------------------------------------------------------------------------
-void CConditionalOfPickUp::Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState)
+void CConditionalOfPickUp::Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,bool timer,CGameState &cGameState)
 {
  Init();
 
@@ -87,5 +87,5 @@ void CConditionalOfPickUp::Execute(std::vector<std::shared_ptr<IPart> > &Map,int
   //объекты пересекаются
   if (iAction_LocalPtr.get()!=NULL) iAction_LocalPtr->Execute(iPart_Ptr,cGameState);
  };
- std::for_each(Map.begin(),Map.end(),execute_function);
+ std::for_each(cGameState.Map.begin(),cGameState.Map.end(),execute_function);
 }

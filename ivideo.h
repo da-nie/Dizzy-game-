@@ -41,12 +41,14 @@ class IVideo
   virtual void GetLineSize(uint32_t &linesize) const =0;//получить размер строки в пикселях
   virtual void PutSymbol(int64_t x,int64_t y,char symbol,uint32_t color)=0;//вывод символа в позицию
   virtual void PutString(int64_t x,int64_t y,const char *string,uint32_t color)=0;//вывод строчки в позицию
+  virtual void PutStringWithIncrementHeight(int64_t x,int64_t &y,const char *string,uint32_t color)=0;//вывод строчки в позицию с инкрементом координаты Y
   virtual void DrawPoint(int64_t x,int64_t y,uint32_t color)=0;//рисование точки
   virtual void DrawLine(int64_t x1,int64_t y1,int64_t x2,int64_t y2,uint32_t color,uint32_t thickness,LINE_TYPE line_type)=0;//рисование линии  
   virtual void GetStringImageSize(const char *string,uint32_t &width,uint32_t &height)=0;//получить размер строки в пикселях
   virtual void FillRectangle(int64_t x1,int64_t y1,int64_t x2,int64_t y2,uint32_t color)=0;//нарисовать закрашеный прямоугольник
   virtual void SaveScreen(void)=0;//сохранить изображение в память
   virtual void RestoreScreen(void)=0;//восстановить изображение из памяти
+  virtual void ClearScreen(uint32_t color)=0;//очистить экран
   //-статические функции--------------------------------------------------------------------------------
   static IVideo* CreateNewCVideoSoftware(uint32_t width,uint32_t height);//создать класс программной растеризации
  private:

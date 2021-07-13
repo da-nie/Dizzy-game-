@@ -1,0 +1,26 @@
+ //события взятия
+
+IfPickUp("BOTTLE")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+IfPickUp("BOTTLE WATER")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+IfPickUp("RING")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+IfPickUp("POISON")
+ActionBegin
+ ActionPickUp()
+ActionEnd
+
+IfPickUp("PAIL")
+ActionBegin
+ ActionPickUp()
+ActionEnd

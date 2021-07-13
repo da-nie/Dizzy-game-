@@ -13,8 +13,8 @@
 
 //шрифт
 static uint8_t Font8x14[224][14]={
+ { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
  { 0x00, 0x10, 0x38, 0x38, 0x38, 0x10, 0x10, 0x10, 0x00, 0x10, 0x10, 0x00, 0x00, 0x00},
- { 0x40, 0xA0, 0x4E, 0x1F, 0x19, 0x18, 0x18, 0x18, 0x19, 0x1F, 0x0E, 0x00, 0x00, 0x00},
  { 0x00, 0x66, 0x66, 0x22, 0x44, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
  { 0x00, 0x44, 0x44, 0xFE, 0xFE, 0x44, 0x44, 0xFE, 0xFE, 0x44, 0x44, 0x00, 0x00, 0x00},
  { 0x18, 0x18, 0x7C, 0xC6, 0xC2, 0xC0, 0x7C, 0x06, 0x06, 0x86, 0xC6, 0x7C, 0x18, 0x18},
@@ -237,6 +237,8 @@ static uint8_t Font8x14[224][14]={
  { 0x00, 0x00, 0x00, 0x00, 0x3C, 0x66, 0x06, 0x1E, 0x06, 0x66, 0x3C, 0x00, 0x00, 0x00},
  { 0x00, 0x00, 0x00, 0x00, 0xCE, 0xDB, 0xDB, 0xFB, 0xDB, 0xDB, 0xCE, 0x00, 0x00, 0x00},
  { 0x00, 0x00, 0x00, 0x00, 0x7E, 0xCC, 0xCC, 0xFC, 0x6C, 0xCC, 0xCE, 0x00, 0x00, 0x00}
+
+
 };
 
 //****************************************************************************************************
@@ -341,6 +343,17 @@ void CVideo_Software::PutString(int64_t x,int64_t y,const char *string,uint32_t 
 {
  size_t sl=strlen(string);
  for(size_t n=0;n<sl;n++,x+=FONT_WIDTH) PutSymbol(x,y,string[n],color);
+}
+//----------------------------------------------------------------------------------------------------
+//вывод строчки в позицию с инкрементом координаты Y
+//----------------------------------------------------------------------------------------------------
+void CVideo_Software::PutStringWithIncrementHeight(int64_t x,int64_t &y,const char *string,uint32_t color)
+{
+ PutString(x,y,string,color);
+ uint32_t width;
+ uint32_t height;
+ GetStringImageSize(string,width,height);
+ y+=height;
 }
 //----------------------------------------------------------------------------------------------------
 //рисование точки
@@ -471,4 +484,17 @@ void CVideo_Software::SaveScreen(void)
 void CVideo_Software::RestoreScreen(void)
 {
  memcpy(VideoBuffer_Ptr.get(),VideoBuffer_Copy_Ptr.get(),sizeof(uint32_t)*ScreenWidth*ScreenHeight);
+}
+
+//----------------------------------------------------------------------------------------------------
+//очистить экран
+//----------------------------------------------------------------------------------------------------
+void CVideo_Software::ClearScreen(uint32_t color)
+{
+ uint32_t *v_ptr=VideoBuffer_Ptr.get();
+ for(int64_t y=0;y<ScreenHeight;y++,v_ptr+=LineSize)
+ {
+  uint32_t *v_local_ptr=v_ptr;
+  for(int64_t x=0;x<ScreenWidth;x++,v_local_ptr++) *v_local_ptr=color;
+ } 
 }

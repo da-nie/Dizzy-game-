@@ -30,8 +30,8 @@ CLexicalAnalyzer::CLexicalAnalyzer(void)
  cAutomath_PrimaryLevel.AddRule("begin","right bracker end",')',')',true);
  cAutomath_PrimaryLevel.AddRule("begin","is end",'=','=',true);
  cAutomath_PrimaryLevel.AddRule("begin","comma end",',',',',true);
- cAutomath_PrimaryLevel.AddRule("begin","plus end",'+','+',true);
- cAutomath_PrimaryLevel.AddRule("begin","minus end",'-','-',true);
+ //cAutomath_PrimaryLevel.AddRule("begin","plus end",'+','+',true);
+ //cAutomath_PrimaryLevel.AddRule("begin","minus end",'-','-',true);
  cAutomath_PrimaryLevel.AddRule("begin","quote",'\"','\"',false);
  cAutomath_PrimaryLevel.AddRule("begin","terminal",0,0,true);
  cAutomath_PrimaryLevel.AddRule("begin","terminal",10,10,true);
@@ -62,6 +62,11 @@ CLexicalAnalyzer::CLexicalAnalyzer(void)
  cAutomath_NaturalNumber.AddRule("begin","NN",'0','9',false);
  cAutomath_NaturalNumber.AddRule("NN","NN",'0','9',false);
  cAutomath_NaturalNumber.AddRule("NN","NN1 end",0,32,true);
+ //автомат целого числа
+ cAutomath_NegativeNaturalNumber.AddRule("begin","NN",'0','9',false);
+ cAutomath_NegativeNaturalNumber.AddRule("begin","NN",'-','-',false);
+ cAutomath_NegativeNaturalNumber.AddRule("NN","NN",'0','9',false);
+ cAutomath_NegativeNaturalNumber.AddRule("NN","NN1 end",0,32,true);
  //автомат угла
  cAutomath_AngleNumber.AddRule("begin","NN",'0','9',false);
  cAutomath_AngleNumber.AddRule("NN","NN",'0','9',false);
@@ -105,8 +110,8 @@ CLexicalAnalyzer::CLexicalAnalyzer(void)
  AddLexeme("(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET);
  AddLexeme(")",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET);
  AddLexeme("=",CLexeme::ID_LEXEME_TYPE_IS);
- AddLexeme("+",CLexeme::ID_LEXEME_TYPE_PLUS);
- AddLexeme("-",CLexeme::ID_LEXEME_TYPE_MINUS);
+ //AddLexeme("+",CLexeme::ID_LEXEME_TYPE_PLUS);
+ //AddLexeme("-",CLexeme::ID_LEXEME_TYPE_MINUS);
  AddLexeme("\0",CLexeme::ID_LEXEME_TYPE_TERMINAL);
  AddLexeme("\r",CLexeme::ID_LEXEME_TYPE_TERMINAL);
  AddLexeme("\n",CLexeme::ID_LEXEME_TYPE_TERMINAL);
@@ -157,6 +162,21 @@ size_t CLexicalAnalyzer::GetLexemeType(const std::string &name)
   }
   else break;//автомат отверг символ
  }
+
+ //не нашли лексему, может быть это отрицательное натуральное число? 
+ cAutomath_NegativeNaturalNumber.Reset(); 
+ for(n=0;n<=length;n++)
+ {
+  if (cAutomath_NegativeNaturalNumber.Push(name[n])==true) 
+  {
+   if (cAutomath_NegativeNaturalNumber.IsCurrentStateEndingType()==true)//автомат вошёл в допускающее состояние
+   {
+    return(CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER);
+   }
+  }
+  else break;//автомат отверг символ
+ }
+
  
  //не нашли лексему, может быть это угол?
  cAutomath_AngleNumber.Reset();

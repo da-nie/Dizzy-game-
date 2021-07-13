@@ -1,0 +1,6 @@
+//описания предметов
+
+ SetDescription("BOTTLE","ПУСТАЯ БУТЫЛКА")
+ SetDescription("RING","КОЛЬЦО С ФИАНИТОМ")
+ SetDescription("POISON","КОЛБА С ЯДОМ")
+ SetDescription("PAIL","ВЕДРО")

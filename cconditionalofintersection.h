@@ -36,16 +36,18 @@ class CConditionalOfIntersection:public IConditionalExpression
   //-константы------------------------------------------------------------------------------------------
  private:
   //-переменные-----------------------------------------------------------------------------------------
-  std::string Name;//имя объекта, пересечение с которым проверяется
-  std::shared_ptr<IAction> iAction_Ptr;//указатель на выполняемое действие
+  std::string Name_One;//первый элемент
+  std::string Name_Two;//второй элемент
+  std::shared_ptr<IAction> iAction_OnePtr;//указатель на действие с первым объектом
+  std::shared_ptr<IAction> iAction_TwoPtr;//указатель на действие со вторым объектом
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CConditionalOfIntersection(const std::string &name,std::shared_ptr<IAction> iAction_SetPtr);
+  CConditionalOfIntersection(const std::string &name_one,const std::string &name_two,std::shared_ptr<IAction> iAction_OneSetPtr,std::shared_ptr<IAction> iAction_TwoSetPtr);
   //-деструктор-----------------------------------------------------------------------------------------
   ~CConditionalOfIntersection();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  void Execute(std::vector<std::shared_ptr<IPart> > &Map,int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,CGameState &cGameState);//проверить условие и выполнить действие
+  void Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,bool timer,CGameState &cGameState);//проверить условие и выполнить действие
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
   void Init(void);//инициализация
