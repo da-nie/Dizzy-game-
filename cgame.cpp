@@ -3,23 +3,8 @@
 //****************************************************************************************************
 #include "cgame.h"
 #include "cpart.h"
-#include "cconditionalofintersection.h"
-#include "cconditionalofuse.h"
-#include "cconditionalofpickup.h"
-#include "cactionchangename.h"
-#include "cactionchangenameglobal.h"
-#include "cactionchangedescription.h"
-#include "cactionchangedescriptionglobal.h"
-#include "cactioncopyposition.h"
-#include "cactionchangeposition.h"
-#include "cactionsetanimationstep.h"
-#include "cactionmessage.h"
-#include "cactionsingle.h"
-#include "cactionsetenabled.h"
-#include "cactionpickup.h"
 #include "csyntaxanalyzer.h"
 #include "system.h"
-
 #include <algorithm>
 #include <memory>
 
@@ -56,6 +41,9 @@ CGame::CGame(void)
 
  cSprite_Frame.Load("Sprites\\frame.tga");
  cSprite_Frame.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
+
+ cSprite_ScreenFrame.Load("Sprites\\screen_frame.tga");
+ cSprite_Header.Load("Sprites\\header.tga");
 
  cFontPrinter_Ptr.reset(new CFontPrinter("Sprites\\font.tga",8,8,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B));
 
@@ -104,8 +92,6 @@ CGame::CGame(void)
  sFrame_Array.push_back(SFrame(36,MOVE_JUMP_RIGHT,false,NULL));//36
  sFrame_Array.push_back(SFrame(37,MOVE_JUMP_RIGHT,false,NULL));//37
  sFrame_Array.push_back(SFrame(38,MOVE_JUMP_RIGHT,true,NULL));//38
-
-
 
  sFrame_Stop_Ptr=&sFrame_Array[0];
  sFrame_MoveLeft_Ptr=&sFrame_Array[2];
@@ -161,25 +147,6 @@ CGame::CGame(void)
 
 
  sFrame_Ptr=sFrame_Stop_Ptr;
- X=160;
- Y=5;
-
- Map_X=0;
- Map_Y=0;
-
- dX=0;
- dY=0;
-
- MoveControl=true;
- InventoryMode=false;
- InventorySelectedIndex=0;
-
- TilesAnimationTickCounter=0;
- DizzyAnimationTickCounter=0;
- MoveTickCounter=0;
-
- UseDelayCounter=0;
- FlashTickCounter=0;
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -206,31 +173,33 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
  cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DIZZY_WIDTH*sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
  //рисуем элементы переднего плана
  DrawFirstPlaneMap(iVideo_Ptr); 
+ //рисуем рамку вокруг экрана
+ DrawScreenFrame(iVideo_Ptr);
 }
 //----------------------------------------------------------------------------------------------------
 //управление от клавиатуры
 //----------------------------------------------------------------------------------------------------
 void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
 {
- if (InventoryMode==true)
+ if (cGameState.InventoryMode==true)
  {
   if (UseDelayCounter==0)
   {
    if (up==true) 
    {
-    InventorySelectedIndex--;
+    cGameState.InventorySelectedIndex--;
 	UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
    }
    if (down==true)
    {
-    InventorySelectedIndex++;
+    cGameState.InventorySelectedIndex++;
     UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
    }
    if (fire==true)
    {
     PressUse();
 	UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
-	InventoryMode=false;
+	cGameState.InventoryMode=false;
    }
   }
   return;
@@ -280,8 +249,8 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
    {    
     PushInventory(cGameState.Take[n]);
    }  
-   InventoryMode=true;
-   InventorySelectedIndex=0;
+   cGameState.InventoryMode=true;
+   cGameState.InventorySelectedIndex=0;
    UseDelayCounter=USE_DELAY_COUNTER_MAX_VALUE;
   }
  }
@@ -291,14 +260,14 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
 //----------------------------------------------------------------------------------------------------
 void CGame::PressUse(void)
 { 
- if (InventorySelectedIndex!=0)//выбрано "использовать"
+ if (cGameState.InventorySelectedIndex!=0)//выбрано "использовать"
  {
   size_t size=cGameState.Inventory.size();
-  if (InventorySelectedIndex>size) return;//нет такого предмета в инвентаре
+  if (cGameState.InventorySelectedIndex>size) return;//нет такого предмета в инвентаре
   //получаем прдемет из инвентаря
   //использование предметов возможно, только если они находятся в инвентаре.
   //поэтому выкладываем предмет мы уже после использования и никак иначе.
-  std::shared_ptr<IPart> unit=cGameState.Inventory[InventorySelectedIndex-1];  
+  std::shared_ptr<IPart> unit=cGameState.Inventory[cGameState.InventorySelectedIndex-1];  
   //задаём предмету координаты Диззи и применяем правила игры
   unit->BlockPosX=(X+DIZZY_WIDTH/2)-TILE_WIDTH/2+Map_X;
   unit->BlockPosY=(Y+DIZZY_HEIGHT)-TILE_HEIGHT+Map_Y;
@@ -309,7 +278,7 @@ void CGame::PressUse(void)
   cGameState.Take.clear();  
   for(size_t m=0;m<cond_size;m++) cGameState.ConditionalExpression[m]->Execute(X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,false,cGameState);
   //выкладываем предмет из инвентаря
-  PopInventory(InventorySelectedIndex-1);
+  PopInventory(cGameState.InventorySelectedIndex-1);
   //если UsedObject был использован, указатель станет NULL.
   if (cGameState.UsedObject.get()==NULL)//предмет был использован
   {
@@ -346,6 +315,8 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
  uint32_t width;
  uint32_t height;
  iVideo_Ptr->GetScreenSize(width,height);
+ int32_t offset_y=cSprite_Header.GetHeight();
+ height-=offset_y;
  
  iVideo_Ptr->ClearScreen(NO_BARRIER_COLOR); 
  //рисуем препятствия 
@@ -409,13 +380,13 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    //Map_X+=7*width/8;
    redraw_barrier=true;
   }
-  if (Y>=3*height/4)
+  if (Y>=(3*height/4+offset_y))
   {
    Y-=2;
    Map_Y+=2;
    redraw_barrier=true;
   }
-  if (Y<height/4 && Map_Y>=2)
+  if (Y<(height/4+offset_y) && Map_Y>=2)
   {
    Y+=2;
    Map_Y-=2;
@@ -495,26 +466,6 @@ bool CGame::IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 bool CGame::IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp)
 {
  return(cSprite_Dizzy.IsCollizionSpriteItem(iVideo_Ptr,xp,yp,DIZZY_WIDTH*40,0,DIZZY_WIDTH,DIZZY_HEIGHT,true,0,0,0)); 
-}
-
-//----------------------------------------------------------------------------------------------------
-//загрузить карту
-//----------------------------------------------------------------------------------------------------
-bool CGame::LoadMap(const std::string &file_name)
-{
- std::ifstream file;
- file.open(file_name,std::ios_base::in|std::ios_base::binary);
- if (file.is_open()==false) return(false);
- int32_t part;
- if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
-
- for(size_t n=0;n<part;n++)
- {
-  std::shared_ptr<IPart> iPart_Ptr(new CPart());
-  if (iPart_Ptr->Load(file)==false) return(false);
-  cGameState.Map.push_back(iPart_Ptr);
- }
- return(true);
 }
 //----------------------------------------------------------------------------------------------------
 //нарисовать преграды
@@ -740,8 +691,8 @@ void CGame::PutInventory(IVideo *iVideo_Ptr)
   int32_t l=cGameState.Inventory[n]->Description.length();
   if (text_width<l) text_width=l;
  }
- if (InventorySelectedIndex<0) InventorySelectedIndex+=(size+1);
- InventorySelectedIndex%=(size+1);
+ if (cGameState.InventorySelectedIndex<0) cGameState.InventorySelectedIndex+=(size+1);
+ cGameState.InventorySelectedIndex%=(size+1);
 
  size_t text_height=8+size;
  if (size==0) text_height++;
@@ -761,13 +712,13 @@ void CGame::PutInventory(IVideo *iVideo_Ptr)
  for(size_t n=0;n<size;n++)
  {  
   std::string &name=cGameState.Inventory[n]->Description;
-  if ((n+1)!=InventorySelectedIndex || FlashTickCounter>=3)
+  if ((n+1)!=cGameState.InventorySelectedIndex || FlashTickCounter>=3)
   {
    cFontPrinter_Ptr->PrintAt(x+symbol_width*(text_width-name.length())/2,y+symbol_height*(n+2),name,iVideo_Ptr);
   }
  }
  
- if (InventorySelectedIndex!=0 || FlashTickCounter>=3)
+ if (cGameState.InventorySelectedIndex!=0 || FlashTickCounter>=3)
  {
   cFontPrinter_Ptr->PrintAt(x+symbol_width*(text_width-action.length())/2,y+symbol_height*(text_height-3),action,iVideo_Ptr);  
  }
@@ -794,6 +745,99 @@ std::shared_ptr<IPart> CGame::PopInventory(size_t index)
  iPart_Ptr->PopInventory();//выкладываем объект
  return(iPart_Ptr);
 }
+
+//----------------------------------------------------------------------------------------------------
+//нарисовать экранную рамку
+//----------------------------------------------------------------------------------------------------
+void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
+{
+ static const int32_t FRAME_WIDTH=8;
+ static const int32_t FRAME_HEIGHT=8;
+
+ static const int32_t FRAME_UNIT_OFFSET_X=11;
+ static const int32_t FRAME_UNIT_OFFSET_Y=1;
+
+ static const int32_t FRAME_ANGLE_OFFSET_X=1;
+ static const int32_t FRAME_ANGLE_OFFSET_Y=1;
+
+ cSprite_Header.Put(iVideo_Ptr,0,0,false);
+ int32_t offset_y=cSprite_Header.GetHeight();
+ int32_t f_width=SCREEN_WIDTH/FRAME_HEIGHT;
+ int32_t f_height=(SCREEN_HEIGHT-offset_y)/FRAME_HEIGHT;
+ for(size_t n=1;n<f_width-1;n++)
+ {
+  cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,n*FRAME_WIDTH,offset_y,FRAME_UNIT_OFFSET_X,FRAME_UNIT_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,false); 
+  cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,n*FRAME_WIDTH,SCREEN_HEIGHT-FRAME_HEIGHT,FRAME_UNIT_OFFSET_X,FRAME_UNIT_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,false); 
+ }
+ for(size_t n=1;n<f_height-1;n++)
+ {
+  cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,0,offset_y+n*FRAME_HEIGHT,FRAME_UNIT_OFFSET_X,FRAME_UNIT_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,false); 
+  cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,SCREEN_WIDTH-FRAME_WIDTH,offset_y+n*FRAME_HEIGHT,FRAME_UNIT_OFFSET_X,FRAME_UNIT_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,false); 
+ }
+ cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,0,offset_y,FRAME_ANGLE_OFFSET_X,FRAME_ANGLE_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,false); 
+ cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,SCREEN_WIDTH-FRAME_WIDTH,offset_y,FRAME_ANGLE_OFFSET_X,FRAME_ANGLE_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,false); 
+ cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,0,SCREEN_HEIGHT-FRAME_HEIGHT,FRAME_ANGLE_OFFSET_X,FRAME_ANGLE_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,false); 
+ cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,SCREEN_WIDTH-FRAME_WIDTH,SCREEN_HEIGHT-FRAME_HEIGHT,FRAME_ANGLE_OFFSET_X,FRAME_ANGLE_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,false); 
+
+ char str[STRING_BUFFER_SIZE];
+ //выводим счёт
+ sprintf(str,"%05i",cGameState.Score);
+ cFontPrinter_Ptr->PrintAt(77,32,str,iVideo_Ptr);
+ //выводим жизни
+ //выводим энергию
+ static const int32_t ENERGY_OFFSET_POS_X=160;//положение шкалы энергии по X
+ static const int32_t ENERGY_OFFSET_POS_Y=32;//положение шкалы энергии по Y
+ static const int32_t ENERGY_WIDTH=48;//ширина полной шкалы энергии
+ static const int32_t ENERGY_HEIGHT=6;//высота шкалы энергии
+ static const int32_t ENERGY_PART=3;//на сколько частей делится шкала энергии
+ 
+ int32_t x1=ENERGY_OFFSET_POS_X;
+ int32_t x2=ENERGY_OFFSET_POS_X+ENERGY_WIDTH*cGameState.Energy/cGameState.ENERGY_MAX_VALUE;
+ int32_t y1=ENERGY_OFFSET_POS_Y;
+ int32_t y2=y1+ENERGY_HEIGHT;
+ int32_t part=ENERGY_WIDTH/3;
+ static const int32_t ENERGY_GOOD_COLOR=(0<<24)|(64<<16)|(255<<8)|(64<<0);//цвет "отлично"
+ static const int32_t ENERGY_NORMAL_COLOR=(0<<24)|(255<<16)|(255<<8)|(64<<0);//цвет "хорошо"
+ static const int32_t ENERGY_BAD_COLOR=(0<<24)|(255<<16)|(64<<8)|(64<<0);//цвет "плохо"
+
+ int32_t x_bad=x1+part;
+ if (x2<x_bad) x_bad=x2;
+ iVideo_Ptr->FillRectangle(x1,y1,x_bad,y2,ENERGY_BAD_COLOR);
+ if (x2>x_bad)
+ {
+  int32_t x_normal=x1+part*2;
+  if (x2<x_normal) x_normal=x2;
+  iVideo_Ptr->FillRectangle(x_bad,y1,x_normal,y2,ENERGY_NORMAL_COLOR);
+  if (x2>x_normal)
+  {
+   int32_t x_good=x2;
+   iVideo_Ptr->FillRectangle(x_normal,y1,x_good,y2,ENERGY_GOOD_COLOR);
+  }
+ }
+ //выводим количество собранных предметов
+ sprintf(str,"%02i",cGameState.Items);
+ cFontPrinter_Ptr->PrintAt(129,32,str,iVideo_Ptr);
+}
+//----------------------------------------------------------------------------------------------------
+//загрузить карту
+//----------------------------------------------------------------------------------------------------
+bool CGame::LoadMap(const std::string &file_name)
+{
+ std::ifstream file;
+ file.open(file_name,std::ios_base::in|std::ios_base::binary);
+ if (file.is_open()==false) return(false);
+ int32_t part;
+ if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
+
+ for(size_t n=0;n<part;n++)
+ {
+  std::shared_ptr<IPart> iPart_Ptr(new CPart());
+  if (iPart_Ptr->Load(file)==false) return(false);
+  cGameState.Map.push_back(iPart_Ptr);
+ }
+ return(true);
+}
+
 //----------------------------------------------------------------------------------------------------
 //загрузить условия игры
 //----------------------------------------------------------------------------------------------------
@@ -917,7 +961,7 @@ void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
  else
  {
   KeyboardControl(left,right,up,down,fire);
-  if (InventoryMode==true)//включён режим просмотра инвентаря
+  if (cGameState.InventoryMode==true)//включён режим просмотра инвентаря
   {
    PutInventory(iVideo_Ptr);
   }
@@ -934,6 +978,26 @@ void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
 //----------------------------------------------------------------------------------------------------
 bool CGame::Init(IVideo *iVideo_Ptr)
 {
+ X=160;
+ Y=5;
+
+ Map_X=0;
+ Map_Y=0;
+
+ dX=0;
+ dY=0;
+
+ MoveControl=true;
+
+ TilesAnimationTickCounter=0;
+ DizzyAnimationTickCounter=0;
+ MoveTickCounter=0;
+
+ UseDelayCounter=0;
+ FlashTickCounter=0;
+
+ cGameState.Init();
+
  iVideo_Ptr->ClearScreen(BLACK_COLOR);
  //загружаем карту
  cGameState.Map.clear();

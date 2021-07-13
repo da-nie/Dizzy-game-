@@ -17,6 +17,7 @@
     <ClCompile Include="cactionchangenameglobal.cpp" />
     <ClCompile Include="cactionchangeposition.cpp" />
     <ClCompile Include="cactioncopyposition.cpp" />
+    <ClCompile Include="cactionenergyupdate.cpp" />
     <ClCompile Include="cactionmessage.cpp" />
     <ClCompile Include="cactionmove.cpp" />
     <ClCompile Include="cactionpickup.cpp" />
@@ -58,6 +59,7 @@
     <ClInclude Include="cactionchangenameglobal.h" />
     <ClInclude Include="cactionchangeposition.h" />
     <ClInclude Include="cactioncopyposition.h" />
+    <ClInclude Include="cactionenergyupdate.h" />
     <ClInclude Include="cactionmessage.h" />
     <ClInclude Include="cactionmove.h" />
     <ClInclude Include="cactionpickup.h" />

@@ -79,6 +79,8 @@ class CGame
 
   static const int32_t SPEED_X=2;//скорость Диззи по X
   static const int32_t SPEED_Y=2;//скорость Диззи по Y
+
+  static const size_t STRING_BUFFER_SIZE=255;//размер буфера строки
  private:
   //-переменные-----------------------------------------------------------------------------------------
 	   
@@ -87,6 +89,8 @@ class CGame
 
   CSprite cSprite_Dizzy;//спрайт Диззи
   CSprite cSprite_Frame;//рамки
+  CSprite cSprite_ScreenFrame;//рамки для экрана
+  CSprite cSprite_Header;//заголовок экрана
 
   CSprite cSprite_Tiles;//тайлы
   CSprite cSprite_TilesBarrier;//непроницаемость тайлов
@@ -147,9 +151,6 @@ class CGame
   CGameState cGameState;//состояние игры
 
   uint32_t UseDelayCounter;//счётчик до следующего нажатия кнопки "использовать"
-  
-  bool InventoryMode;//режим работы с инвентарём
-  int32_t InventorySelectedIndex;//выбранная позиция в инвентаре
  public:
   //-конструктор----------------------------------------------------------------------------------------
   CGame(void);
@@ -171,7 +172,6 @@ class CGame
   void Processing(IVideo *iVideo_Ptr);//обработка игрового поля
   bool IsCollizionLegs(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками ног Диззи
   bool IsCollizionBody(IVideo *iVideo_Ptr,int32_t xp,int32_t yp);//проверить столкновение с блоками корпуса Диззи
-  bool LoadMap(const std::string &file_name);//загрузить карту
   void DrawBarrier(IVideo *iVideo_Ptr);//нарисовать преграды
   void DrawMap(IVideo *iVideo_Ptr);//нарисовать карту
   void DrawFirstPlaneMap(IVideo *iVideo_Ptr);//нарисовать карту переднего плана
@@ -184,6 +184,8 @@ class CGame
   std::shared_ptr<IPart> PopInventory(size_t index);//вынуть из инвентаря
   bool LoadConditional(const std::string &path,std::vector<std::string> &log);//загрузить условия игры
   bool LoadConditionalFile(const std::string &file_name,std::vector<std::string> &log);//загрузить файл условий игры
+  bool LoadMap(const std::string &file_name);//загрузить карту
+  void DrawScreenFrame(IVideo *iVideo_Ptr);//нарисовать экранную рамку
 };
 
 #endif

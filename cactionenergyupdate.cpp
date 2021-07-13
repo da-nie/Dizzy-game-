@@ -1,7 +1,7 @@
 //****************************************************************************************************
 //подключаемые библиотеки
 //****************************************************************************************************
-#include "cgamestate.h"
+#include "cactionenergyupdate.h"
 
 //****************************************************************************************************
 //глобальные переменные
@@ -22,14 +22,16 @@
 //----------------------------------------------------------------------------------------------------
 //конструктор
 //----------------------------------------------------------------------------------------------------
-CGameState::CGameState(void)
-{ 
+CActionEnergyUpdate::CActionEnergyUpdate(int32_t d_energy,std::shared_ptr<IAction> iAction_Ptr)
+{
+ dEnergy=d_energy;
+ iAction_NextPtr=iAction_Ptr;
  Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
 //----------------------------------------------------------------------------------------------------
-CGameState::~CGameState()
+CActionEnergyUpdate::~CActionEnergyUpdate()
 {
 }
 
@@ -46,66 +48,17 @@ CGameState::~CGameState()
 //****************************************************************************************************
 
 //----------------------------------------------------------------------------------------------------
-//очистить список возможных для взятия объектов
+//выполнить действие с элементом
 //----------------------------------------------------------------------------------------------------
-void CGameState::ClearTake(void)
+void CActionEnergyUpdate::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &cGameState)
 {
- Take.clear();
+ cGameState.EnergyUpdate(dEnergy);
+ if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
 }
 //----------------------------------------------------------------------------------------------------
-//добавить объект в список возможных для взятия
+//инициализация
 //----------------------------------------------------------------------------------------------------
-void CGameState::AddTake(std::shared_ptr<IPart> iPart_Ptr)
+void CActionEnergyUpdate::Init(void)
 {
- Take.push_back(iPart_Ptr);
-}
-//----------------------------------------------------------------------------------------------------
-//добавить сообщение
-//----------------------------------------------------------------------------------------------------
-void CGameState::AddMessage(const std::string &message,int32_t screen_x,int32_t screen_y)
-{
- //определяем размер сообщения в символах
- SMessage sMessage;
- size_t length=message.length();
- std::string line;
- line.reserve(length);
- sMessage.InSymbolWidth=0;
- const char *ptr=message.c_str();
- for(size_t n=0;n<length;n++,ptr++)
- {
-  uint8_t symbol=static_cast<uint8_t>(*ptr);  
-  if (symbol!=static_cast<uint8_t>('\\')) line+=(*ptr);
-  if (symbol==static_cast<uint8_t>('\\') || n==length-1)
-  {
-   size_t line_width=line.length();
-   if (line_width>sMessage.InSymbolWidth) sMessage.InSymbolWidth=line_width;
-   sMessage.Message.push_back(line); 
-   line="";
-  }  
- }
- sMessage.ScreenX=screen_x;
- sMessage.ScreenY=screen_y;
- sMessage.InSymbolHeight=sMessage.Message.size();
- Message.push_back(sMessage);
-}
-//----------------------------------------------------------------------------------------------------
-//выполнить изменение энергии Диззи
-//----------------------------------------------------------------------------------------------------
-void CGameState::EnergyUpdate(int32_t d_energy)
-{
- Energy+=d_energy;
- if (Energy<0) Energy=0;
- if (Energy>100) Energy=100;
-}
-//----------------------------------------------------------------------------------------------------
-//инициализация игры
-//----------------------------------------------------------------------------------------------------
-void CGameState::Init(void)
-{
- Life=MAX_DIZZY_LIFE;
- Energy=ENERGY_MAX_VALUE;
- Score=0;
- Items=0;
- InventoryMode=false;
- InventorySelectedIndex=0;
+ if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Init();
 }

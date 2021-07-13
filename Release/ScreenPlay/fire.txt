@@ -22,3 +22,12 @@ ActionFirstEnd
 ActionSecondBegin
 ActionSecondEnd
 
+IfDizzyIntersection("FIRE_LEFT")
+ActionBegin
+ ActionEnergyUpdate(-1)
+ActionEnd
+
+IfDizzyIntersection("FIRE_RIGHT")
+ActionBegin
+ ActionEnergyUpdate(-1)
+ActionEnd

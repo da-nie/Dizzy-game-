@@ -132,6 +132,9 @@
     <ClCompile Include="cconditionalofdizzyintersection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cactionenergyupdate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -249,6 +252,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cconditionalofdizzyintersection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionenergyupdate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

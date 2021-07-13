@@ -19,6 +19,7 @@
 #include "cactionsetenabled.h"
 #include "cactionpickup.h"
 #include "cactionmove.h"
+#include "cactionenergyupdate.h"
 
 //****************************************************************************************************
 //глобальные переменные
@@ -61,6 +62,7 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cLexicalAnalyzer.AddLexeme("ActionSetEnabled",ID_LEXEME_TYPE_ACTION_SET_ENABLED); 
  cLexicalAnalyzer.AddLexeme("ActionSingle",ID_LEXEME_TYPE_ACTION_SINGLE); 
  cLexicalAnalyzer.AddLexeme("ActionMove",ID_LEXEME_TYPE_ACTION_MOVE);
+ cLexicalAnalyzer.AddLexeme("ActionEnergyUpdate",ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE);
  //команды условий
 
  cLexicalAnalyzer.AddLexeme("IfIntersection",ID_LEXEME_TYPE_IF_INTERSECTION); 
@@ -218,6 +220,13 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cAutomath_Syntax.AddRule("set_description(`A`","set_description(`A`,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
  cAutomath_Syntax.AddRule("set_description(`A`,","set_description(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("set_description(`A`,`A`","set_description(`A`,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+ 
+ //команда ActionEnergyUpdate()
+ cAutomath_Syntax.AddRule("begin","action_energy_update",ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE,ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE,false);
+ cAutomath_Syntax.AddRule("action_energy_update","action_energy_update(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("action_energy_update(","action_energy_update(N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_energy_update(","action_energy_update(N",CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_energy_update(N","action_energy_update(N)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
  
  vector_CLexeme.clear();
  Mode=MODE_WAIT_COMMAND;
@@ -378,6 +387,7 @@ bool CSyntaxAnalyzer::IsAction(const CLexeme &cLexeme_Command)
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_SET_ENABLED) return(true); 
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_SINGLE) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_MOVE) return(true);
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE) return(true);
  return(false);
 }
 
@@ -547,7 +557,13 @@ std::shared_ptr<IAction> CSyntaxAnalyzer::CreateAction(const std::vector<CLexeme
   int32_t dy=atoi(dy_str.c_str());
   return(std::shared_ptr<IAction>(new CActionMove(dx,dy,next_ptr)));
  }
-
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE)
+ {
+  std::string denergy_str;
+  lexeme[2].GetName(denergy_str);
+  int32_t denergy=atoi(denergy_str.c_str());
+  return(std::shared_ptr<IAction>(new CActionEnergyUpdate(denergy,next_ptr)));
+ }
  return(std::shared_ptr<IAction>(NULL));
 }
 //----------------------------------------------------------------------------------------------------
