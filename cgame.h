@@ -20,6 +20,7 @@
 #include "ipart.h"
 #include "iconditionalexpression.h"
 #include "cgamestate.h"
+#include "cdizzy.h"
 
 //****************************************************************************************************
 //макроопределения
@@ -83,7 +84,8 @@ class CGame
   static const size_t STRING_BUFFER_SIZE=255;//размер буфера строки
  private:
   //-переменные-----------------------------------------------------------------------------------------
-	   
+  CDizzy cDizzy;//Диззи
+
   int32_t Map_X;//координаты левого верхнего угла карты
   int32_t Map_Y;
 
@@ -101,45 +103,7 @@ class CGame
   int32_t dX;//скорости Диззи
   int32_t dY;
 
-  //режимы движения Диззи
-  enum MOVE
-  {
-   MOVE_STOP,
-   MOVE_LEFT,
-   MOVE_RIGHT,
-   MOVE_JUMP,
-   MOVE_JUMP_LEFT,
-   MOVE_JUMP_RIGHT,
-  };
-
   bool MoveControl;//управляем ли Dizzy игроком
-
-  struct SFrame
-  {   
-   MOVE Move;//режим движения
-   int32_t ImageFrame;//номер кадра в изображении
-   SFrame *sFrame_Next_Ptr;//указатель на следующий кадр
-   bool EndFrame;//является ли кадр последним кадром
-   
-   SFrame(int32_t image_frame,MOVE move,bool end_frame=false,SFrame *next_ptr=NULL)
-   { 
-    Move=move;
-	ImageFrame=image_frame;
-	sFrame_Next_Ptr=next_ptr;
-	EndFrame=end_frame;
-   }
-  };
-  
-  SFrame *sFrame_Stop_Ptr;//указатель на последовательность анимации "Диззи стоит"
-  SFrame *sFrame_MoveLeft_Ptr;//указатель на последовательность анимации "Диззи идёт влево"
-  SFrame *sFrame_MoveRight_Ptr;//указатель на последовательность анимации "Диззи идёт вправо"
-  SFrame *sFrame_Jump_Ptr;//указатель на последовательность анимации "Диззи прыгает на месте"
-  SFrame *sFrame_JumpLeft_Ptr;//указатель на последовательность анимации "Диззи прыгает влево"
-  SFrame *sFrame_JumpRight_Ptr;//указатель на последовательность анимации "Диззи прыгает вправо"
-
-  SFrame *sFrame_Ptr;//указатель на текущий кадр анимации
-
-  std::vector<SFrame> sFrame_Array;//набор кадров для анимации Диззи
 
   int32_t TilesAnimationTickCounter;//счётчик анимации тайлов
   int32_t DizzyAnimationTickCounter;//счётчик анимации Диззи

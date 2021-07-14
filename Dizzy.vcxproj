@@ -33,6 +33,7 @@
     <ClCompile Include="cconditionalofpickup.cpp" />
     <ClCompile Include="cconditionaloftimer.cpp" />
     <ClCompile Include="cconditionalofuse.cpp" />
+    <ClCompile Include="cdizzy.cpp" />
     <ClCompile Include="cfontprinter.cpp" />
     <ClCompile Include="cgame.cpp" />
     <ClCompile Include="cgamestate.cpp" />
@@ -78,6 +79,7 @@
     <ClInclude Include="cconditionalofpickup.h" />
     <ClInclude Include="cconditionaloftimer.h" />
     <ClInclude Include="cconditionalofuse.h" />
+    <ClInclude Include="cdizzy.h" />
     <ClInclude Include="cfontprinter.h" />
     <ClInclude Include="cgame.h" />
     <ClInclude Include="cgamestate.h" />

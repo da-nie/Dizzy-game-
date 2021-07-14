@@ -144,6 +144,9 @@
     <ClCompile Include="cactionadditem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cdizzy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -273,6 +276,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cactionadditem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cdizzy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
