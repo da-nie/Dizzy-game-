@@ -64,10 +64,10 @@ void CConditionalOfIntersection::Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t
  //собираем список объектов для взаимодействия
  std::vector<std::shared_ptr<IPart> > first_part;
  std::vector<std::shared_ptr<IPart> > second_part;
- size_t size=cGameState.Map.size();
+ size_t size=cGameState.MapNamed.size();
  for(size_t n=0;n<size;n++)
  {
-  std::shared_ptr<IPart> &iPart_Ptr=cGameState.Map[n];
+  std::shared_ptr<IPart> &iPart_Ptr=cGameState.MapNamed[n];
   if (iPart_Ptr->InInventory==true) continue;//предмет находится в инвентаре и с ним взаимодействовать нельзя
   if (iPart_Ptr->Enabled==false) continue;//предмет неактивен
   if (iPart_Ptr->Name.compare(Name_One)==0) first_part.push_back(iPart_Ptr);

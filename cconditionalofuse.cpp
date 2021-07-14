@@ -96,7 +96,8 @@ void CConditionalOfUse::Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_wi
   if (iAction_LocalTwoPtr.get()!=NULL) iAction_LocalTwoPtr->Execute(iPart_Ptr,cGameState);
   one_object_is_used=true;
  };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),execute_function);
+ std::for_each(cGameState.MapNamed.begin(),cGameState.MapNamed.end(),execute_function);
+
  if (one_object_is_used==true) 
  {  
   if (iAction_OnePtr.get()!=NULL) iAction_OnePtr->Execute(cGameState.UsedObject,cGameState);//выполняем действие с первым объектом

@@ -57,11 +57,11 @@ void CActionCopyPosition::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &c
  //ищем нужные элементы
  std::shared_ptr<IPart> part_one_ptr;
  std::shared_ptr<IPart> part_two_ptr;
- size_t size=cGameState.Map.size();
+ size_t size=cGameState.MapNamed.size();
  for(size_t n=0;n<size;n++)
  {
-  if (cGameState.Map[n]->Name.compare(Name_One)==0) part_one_ptr=cGameState.Map[n];
-  if (cGameState.Map[n]->Name.compare(Name_Two)==0) part_two_ptr=cGameState.Map[n];
+  if (cGameState.MapNamed[n]->Name.compare(Name_One)==0) part_one_ptr=cGameState.MapNamed[n];
+  if (cGameState.MapNamed[n]->Name.compare(Name_Two)==0) part_two_ptr=cGameState.MapNamed[n];
  }
  if (part_one_ptr.get()!=NULL && part_two_ptr.get()!=NULL)//выполняем замену координат
  {  

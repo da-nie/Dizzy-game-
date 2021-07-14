@@ -52,6 +52,7 @@ class CGameState
   std::vector<std::shared_ptr<IPart> > Inventory;//интвентарь
   std::shared_ptr<IPart> UsedObject;//используемый предмет
   std::vector<std::shared_ptr<IPart> > Map;//карта
+  std::vector<std::shared_ptr<IPart> > MapNamed;//именованые блоки карты
 
   std::vector<SMessage> Message;//список сообщений
 

@@ -85,5 +85,5 @@ void CConditionalOfDizzyIntersection::Execute(int32_t dizzy_x,int32_t dizzy_y,in
   //объекты пересекаются
   if (iAction_LocalPtr.get()!=NULL) iAction_LocalPtr->Execute(iPart_Ptr,cGameState);
  };
- std::for_each(cGameState.Map.begin(),cGameState.Map.end(),execute_function);
+ std::for_each(cGameState.MapNamed.begin(),cGameState.MapNamed.end(),execute_function);
 }

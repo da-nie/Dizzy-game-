@@ -52,10 +52,10 @@ CActionChangeDescriptionGlobal::~CActionChangeDescriptionGlobal()
 //----------------------------------------------------------------------------------------------------
 void CActionChangeDescriptionGlobal::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &cGameState)
 {
- size_t size=cGameState.Map.size();
+ size_t size=cGameState.MapNamed.size();
  for(size_t n=0;n<size;n++)
  {
-  if (cGameState.Map[n]->Name.compare(iPart_Ptr->Name)==0) cGameState.Map[n]->Description=Description;
+  if (cGameState.MapNamed[n]->Name.compare(iPart_Ptr->Name)==0) cGameState.MapNamed[n]->Description=Description;
  }
  if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
 }

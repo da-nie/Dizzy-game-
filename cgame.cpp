@@ -331,11 +331,11 @@ void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
   float min_distance=0;
   int32_t y=0;
   int32_t x=0;  
-  size_t size=cGameState.Map.size();
+  size_t size=cGameState.MapNamed.size();
   bool first=true;
   for(size_t n=0;n<size;n++)
   {
-   std::shared_ptr<IPart> iPart_Ptr=cGameState.Map[n];
+   std::shared_ptr<IPart> iPart_Ptr=cGameState.MapNamed[n];
    if (iPart_Ptr->Name.compare("RESPAWN")!=0) continue;
 
    float dx=((X+Map_X)-iPart_Ptr->BlockPosX)/TILE_WIDTH;
@@ -769,6 +769,7 @@ bool CGame::LoadMap(const std::string &file_name)
   std::shared_ptr<IPart> iPart_Ptr(new CPart());
   if (iPart_Ptr->Load(file)==false) return(false);
   cGameState.Map.push_back(iPart_Ptr);
+  if (iPart_Ptr->Name.length()>0) cGameState.MapNamed.push_back(iPart_Ptr);
  }
  return(true);
 }
@@ -988,6 +989,7 @@ bool CGame::Init(IVideo *iVideo_Ptr)
  iVideo_Ptr->ClearScreen(BLACK_COLOR);
  //загружаем карту
  cGameState.Map.clear();
+ cGameState.MapNamed.clear();
  if (LoadMap(MAP_FILE_NAME)==false)
  {
   std::string message="Не могу открыть файл карты "+std::string(MAP_FILE_NAME)+" !";  
