@@ -59,11 +59,16 @@ class CGameState
 
   int32_t Life;//количество жизней Диззи
   int32_t Energy;//энергия Диззи
+  int32_t ScreenEnergy;//отображаемая на экране энергия Диззи
   int32_t Score;//набранные очки Диззи
+  int32_t ScreenScore;//отображаемые на экране очки Диззи
   int32_t Items;//собранные Диззи предметы
 
   bool InventoryMode;//режим работы с инвентарём
   int32_t InventorySelectedIndex;//выбранная позиция в инвентаре
+
+  int32_t DizzyStartPositionX;//координата X начальной позиции Диззи
+  int32_t DizzyStartPositionY;//координата Y начальной позиции Диззи
  private:
   //-переменные-----------------------------------------------------------------------------------------  
  public:
@@ -77,7 +82,11 @@ class CGameState
   void AddTake(std::shared_ptr<IPart> iPart_Ptr);//добавить объект в список возможных для взятия
   void AddMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//добавить сообщение
   void EnergyUpdate(int32_t d_energy);//выполнить изменение энергии Диззи
-  void Init(void);//инициализация игры
+  void AddScore(int32_t d_score);//добавить очки Диззи
+  void AddLife(void);//добавить жизнь Диззи
+  void AddItem(void);//добавить найденный предмет Диззи
+  void SetDizzyStartPosition(int32_t x,int32_t y);//задать стартовую позицию Диззи
+  void Init(void);//инициализация игры  
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
 };

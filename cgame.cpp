@@ -43,6 +43,7 @@ CGame::CGame(void)
  cSprite_Frame.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
 
  cSprite_ScreenFrame.Load("Sprites\\screen_frame.tga");
+ cSprite_ScreenFrame.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
  cSprite_Header.Load("Sprites\\header.tga");
 
  cFontPrinter_Ptr.reset(new CFontPrinter("Sprites\\font.tga",8,8,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B));
@@ -365,7 +366,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    dY=0;
   }
 
-  bool redraw_barrier=MoveMap(width,height,offset_y);
+  bool redraw_barrier=MoveMapStep(width,height,offset_y);
 
   if (redraw_barrier==true)
   {
@@ -424,6 +425,13 @@ void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
  if (cGameState.Energy==0)//Диззи погиб
  {
   cGameState.AddMessage("ДИЗЗИ ПОГИБ!\\ВЫ ПОТЕРЯЛИ ЖИЗНЬ",100,120);
+  if (cGameState.Life>1) cGameState.Life--;
+  else//игра начинается сначала
+  {
+   cGameState.AddMessage("ВЫ ПРОИГРАЛИ!",150,120);
+   Init(iVideo_Ptr);
+   return;
+  }
   //ищем ближайшую точку восстановления
   float min_distance=0;
   int32_t y=0;
@@ -447,23 +455,14 @@ void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
    first=false;
   }
   cGameState.Energy=100;
+  cGameState.ScreenEnergy=0;
   X=x-Map_X;
   Y=y-Map_Y;
   dX=0;
   dY=0;
   sFrame_Ptr=sFrame_Stop_Ptr;
   //перемещаем карту
-  uint32_t w;
-  uint32_t h;
-  iVideo_Ptr->GetScreenSize(w,h);
-  int32_t width=w;
-  int32_t height=h;
-  int32_t offset_y=cSprite_Header.GetHeight();
-  height-=offset_y; 
-  while(1) 
-  {
-   if (MoveMap(width,height,offset_y)==false) break;
-  }
+  MoveMap(iVideo_Ptr);
  }
 }
 
@@ -772,12 +771,17 @@ std::shared_ptr<IPart> CGame::PopInventory(size_t index)
  iPart_Ptr->PopInventory();//выкладываем объект
  return(iPart_Ptr);
 }
-
 //----------------------------------------------------------------------------------------------------
 //нарисовать экранную рамку
 //----------------------------------------------------------------------------------------------------
 void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
 {
+ if (cGameState.ScreenEnergy<cGameState.Energy) cGameState.ScreenEnergy++;
+ if (cGameState.ScreenEnergy>cGameState.Energy) cGameState.ScreenEnergy--;
+
+ if (cGameState.ScreenScore<cGameState.Score) cGameState.ScreenScore++;
+ if (cGameState.ScreenScore>cGameState.Score) cGameState.ScreenScore--;
+
  static const int32_t FRAME_WIDTH=8;
  static const int32_t FRAME_HEIGHT=8;
 
@@ -786,6 +790,9 @@ void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
 
  static const int32_t FRAME_ANGLE_OFFSET_X=1;
  static const int32_t FRAME_ANGLE_OFFSET_Y=1;
+
+ static const int32_t FRAME_LIFE_OFFSET_X=21;
+ static const int32_t FRAME_LIFE_OFFSET_Y=1;
 
  cSprite_Header.Put(iVideo_Ptr,0,0,false);
  int32_t offset_y=cSprite_Header.GetHeight();
@@ -808,9 +815,15 @@ void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
 
  char str[STRING_BUFFER_SIZE];
  //выводим счёт
- sprintf(str,"%05i",cGameState.Score);
+ sprintf(str,"%05i",cGameState.ScreenScore);
  cFontPrinter_Ptr->PrintAt(77,32,str,iVideo_Ptr);
  //выводим жизни
+ static const int32_t LIFE_OFFSET_POS_Y=32;//положение количества жизней по Y
+ static const int32_t LIFE_OFFSET_POS_X=224;//положение количества жизней по X
+ for(int32_t n=0;n<cGameState.Life;n++)
+ {
+  cSprite_ScreenFrame.PutSpriteItem(iVideo_Ptr,n*FRAME_WIDTH+LIFE_OFFSET_POS_X,LIFE_OFFSET_POS_Y,FRAME_LIFE_OFFSET_X,FRAME_LIFE_OFFSET_Y,FRAME_WIDTH,FRAME_HEIGHT,true); 
+ }
  //выводим энергию
  static const int32_t ENERGY_OFFSET_POS_X=160;//положение шкалы энергии по X
  static const int32_t ENERGY_OFFSET_POS_Y=32;//положение шкалы энергии по Y
@@ -819,7 +832,7 @@ void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
  static const int32_t ENERGY_PART=3;//на сколько частей делится шкала энергии
  
  int32_t x1=ENERGY_OFFSET_POS_X;
- int32_t x2=ENERGY_OFFSET_POS_X+ENERGY_WIDTH*cGameState.Energy/cGameState.ENERGY_MAX_VALUE;
+ int32_t x2=ENERGY_OFFSET_POS_X+ENERGY_WIDTH*cGameState.ScreenEnergy/cGameState.ENERGY_MAX_VALUE;
  int32_t y1=ENERGY_OFFSET_POS_Y;
  int32_t y2=y1+ENERGY_HEIGHT;
  int32_t part=ENERGY_WIDTH/3;
@@ -1002,7 +1015,25 @@ void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
 //----------------------------------------------------------------------------------------------------
 //выполнить перемещение карты, если требуется
 //----------------------------------------------------------------------------------------------------
-bool CGame::MoveMap(int32_t width,int32_t height,int32_t offset_y)
+void CGame::MoveMap(IVideo *iVideo_Ptr)
+{
+ uint32_t w;
+ uint32_t h;
+ iVideo_Ptr->GetScreenSize(w,h);
+ int32_t width=w;
+ int32_t height=h;
+ int32_t offset_y=cSprite_Header.GetHeight();
+ height-=offset_y; 
+ while(1) 
+ {
+  if (MoveMapStep(width,height,offset_y)==false) break;
+ }
+}
+
+//----------------------------------------------------------------------------------------------------
+//выполнить перемещение карты на один шаг, если требуется
+//----------------------------------------------------------------------------------------------------
+bool CGame::MoveMapStep(int32_t width,int32_t height,int32_t offset_y)
 {
  bool update=false;
  if (X<width/4 && Map_X>=2)
@@ -1071,16 +1102,16 @@ bool CGame::Init(IVideo *iVideo_Ptr)
  //загружаем условные выражения
  std::vector<std::string> log;
  int64_t y=0;
- uint32_t width;
- uint32_t height;
- iVideo_Ptr->GetStringImageSize(" ",width,height);
+ uint32_t swidth;
+ uint32_t sheight;
+ iVideo_Ptr->GetStringImageSize(" ",swidth,sheight);
  if (LoadConditional("./ScreenPlay",log)==false)
  {  
   if (log.size()<2) return(false);
   iVideo_Ptr->PutStringWithIncrementHeight(0,y,"Произошла ошибка трансляции файла",YELLOW_COLOR);
   iVideo_Ptr->PutStringWithIncrementHeight(0,y,log[0].c_str(),YELLOW_COLOR);
   iVideo_Ptr->PutStringWithIncrementHeight(0,y," ",YELLOW_COLOR);  
-  int32_t index=static_cast<int32_t>(log.size())-(static_cast<int32_t>(SCREEN_HEIGHT/height)-3);
+  int32_t index=static_cast<int32_t>(log.size())-(static_cast<int32_t>(SCREEN_HEIGHT/sheight)-3);
   if (index<2) index=2;  
   for(size_t n=index;n<log.size();n++)
   {
@@ -1088,6 +1119,12 @@ bool CGame::Init(IVideo *iVideo_Ptr)
   }
   return(false);
  }
+ //меняем позицию Диззи
+ X=cGameState.DizzyStartPositionX;
+ Y=cGameState.DizzyStartPositionY;
+
+ //перемещаем карту
+ MoveMap(iVideo_Ptr);
  return(true);
 }
 

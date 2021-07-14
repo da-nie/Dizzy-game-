@@ -1,0 +1,4 @@
+//установка объектов на требуемые позиции
+
+CopyPosition("FIRE_RIGHT","PAIL")
+SetDizzyPosition("DIZZY_START_POSITION")

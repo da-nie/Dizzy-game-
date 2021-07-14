@@ -20,6 +20,9 @@
 #include "cactionpickup.h"
 #include "cactionmove.h"
 #include "cactionenergyupdate.h"
+#include "cactionaddlife.h"
+#include "cactionaddscore.h"
+#include "cactionadditem.h"
 
 //****************************************************************************************************
 //глобальные переменные
@@ -48,6 +51,8 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cLexicalAnalyzer.AddLexeme("false",ID_LEXEME_TYPE_BOOL); 
  //служебные команды
  cLexicalAnalyzer.AddLexeme("SetDescription",ID_LEXEME_TYPE_SET_DESCRIPTION);
+ cLexicalAnalyzer.AddLexeme("CopyPosition",ID_LEXEME_TYPE_COPY_POSITION);
+ cLexicalAnalyzer.AddLexeme("SetDizzyPosition",ID_LEXEME_TYPE_SET_DIZZY_POSITION);
  //команды действий
    
  cLexicalAnalyzer.AddLexeme("ActionMessage",ID_LEXEME_TYPE_ACTION_MESSAGE); 
@@ -63,6 +68,9 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cLexicalAnalyzer.AddLexeme("ActionSingle",ID_LEXEME_TYPE_ACTION_SINGLE); 
  cLexicalAnalyzer.AddLexeme("ActionMove",ID_LEXEME_TYPE_ACTION_MOVE);
  cLexicalAnalyzer.AddLexeme("ActionEnergyUpdate",ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE);
+ cLexicalAnalyzer.AddLexeme("ActionAddScore",ID_LEXEME_TYPE_ACTION_ADD_SCORE);
+ cLexicalAnalyzer.AddLexeme("ActionAddLife",ID_LEXEME_TYPE_ACTION_ADD_LIFE);
+ cLexicalAnalyzer.AddLexeme("ActionAddItem",ID_LEXEME_TYPE_ACTION_ADD_ITEM);
  //команды условий
 
  cLexicalAnalyzer.AddLexeme("IfIntersection",ID_LEXEME_TYPE_IF_INTERSECTION); 
@@ -179,6 +187,30 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  //команда ActionSecondEnd
  cAutomath_Syntax.AddRule("begin","action_second_end",ID_LEXEME_TYPE_ACTION_SECOND_END,ID_LEXEME_TYPE_ACTION_SECOND_END,true);
 
+ //команда ActionEnergyUpdate(-1)
+ cAutomath_Syntax.AddRule("begin","action_energy_update",ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE,ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE,false);
+ cAutomath_Syntax.AddRule("action_energy_update","action_energy_update(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("action_energy_update(","action_energy_update(N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_energy_update(","action_energy_update(N",CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_energy_update(N","action_energy_update(N)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+ //команда ActionAddScore(100)
+ cAutomath_Syntax.AddRule("begin","action_add_score",ID_LEXEME_TYPE_ACTION_ADD_SCORE,ID_LEXEME_TYPE_ACTION_ADD_SCORE,false);
+ cAutomath_Syntax.AddRule("action_add_score","action_add_score(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("action_add_score(","action_add_score(N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_add_score(","action_add_score(N",CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_add_score(N","action_add_score(N)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+ //команда ActionAddLife()
+ cAutomath_Syntax.AddRule("begin","action_add_life",ID_LEXEME_TYPE_ACTION_ADD_LIFE,ID_LEXEME_TYPE_ACTION_ADD_LIFE,false);
+ cAutomath_Syntax.AddRule("action_add_life","action_add_life(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("action_add_life(","action_add_life()",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+ //команда ActionAddItem()
+ cAutomath_Syntax.AddRule("begin","action_add_item",ID_LEXEME_TYPE_ACTION_ADD_ITEM,ID_LEXEME_TYPE_ACTION_ADD_ITEM,false);
+ cAutomath_Syntax.AddRule("action_add_item","action_add_item(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("action_add_item(","action_add_item()",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
  //команда IfDizzyIntersection("CAT")
  cAutomath_Syntax.AddRule("begin","if_dizzy_intersection",ID_LEXEME_TYPE_IF_DIZZY_INTERSECTION,ID_LEXEME_TYPE_IF_DIZZY_INTERSECTION,false);
  cAutomath_Syntax.AddRule("if_dizzy_intersection","if_dizzy_intersection(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
@@ -221,13 +253,21 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cAutomath_Syntax.AddRule("set_description(`A`,","set_description(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("set_description(`A`,`A`","set_description(`A`,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
  
- //команда ActionEnergyUpdate()
- cAutomath_Syntax.AddRule("begin","action_energy_update",ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE,ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE,false);
- cAutomath_Syntax.AddRule("action_energy_update","action_energy_update(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
- cAutomath_Syntax.AddRule("action_energy_update(","action_energy_update(N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
- cAutomath_Syntax.AddRule("action_energy_update(","action_energy_update(N",CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,false);
- cAutomath_Syntax.AddRule("action_energy_update(N","action_energy_update(N)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
- 
+ //команда CopyPosition("FIRE","FIRE_POS")
+ cAutomath_Syntax.AddRule("begin","copy_position",ID_LEXEME_TYPE_COPY_POSITION,ID_LEXEME_TYPE_COPY_POSITION,false);
+ cAutomath_Syntax.AddRule("copy_position","copy_position(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("copy_position(","copy_position(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("copy_position(`A`","copy_position(`A`,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("copy_position(`A`,","copy_position(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("copy_position(`A`,`A`","copy_position(`A`,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+ //команда SetDizzyPosition("DIZZY_START_POSITION")
+ cAutomath_Syntax.AddRule("begin","set_dizzy_position",ID_LEXEME_TYPE_SET_DIZZY_POSITION,ID_LEXEME_TYPE_SET_DIZZY_POSITION,false);
+ cAutomath_Syntax.AddRule("set_dizzy_position","set_dizzy_position(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("set_dizzy_position(","set_dizzy_position(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("set_dizzy_position(`A`","set_dizzy_position(`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+
  vector_CLexeme.clear();
  Mode=MODE_WAIT_COMMAND;
 }
@@ -271,7 +311,6 @@ double CSyntaxAnalyzer::ConvertAngleToSec(const char *string)
  double value=g*3600+m*60+s;
  return(value);
 }
-
 //----------------------------------------------------------------------------------------------------
 //задать описание
 //----------------------------------------------------------------------------------------------------
@@ -284,24 +323,102 @@ void CSyntaxAnalyzer::SetDescription(const std::string &name,const std::string &
   if (iPart_Ptr->Name.compare(name)==0) iPart_Ptr->Description=description;
  }
 }
+//----------------------------------------------------------------------------------------------------
+//переместить объект в заданную позицию
+//----------------------------------------------------------------------------------------------------
+void CSyntaxAnalyzer::CopyPosition(const std::string &name_first,const std::string &name_second,std::vector<std::shared_ptr<IPart> > &Map)
+{
+ size_t size=Map.size();
+ int32_t x;
+ int32_t y;
+ //ищем конечную позицию
+ bool find=false;
+ for(size_t n=0;n<size;n++)
+ {
+  std::shared_ptr<IPart> iPart_Ptr=Map[n];
+  if (iPart_Ptr->Name.compare(name_second)==0)
+  {
+   x=iPart_Ptr->BlockPosX;
+   y=iPart_Ptr->BlockPosY;
+   find=true;
+   break;
+  }
+ }
+ if (find==false) return;
+ //перемещаем туда все найденные объекты
+ for(size_t n=0;n<size;n++)
+ {
+  std::shared_ptr<IPart> iPart_Ptr=Map[n];
+  if (iPart_Ptr->Name.compare(name_first)==0)
+  {
+   iPart_Ptr->BlockPosX=x;
+   iPart_Ptr->BlockPosY=y;
+  }
+ }
+}
+
+//----------------------------------------------------------------------------------------------------
+//переместить Диззи в заданную позицию
+//----------------------------------------------------------------------------------------------------
+void CSyntaxAnalyzer::SetDizzyPosition(const std::string &name,CGameState &cGameState)
+{
+ size_t size=cGameState.Map.size();
+ int32_t x;
+ int32_t y;
+ //ищем конечную позицию
+ bool find=false;
+ for(size_t n=0;n<size;n++)
+ {
+  std::shared_ptr<IPart> iPart_Ptr=cGameState.Map[n];
+  if (iPart_Ptr->Name.compare(name)==0)
+  {
+   x=iPart_Ptr->BlockPosX;
+   y=iPart_Ptr->BlockPosY;
+   find=true;
+   break;
+  }
+ }
+ if (find==false) return;
+ //перемещаем Диззи
+ cGameState.SetDizzyStartPosition(x,y);
+}
 
 //----------------------------------------------------------------------------------------------------
 //обработка лексемы в режиме MODE_WAIT_COMMAND
 //----------------------------------------------------------------------------------------------------
-bool CSyntaxAnalyzer::ModeWaitCommand(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IPart> > &Map)
+bool CSyntaxAnalyzer::ModeWaitCommand(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message,CGameState &cGameState)
 {
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_SET_DESCRIPTION)
+ {
+  if (CommandLexeme.size()==0) return(true);
+  std::string name;
+  CommandLexeme[0][2].GetName(name);
+  std::string description;
+  CommandLexeme[0][4].GetName(description);
+  SetDescription(name,description,cGameState.Map);
+  CommandLexeme.clear();
+  return(true);
+ }
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_COPY_POSITION)
  {
   if (CommandLexeme.size()==0) return(true);
   std::string name_first;
   CommandLexeme[0][2].GetName(name_first);
   std::string name_second;
   CommandLexeme[0][4].GetName(name_second);
-  SetDescription(name_first,name_second,Map);
+  CopyPosition(name_first,name_second,cGameState.Map);
   CommandLexeme.clear();
   return(true);
  }
-
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_SET_DIZZY_POSITION)
+ {
+  if (CommandLexeme.size()==0) return(true);
+  std::string name;
+  CommandLexeme[0][2].GetName(name);
+  SetDizzyPosition(name,cGameState);
+  CommandLexeme.clear();
+  return(true);
+ }
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_IF_DIZZY_INTERSECTION)
  {
   Mode=MODE_WAIT_ACTION_BEGIN;
@@ -388,6 +505,9 @@ bool CSyntaxAnalyzer::IsAction(const CLexeme &cLexeme_Command)
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_SINGLE) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_MOVE) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE) return(true);
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_SCORE) return(true);
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_LIFE) return(true);
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_ITEM) return(true);
  return(false);
 }
 
@@ -446,7 +566,7 @@ bool CSyntaxAnalyzer::ModeAddAction(const CLexeme &cLexeme_Command,int32_t line_
 //----------------------------------------------------------------------------------------------------
 //сформирована новая команда
 //----------------------------------------------------------------------------------------------------
-bool CSyntaxAnalyzer::NewCommand(const std::vector<CLexeme> &lexeme,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression,std::vector<std::shared_ptr<IPart> > &Map)
+bool CSyntaxAnalyzer::NewCommand(const std::vector<CLexeme> &lexeme,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression,CGameState &cGameState)
 { 
  if (lexeme.size()==0) return(true);
  //сохраняем лексемы (создавать действия и условия будем в обратном порядке)
@@ -454,7 +574,7 @@ bool CSyntaxAnalyzer::NewCommand(const std::vector<CLexeme> &lexeme,int32_t line
  //смотрим, в каком режиме работает транслятор
  const CLexeme &cLexeme_Command=lexeme[0];
  //ожидание команды
- if (Mode==MODE_WAIT_COMMAND) return(ModeWaitCommand(cLexeme_Command,line_index,message,Map));
+ if (Mode==MODE_WAIT_COMMAND) return(ModeWaitCommand(cLexeme_Command,line_index,message,cGameState));
  if (Mode==MODE_WAIT_ACTION_BEGIN) return(ModeWaitActionBegin(cLexeme_Command,line_index,message));
  if (Mode==MODE_WAIT_ACTION_FIRST_BEGIN) return(ModeWaitActionFirstBegin(cLexeme_Command,line_index,message));
  if (Mode==MODE_WAIT_ACTION_SECOND_BEGIN) return(ModeWaitActionSecondBegin(cLexeme_Command,line_index,message));
@@ -564,6 +684,21 @@ std::shared_ptr<IAction> CSyntaxAnalyzer::CreateAction(const std::vector<CLexeme
   int32_t denergy=atoi(denergy_str.c_str());
   return(std::shared_ptr<IAction>(new CActionEnergyUpdate(denergy,next_ptr)));
  }
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_SCORE)
+ {
+  std::string dscore_str;
+  lexeme[2].GetName(dscore_str);
+  int32_t dscore=atoi(dscore_str.c_str());
+  return(std::shared_ptr<IAction>(new CActionAddScore(dscore,next_ptr)));
+ }
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_LIFE)
+ {
+  return(std::shared_ptr<IAction>(new CActionAddLife(next_ptr)));
+ }
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_ITEM)
+ {
+  return(std::shared_ptr<IAction>(new CActionAddItem(next_ptr)));
+ }
  return(std::shared_ptr<IAction>(NULL));
 }
 //----------------------------------------------------------------------------------------------------
@@ -620,8 +755,7 @@ std::shared_ptr<IConditionalExpression> CSyntaxAnalyzer::CreateConditional(void)
   CommandLexeme[0][2].GetName(name);
 
   return(std::shared_ptr<IConditionalExpression>(new CConditionalOfTimer(name,iAction_Ptr)));
- } 
-
+ }
 
  if (CommandLexeme[0][0].GetType()==ID_LEXEME_TYPE_IF_USE)
  {  
@@ -738,7 +872,7 @@ bool CSyntaxAnalyzer::Processing(char symbol,int32_t line_index,std::string &mes
    vector_CLexeme.push_back(cLexeme);
    if (cAutomath_Syntax.IsCurrentStateEndingType()==true)
    {
-    if (NewCommand(vector_CLexeme,line_index,message,cGameState.ConditionalExpression,cGameState.Map)==false) return(false);
+    if (NewCommand(vector_CLexeme,line_index,message,cGameState.ConditionalExpression,cGameState)==false) return(false);
     vector_CLexeme.clear();
     new_line=true;
    }

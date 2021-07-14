@@ -11,6 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cactionadditem.cpp" />
+    <ClCompile Include="cactionaddlife.cpp" />
+    <ClCompile Include="cactionaddscore.cpp" />
     <ClCompile Include="cactionchangedescription.cpp" />
     <ClCompile Include="cactionchangedescriptionglobal.cpp" />
     <ClCompile Include="cactionchangename.cpp" />
@@ -53,6 +56,9 @@
     <ClCompile Include="tga.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cactionadditem.h" />
+    <ClInclude Include="cactionaddlife.h" />
+    <ClInclude Include="cactionaddscore.h" />
     <ClInclude Include="cactionchangedescription.h" />
     <ClInclude Include="cactionchangedescriptionglobal.h" />
     <ClInclude Include="cactionchangename.h" />

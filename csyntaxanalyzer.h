@@ -40,6 +40,8 @@ class CSyntaxAnalyzer
    ID_LEXEME_TYPE_MNW_MODE=CLexeme::ID_LEXEME_USER,
    ID_LEXEME_TYPE_BOOL,
    ID_LEXEME_TYPE_SET_DESCRIPTION,
+   ID_LEXEME_TYPE_COPY_POSITION,
+   ID_LEXEME_TYPE_SET_DIZZY_POSITION,
    //команды действий
    ID_LEXEME_TYPE_ACTION_MESSAGE,
    ID_LEXEME_TYPE_ACTION_CHANGE_NAME,
@@ -54,6 +56,9 @@ class CSyntaxAnalyzer
    ID_LEXEME_TYPE_ACTION_SINGLE, 
    ID_LEXEME_TYPE_ACTION_MOVE,
    ID_LEXEME_TYPE_ACTION_ENERGY_UPDATE,
+   ID_LEXEME_TYPE_ACTION_ADD_SCORE,
+   ID_LEXEME_TYPE_ACTION_ADD_LIFE,
+   ID_LEXEME_TYPE_ACTION_ADD_ITEM,
    //команды условий
    ID_LEXEME_TYPE_IF_INTERSECTION,
    ID_LEXEME_TYPE_IF_DIZZY_INTERSECTION,
@@ -105,7 +110,9 @@ class CSyntaxAnalyzer
   //-закрытые функции-----------------------------------------------------------------------------------  
   double ConvertAngleToSec(const char *string);//получить угол по строке формата a'b'c
   void SetDescription(const std::string &name,const std::string &description,std::vector<std::shared_ptr<IPart> > &Map);//задать описание
-  bool ModeWaitCommand(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IPart> > &Map);//обработка лексемы в режиме MODE_WAIT_COMMAND
+  void CopyPosition(const std::string &name_first,const std::string &name_second,std::vector<std::shared_ptr<IPart> > &Map);//переместить объект в заданную позицию
+  void SetDizzyPosition(const std::string &name,CGameState &cGameState);//переместить Диззи в заданную позицию
+  bool ModeWaitCommand(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message,CGameState &cGameState);//обработка лексемы в режиме MODE_WAIT_COMMAND
   bool ModeWaitActionBegin(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message);//обработка лексемы в режиме MODE_WAIT_ACTION_BEGIN
   bool ModeWaitActionFirstBegin(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message);//обработка лексемы в режиме MODE_WAIT_ACTION_FIRST_BEGIN
   bool ModeWaitActionSecondBegin(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message);//обработка лексемы в режиме MODE_WAIT_ACTION_SECOND_BEGIN
@@ -113,7 +120,7 @@ class CSyntaxAnalyzer
   bool ModeAddActionFirst(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message);//обработка лексемы в режиме MODE_ADD_ACTION_FIRST
   bool ModeAddActionSecond(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression);//обработка лексемы в режиме MODE_ADD_ACTION_SECOND
   bool ModeAddAction(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression);//обработка лексемы в режиме MODE_ADD_ACTION
-  bool NewCommand(const std::vector<CLexeme> &lexeme,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression,std::vector<std::shared_ptr<IPart> > &Map);//сформирована новая команда
+  bool NewCommand(const std::vector<CLexeme> &lexeme,int32_t line_index,std::string &message,std::vector<std::shared_ptr<IConditionalExpression> > &ConditionalExpression,CGameState &cGameState);//сформирована новая команда
   std::shared_ptr<IAction> CSyntaxAnalyzer::CreateAction(const std::vector<CLexeme> &lexeme,std::shared_ptr<IAction> next_ptr);//создать действие по лексеме
   std::shared_ptr<IConditionalExpression> CreateConditional(void);//создание условного выражение по списку лексем  
 };

@@ -7,6 +7,7 @@ ActionFirstBegin
  ActionChangeGlobalName("BOTTLE WATER")
  ActionSetAnimationStep(1)
  ActionMessage(50,100,"дхггх мюонкмхк асршкйс бндни.")
+ ActionAddScore(10)
 ActionFirstEnd
 ActionSecondBegin
 ActionSecondEnd

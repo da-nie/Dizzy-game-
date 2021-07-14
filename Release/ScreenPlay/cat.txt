@@ -43,6 +43,7 @@ ActionSecondBegin
  ActionCopyPosition("RING","RING_POS")
  ActionMessage(30,100,"дхггх дюк асршкйс бндш йнр╗мйс...")
  ActionMessage(40,80,"аскэй-аскэй!\яоюяхан! гю щрн ъ дюл реае\йнкэжн. ъ ецн цде-рн яо╗п.")
+ ActionAddScore(100)
 ActionSecondEnd
 
 IfUse("POISON","WAIT CAT")
@@ -87,6 +88,7 @@ ActionFirstBegin
  ActionChangeGlobalDescription("осярюъ асршкйю")
  ActionChangeGlobalName("BOTTLE")
  ActionSetAnimationStep(0)
+ ActionAddScore(1)
 ActionFirstEnd
 ActionSecondBegin
 ActionSecondEnd
