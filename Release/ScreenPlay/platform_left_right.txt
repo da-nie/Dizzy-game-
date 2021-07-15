@@ -1,0 +1,23 @@
+IfTimer("PLATFORM_LEFT")
+ActionBegin
+ ActionMove(-2,0) 
+ActionEnd
+
+IfTimer("PLATFORM_RIGHT")
+ActionBegin
+ ActionMove(2,0) 
+ActionEnd
+
+IfIntersection("PLATFORM_LEFT","PLATFORM_LEFT_BORDER")
+ActionFirstBegin
+ ActionChangeGlobalName("PLATFORM_RIGHT")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfIntersection("PLATFORM_RIGHT","PLATFORM_RIGHT_BORDER")
+ActionFirstBegin
+ ActionChangeGlobalName("PLATFORM_LEFT")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd

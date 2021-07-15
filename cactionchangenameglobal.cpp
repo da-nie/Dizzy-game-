@@ -57,7 +57,7 @@ void CActionChangeNameGlobal::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameStat
  size_t size=cGameState.MapNamed.size();
  for(size_t n=0;n<size;n++)
  {
-  if (cGameState.MapNamed[n]->Name.compare(Name)==0) cGameState.MapNamed[n]->Name=Name;
+  if (cGameState.MapNamed[n]->Name.compare(last_name)==0) cGameState.MapNamed[n]->Name=Name;
  }
  if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
 }

@@ -1,6 +1,7 @@
 //установка объектов на требуемые позиции
 
 CopyPosition("FIRE_RIGHT","PAIL")
+CopyPosition("BRIDGE","BRIDGE_POS")
 CopyPositionOffset("DROP_FIRE_0","DROP_FIRE_START",0,0)
 CopyPositionOffset("DROP_FIRE_1","DROP_FIRE_START",0,24)
 CopyPositionOffset("DROP_FIRE_2","DROP_FIRE_START",0,48)

@@ -38,5 +38,6 @@ ActionSecondEnd
 
 IfDizzyIntersection("DANGER_WATER")
 ActionBegin
+ ActionSingle()
  ActionEnergyUpdate(-1)
 ActionEnd

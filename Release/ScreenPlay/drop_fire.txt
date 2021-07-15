@@ -12,13 +12,14 @@ ActionSecondEnd
 
 IfDizzyIntersection("DROP_FIRE_0")
 ActionBegin
+ ActionSingle()
  ActionEnergyUpdate(1)
 ActionEnd
 
 
 IfTimer("DROP_FIRE_1")
 ActionBegin
- ActionMove(0,2) 
+ ActionMove(0,1) 
 ActionEnd
 
 IfIntersection("DROP_FIRE_1","DROP_FIRE_BORDER")
@@ -30,12 +31,13 @@ ActionSecondEnd
 
 IfDizzyIntersection("DROP_FIRE_1")
 ActionBegin
+ ActionSingle()
  ActionEnergyUpdate(1)
 ActionEnd
 
 IfTimer("DROP_FIRE_2")
 ActionBegin
- ActionMove(0,3) 
+ ActionMove(0,1) 
 ActionEnd
 
 IfIntersection("DROP_FIRE_2","DROP_FIRE_BORDER")
@@ -47,5 +49,6 @@ ActionSecondEnd
 
 IfDizzyIntersection("DROP_FIRE_2")
 ActionBegin
+ ActionSingle()
  ActionEnergyUpdate(1)
 ActionEnd

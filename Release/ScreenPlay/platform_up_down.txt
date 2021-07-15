@@ -5,7 +5,7 @@ ActionEnd
 
 IfTimer("PLATFORM_DOWN")
 ActionBegin
- ActionMove(0,1) 
+ ActionMove(0,2) 
 ActionEnd
 
 

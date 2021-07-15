@@ -1,0 +1,16 @@
+IfTimer("BRIDGE_DOWN")
+ActionBegin
+ ActionMove(0,1) 
+ActionEnd
+
+IfDizzyIntersection("BRIDGE")
+ActionBegin
+ ActionChangeGlobalName("BRIDGE_DOWN")
+ActionEnd
+
+IfIntersection("BRIDGE_DOWN","BRIDGE_DOWN_BORDER")
+ActionFirstBegin
+ ActionChangeGlobalName("BRIDGE_STOP")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd

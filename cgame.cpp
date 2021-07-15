@@ -236,7 +236,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
   
   if (dx>0) X++;
   if (dx<0) X--;
-
+  
   if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
   {
    if (IsCollizionBody(iVideo_Ptr,X,Y)==false)//пересечение не выше допуска
@@ -251,15 +251,16 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
 	//dX=0;//TODO: если так сделать, Диззи не сможет забираться перекатываясь через края блоков.
    }
   }
-
+  
   if (dy>0) Y++;
   if (dy<0) Y--;
+  
   if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
   {
    Y=last_y;
    dy=0;
    dY=0;
-  }
+  }  
 
   bool redraw_barrier=MoveMapStep(width,height,offset_y);
 
@@ -276,6 +277,8 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
   {
    if (dY<SPEED_Y) dY++;
   }
+  if (dY>0) Y++;
+  //while (IsCollizionLegs(iVideo_Ptr,X,Y+1)==false) Y++;
   MoveControl=false;
  }
  else
@@ -285,6 +288,16 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    if (cDizzy.sFrame_Ptr->EndFrame==true) MoveControl=true;//перекатывание завершено
   }
   else MoveControl=true;
+ }
+ 
+ //особый случай: Диззи не двигался, но произошло столкновение (так как двигался другой элемент)
+ if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
+ {
+  //предмет вытесняет Диззи вверх
+  for(size_t n=0;n<TILE_WIDTH/4;n++)
+  {
+   if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true) Y--;
+  }
  }
 }
 
@@ -368,10 +381,10 @@ void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
 void CGame::Processing(IVideo *iVideo_Ptr)
 {
  DizzyAnimation();//выполняем анимацию Диззи
- DizzyMoveProcessing(iVideo_Ptr);//выполняем обработку движения Диззи
  TilesAnimation();//выполняем анимацию всех тайлов
  ConditionalProcessing();//выполняем обработку событий
  DizzyEnergyProcessing(iVideo_Ptr);
+ DizzyMoveProcessing(iVideo_Ptr);//выполняем обработку движения Диззи
 }
 
 //----------------------------------------------------------------------------------------------------
