@@ -41,6 +41,7 @@ class CSyntaxAnalyzer
    ID_LEXEME_TYPE_BOOL,
    ID_LEXEME_TYPE_SET_DESCRIPTION,
    ID_LEXEME_TYPE_COPY_POSITION,
+   ID_LEXEME_TYPE_COPY_POSITION_OFFSET,
    ID_LEXEME_TYPE_SET_DIZZY_POSITION,
    //команды действий
    ID_LEXEME_TYPE_ACTION_MESSAGE,
@@ -50,6 +51,7 @@ class CSyntaxAnalyzer
    ID_LEXEME_TYPE_ACTION_CHANGE_DESCRIPTION_GLOBAL, 
    ID_LEXEME_TYPE_ACTION_CHANGE_POSITION,
    ID_LEXEME_TYPE_ACTION_COPY_POSITION,
+   ID_LEXEME_TYPE_ACTION_COPY_POSITION_OFFSET,
    ID_LEXEME_TYPE_ACTION_PICK_UP,
    ID_LEXEME_TYPE_ACTION_SET_ANIMATION_STEP,
    ID_LEXEME_TYPE_ACTION_SET_ENABLED, 
@@ -110,7 +112,7 @@ class CSyntaxAnalyzer
   //-закрытые функции-----------------------------------------------------------------------------------  
   double ConvertAngleToSec(const char *string);//получить угол по строке формата a'b'c
   void SetDescription(const std::string &name,const std::string &description,std::vector<std::shared_ptr<IPart> > &Map);//задать описание
-  void CopyPosition(const std::string &name_first,const std::string &name_second,std::vector<std::shared_ptr<IPart> > &Map);//переместить объект в заданную позицию
+  void CopyPosition(const std::string &name_first,const std::string &name_second,int32_t offset_x,int32_t offset_y,std::vector<std::shared_ptr<IPart> > &Map);//переместить объект в заданную позицию
   void SetDizzyPosition(const std::string &name,CGameState &cGameState);//переместить Диззи в заданную позицию
   bool ModeWaitCommand(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message,CGameState &cGameState);//обработка лексемы в режиме MODE_WAIT_COMMAND
   bool ModeWaitActionBegin(const CLexeme &cLexeme_Command,int32_t line_index,std::string &message);//обработка лексемы в режиме MODE_WAIT_ACTION_BEGIN

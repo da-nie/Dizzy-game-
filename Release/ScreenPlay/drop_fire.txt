@@ -1,0 +1,51 @@
+IfTimer("DROP_FIRE_0")
+ActionBegin
+ ActionMove(0,1) 
+ActionEnd
+
+IfIntersection("DROP_FIRE_0","DROP_FIRE_BORDER")
+ActionFirstBegin
+ ActionCopyPosition("DROP_FIRE_0","DROP_FIRE_START")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfDizzyIntersection("DROP_FIRE_0")
+ActionBegin
+ ActionEnergyUpdate(1)
+ActionEnd
+
+
+IfTimer("DROP_FIRE_1")
+ActionBegin
+ ActionMove(0,2) 
+ActionEnd
+
+IfIntersection("DROP_FIRE_1","DROP_FIRE_BORDER")
+ActionFirstBegin
+ ActionCopyPosition("DROP_FIRE_1","DROP_FIRE_START")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfDizzyIntersection("DROP_FIRE_1")
+ActionBegin
+ ActionEnergyUpdate(1)
+ActionEnd
+
+IfTimer("DROP_FIRE_2")
+ActionBegin
+ ActionMove(0,3) 
+ActionEnd
+
+IfIntersection("DROP_FIRE_2","DROP_FIRE_BORDER")
+ActionFirstBegin
+ ActionCopyPosition("DROP_FIRE_2","DROP_FIRE_START")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfDizzyIntersection("DROP_FIRE_2")
+ActionBegin
+ ActionEnergyUpdate(1)
+ActionEnd

@@ -1,0 +1,42 @@
+//БГЮХЛНДЕИЯРБХЕ Я БНДНИ
+
+IfUse("BOTTLE","DANGER_WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionChangeGlobalDescription("асршкйю я бндни")
+ ActionChangeGlobalName("BOTTLE WATER")
+ ActionSetAnimationStep(1)
+ ActionMessage(50,100,"дхггх мюонкмхк асршкйс бндни.")
+ ActionAddScore(10)
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("PAIL","DANGER_WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(50,100,"дхггх гювепомск бндс бедпнл.\...мн бндю бшкхкюяэ\вепег дшпйх б бедпе!")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("POISON","DANGER_WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"...цслюммее асдер кнбхрэ пшас\дхмюлхрнл,опхькн б цнкнбс дхггх.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfUse("RING","DANGER_WATER")
+ActionFirstBegin
+ ActionSingle()
+ ActionMessage(30,80,"ме онлмч яйюгйх, цде\рпеанбюкняэ аш йхдюрэ\йнкэжн б лнпе.")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfDizzyIntersection("DANGER_WATER")
+ActionBegin
+ ActionEnergyUpdate(-1)
+ActionEnd

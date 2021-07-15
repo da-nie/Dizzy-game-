@@ -845,7 +845,7 @@ bool CGame::LoadConditionalFile(const std::string &file_name,std::vector<std::st
    }
    if (new_line==true)
    {
-   	if (line.length()!=0) log.push_back(std::to_string((_Longlong)line_index)+": "+line);   	 
+   	if (line.length()!=0) log.push_back(std::to_string(static_cast<_Longlong>(line_index))+": "+line);   	 
 	line_index++;
     line="";
    }  

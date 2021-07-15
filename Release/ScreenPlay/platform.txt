@@ -1,0 +1,24 @@
+IfTimer("PLATFORM_UP")
+ActionBegin
+ ActionMove(0,-2) 
+ActionEnd
+
+IfTimer("PLATFORM_DOWN")
+ActionBegin
+ ActionMove(0,1) 
+ActionEnd
+
+
+IfIntersection("PLATFORM_DOWN","PLATFORM_DOWN_BORDER")
+ActionFirstBegin
+ ActionChangeName("PLATFORM_UP")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfIntersection("PLATFORM_UP","PLATFORM_UP_BORDER")
+ActionFirstBegin
+ ActionChangeName("PLATFORM_DOWN")
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd

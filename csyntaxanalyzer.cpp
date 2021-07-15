@@ -12,6 +12,7 @@
 #include "cactionchangedescription.h"
 #include "cactionchangedescriptionglobal.h"
 #include "cactioncopyposition.h"
+#include "cactioncopypositionoffset.h"
 #include "cactionchangeposition.h"
 #include "cactionsetanimationstep.h"
 #include "cactionmessage.h"
@@ -52,6 +53,7 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  //служебные команды
  cLexicalAnalyzer.AddLexeme("SetDescription",ID_LEXEME_TYPE_SET_DESCRIPTION);
  cLexicalAnalyzer.AddLexeme("CopyPosition",ID_LEXEME_TYPE_COPY_POSITION);
+ cLexicalAnalyzer.AddLexeme("CopyPositionOffset",ID_LEXEME_TYPE_COPY_POSITION_OFFSET);
  cLexicalAnalyzer.AddLexeme("SetDizzyPosition",ID_LEXEME_TYPE_SET_DIZZY_POSITION);
  //команды действий
    
@@ -62,6 +64,7 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cLexicalAnalyzer.AddLexeme("ActionChangeGlobalDescription",ID_LEXEME_TYPE_ACTION_CHANGE_DESCRIPTION_GLOBAL);                              
  cLexicalAnalyzer.AddLexeme("ActionChangePosition",ID_LEXEME_TYPE_ACTION_CHANGE_POSITION); 
  cLexicalAnalyzer.AddLexeme("ActionCopyPosition",ID_LEXEME_TYPE_ACTION_COPY_POSITION); 
+ cLexicalAnalyzer.AddLexeme("ActionCopyPositionOffset",ID_LEXEME_TYPE_ACTION_COPY_POSITION_OFFSET);
  cLexicalAnalyzer.AddLexeme("ActionPickUp",ID_LEXEME_TYPE_ACTION_PICK_UP); 
  cLexicalAnalyzer.AddLexeme("ActionSetAnimationStep",ID_LEXEME_TYPE_ACTION_SET_ANIMATION_STEP); 
  cLexicalAnalyzer.AddLexeme("ActionSetEnabled",ID_LEXEME_TYPE_ACTION_SET_ENABLED); 
@@ -139,6 +142,20 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cAutomath_Syntax.AddRule("action_copy_position(`A`","action_copy_position(`A`,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
  cAutomath_Syntax.AddRule("action_copy_position(`A`,","action_copy_position(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("action_copy_position(`A`,`A`","action_copy_position(`A`,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+ //команда ActionCopyPositionOffset("RING","RING_POS",8,0)
+ cAutomath_Syntax.AddRule("begin","action_copy_position_offset",ID_LEXEME_TYPE_ACTION_COPY_POSITION_OFFSET,ID_LEXEME_TYPE_ACTION_COPY_POSITION_OFFSET,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset","action_copy_position_offset(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(","action_copy_position_offset(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`","action_copy_position_offset(`A`,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`,","action_copy_position_offset(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`,`A`","action_copy_position_offset(`A`,`A`,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`,`A`,","action_copy_position_offset(`A`,`A`,N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`,`A`,","action_copy_position_offset(`A`,`A`,N",CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`,`A`,N","action_copy_position_offset(`A`,`A`,N,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`,`A`,N,","action_copy_position_offset(`A`,`A`,N,N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`,`A`,N","action_copy_position_offset(`A`,`A`,N,N",CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("action_copy_position_offset(`A`,`A`,N,N","action_copy_position_offset(`A`,`A`,N,N)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
  //команда ActionPickUp()
  cAutomath_Syntax.AddRule("begin","action_pick_up",ID_LEXEME_TYPE_ACTION_PICK_UP,ID_LEXEME_TYPE_ACTION_PICK_UP,false);
@@ -261,13 +278,26 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cAutomath_Syntax.AddRule("copy_position(`A`,","copy_position(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("copy_position(`A`,`A`","copy_position(`A`,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
+ //команда CopyPositionOffset("FIRE","FIRE_POS")
+ cAutomath_Syntax.AddRule("begin","copy_position_offset",ID_LEXEME_TYPE_COPY_POSITION_OFFSET,ID_LEXEME_TYPE_COPY_POSITION_OFFSET,false);
+ cAutomath_Syntax.AddRule("copy_position_offset","copy_position_offset(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(","copy_position_offset(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`","copy_position_offset(`A`,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`,","copy_position_offset(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`,`A`","copy_position_offset(`A`,`A`,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`,`A`,","copy_position_offset(`A`,`A`,N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`,`A`,","copy_position_offset(`A`,`A`,N",CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`,`A`,N","copy_position_offset(`A`,`A`,N,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`,`A`,N,","copy_position_offset(`A`,`A`,N,N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`,`A`,N","copy_position_offset(`A`,`A`,N,N",CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NEGATIVE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("copy_position_offset(`A`,`A`,N,N","copy_position_offset(`A`,`A`,N,N)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+ 
  //команда SetDizzyPosition("DIZZY_START_POSITION")
  cAutomath_Syntax.AddRule("begin","set_dizzy_position",ID_LEXEME_TYPE_SET_DIZZY_POSITION,ID_LEXEME_TYPE_SET_DIZZY_POSITION,false);
  cAutomath_Syntax.AddRule("set_dizzy_position","set_dizzy_position(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
  cAutomath_Syntax.AddRule("set_dizzy_position(","set_dizzy_position(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("set_dizzy_position(`A`","set_dizzy_position(`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
-
-
+ 
  vector_CLexeme.clear();
  Mode=MODE_WAIT_COMMAND;
 }
@@ -326,7 +356,7 @@ void CSyntaxAnalyzer::SetDescription(const std::string &name,const std::string &
 //----------------------------------------------------------------------------------------------------
 //переместить объект в заданную позицию
 //----------------------------------------------------------------------------------------------------
-void CSyntaxAnalyzer::CopyPosition(const std::string &name_first,const std::string &name_second,std::vector<std::shared_ptr<IPart> > &Map)
+void CSyntaxAnalyzer::CopyPosition(const std::string &name_first,const std::string &name_second,int32_t offset_x,int32_t offset_y,std::vector<std::shared_ptr<IPart> > &Map)
 {
  size_t size=Map.size();
  int32_t x;
@@ -351,8 +381,8 @@ void CSyntaxAnalyzer::CopyPosition(const std::string &name_first,const std::stri
   std::shared_ptr<IPart> iPart_Ptr=Map[n];
   if (iPart_Ptr->Name.compare(name_first)==0)
   {
-   iPart_Ptr->BlockPosX=x;
-   iPart_Ptr->BlockPosY=y;
+   iPart_Ptr->BlockPosX=x+offset_x;
+   iPart_Ptr->BlockPosY=y+offset_y;
   }
  }
 }
@@ -406,10 +436,29 @@ bool CSyntaxAnalyzer::ModeWaitCommand(const CLexeme &cLexeme_Command,int32_t lin
   CommandLexeme[0][2].GetName(name_first);
   std::string name_second;
   CommandLexeme[0][4].GetName(name_second);
-  CopyPosition(name_first,name_second,cGameState.Map);
+  CopyPosition(name_first,name_second,0,0,cGameState.Map);
   CommandLexeme.clear();
   return(true);
  }
+
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_COPY_POSITION_OFFSET)
+ {
+  if (CommandLexeme.size()==0) return(true);
+  std::string name_first;
+  CommandLexeme[0][2].GetName(name_first);
+  std::string name_second;
+  CommandLexeme[0][4].GetName(name_second);
+  std::string offset_x_str;
+  CommandLexeme[0][6].GetName(offset_x_str);
+  std::string offset_y_str;
+  CommandLexeme[0][8].GetName(offset_y_str);
+  int32_t offset_x=atoi(offset_x_str.c_str());  
+  int32_t offset_y=atoi(offset_y_str.c_str());  
+  CopyPosition(name_first,name_second,offset_x,offset_y,cGameState.Map);
+  CommandLexeme.clear();
+  return(true);
+ }
+
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_SET_DIZZY_POSITION)
  {
   if (CommandLexeme.size()==0) return(true);
@@ -499,6 +548,7 @@ bool CSyntaxAnalyzer::IsAction(const CLexeme &cLexeme_Command)
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_CHANGE_DESCRIPTION_GLOBAL) return(true); 
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_CHANGE_POSITION) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_COPY_POSITION) return(true);
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_COPY_POSITION_OFFSET) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_PICK_UP) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_SET_ANIMATION_STEP) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_SET_ENABLED) return(true); 
@@ -644,6 +694,20 @@ std::shared_ptr<IAction> CSyntaxAnalyzer::CreateAction(const std::vector<CLexeme
   std::string name_second;
   lexeme[4].GetName(name_second);
   return(std::shared_ptr<IAction>(new CActionCopyPosition(name_first,name_second,next_ptr)));
+ }
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_COPY_POSITION_OFFSET)
+ {
+  std::string name_first;
+  lexeme[2].GetName(name_first);
+  std::string name_second;
+  lexeme[4].GetName(name_second);
+  std::string offset_x_str;
+  lexeme[6].GetName(offset_x_str);
+  std::string offset_y_str;
+  lexeme[8].GetName(offset_y_str);
+  int32_t offset_x=atoi(offset_x_str.c_str());  
+  int32_t offset_y=atoi(offset_y_str.c_str());  
+  return(std::shared_ptr<IAction>(new CActionCopyPositionOffset(name_first,name_second,offset_x,offset_y,next_ptr)));
  }
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_SET_ANIMATION_STEP)
  {

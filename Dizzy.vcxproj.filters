@@ -147,6 +147,9 @@
     <ClCompile Include="cdizzy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cactioncopypositionoffset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -279,6 +282,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cdizzy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactioncopypositionoffset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
