@@ -104,7 +104,7 @@ void CSprite::Put(IVideo *iVideo_Ptr,int32_t x,int32_t y,bool alpha)
  int32_t ds_ptr=Width;
  if (alpha==false)
  {
-  int32_t length=(x2-x1)*4;
+  int32_t length=(x2-x1)*sizeof(uint32_t);
   for(ly=y1;ly<y2;ly++,v_ptr+=dv_ptr,s_ptr+=ds_ptr) memcpy(v_ptr,s_ptr,length);
  }
  else
@@ -161,7 +161,7 @@ void CSprite::PutSpriteItem(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offse
  int32_t ds_ptr=Width;
  if (alpha==false)
  {
-  int32_t length=(x2-x1)*4;
+  int32_t length=(x2-x1)*sizeof(uint32_t);
   for(ly=y1;ly<y2;ly++,v_ptr+=dv_ptr,s_ptr+=ds_ptr) memcpy(v_ptr,s_ptr,length);
  }
  else
@@ -220,8 +220,17 @@ bool CSprite::IsCollizionSpriteItem(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32
  int32_t ds_ptr=Width;
  if (alpha==false)
  {
-  int32_t length=(x2-x1)*4;
-  for(ly=y1;ly<y2;ly++,v_ptr+=dv_ptr,s_ptr+=ds_ptr) memcpy(v_ptr,s_ptr,length);
+  int32_t length=x2-x1;
+  for(ly=y1;ly<y2;ly++,v_ptr+=dv_ptr,s_ptr+=ds_ptr)
+  {
+   uint32_t *s_ptr_l=s_ptr;
+   uint32_t *v_ptr_l=v_ptr;
+   for(lx=0;lx<length;lx++)
+   {    	
+    if (*v_ptr_l!=back_color) return(true);//есть пересечение спрайта
+    v_ptr_l++;
+   }
+  }
  }
  else
  {

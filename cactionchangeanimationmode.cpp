@@ -1,7 +1,7 @@
 //****************************************************************************************************
 //подключаемые библиотеки
 //****************************************************************************************************
-#include "cactionsingle.h"
+#include "cactionchangeanimationmode.h"
 
 //****************************************************************************************************
 //глобальные переменные
@@ -22,15 +22,16 @@
 //----------------------------------------------------------------------------------------------------
 //конструктор
 //----------------------------------------------------------------------------------------------------
-CActionSingle::CActionSingle(std::shared_ptr<IAction> iAction_Ptr)
-{
+CActionChangeAnimationMode::CActionChangeAnimationMode(CTilesSequence::ANIMATION_MODE animation_mode,std::shared_ptr<IAction> iAction_Ptr)
+{ 
+ AnimationMode=animation_mode;
  iAction_NextPtr=iAction_Ptr;
  Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
 //----------------------------------------------------------------------------------------------------
-CActionSingle::~CActionSingle()
+CActionChangeAnimationMode::~CActionChangeAnimationMode()
 {
 }
 
@@ -49,17 +50,15 @@ CActionSingle::~CActionSingle()
 //----------------------------------------------------------------------------------------------------
 //выполнить действие с элементом
 //----------------------------------------------------------------------------------------------------
-void CActionSingle::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &cGameState)
+void CActionChangeAnimationMode::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &cGameState)
 {
- if (First==false) return;
- First=false; 
+ iPart_Ptr->cTilesSequence.SetAnimationMode(AnimationMode);
  if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
 }
 //----------------------------------------------------------------------------------------------------
 //инициализация
 //----------------------------------------------------------------------------------------------------
-void CActionSingle::Init(void)
+void CActionChangeAnimationMode::Init(void)
 {
- First=true;
  if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Init();
 }

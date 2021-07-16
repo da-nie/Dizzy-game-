@@ -14,6 +14,7 @@
     <ClCompile Include="cactionadditem.cpp" />
     <ClCompile Include="cactionaddlife.cpp" />
     <ClCompile Include="cactionaddscore.cpp" />
+    <ClCompile Include="cactionchangeanimationmode.cpp" />
     <ClCompile Include="cactionchangedescription.cpp" />
     <ClCompile Include="cactionchangedescriptionglobal.cpp" />
     <ClCompile Include="cactionchangename.cpp" />
@@ -31,6 +32,7 @@
     <ClCompile Include="cautomath.cpp" />
     <ClCompile Include="cconditionalofdizzyintersection.cpp" />
     <ClCompile Include="cconditionalofintersection.cpp" />
+    <ClCompile Include="cconditionalofnotdizzyintersection.cpp" />
     <ClCompile Include="cconditionalofpickup.cpp" />
     <ClCompile Include="cconditionaloftimer.cpp" />
     <ClCompile Include="cconditionalofuse.cpp" />
@@ -61,6 +63,7 @@
     <ClInclude Include="cactionadditem.h" />
     <ClInclude Include="cactionaddlife.h" />
     <ClInclude Include="cactionaddscore.h" />
+    <ClInclude Include="cactionchangeanimationmode.h" />
     <ClInclude Include="cactionchangedescription.h" />
     <ClInclude Include="cactionchangedescriptionglobal.h" />
     <ClInclude Include="cactionchangename.h" />
@@ -78,6 +81,7 @@
     <ClInclude Include="cautomath.h" />
     <ClInclude Include="cconditionalofdizzyintersection.h" />
     <ClInclude Include="cconditionalofintersection.h" />
+    <ClInclude Include="cconditionalofnotdizzyintersection.h" />
     <ClInclude Include="cconditionalofpickup.h" />
     <ClInclude Include="cconditionaloftimer.h" />
     <ClInclude Include="cconditionalofuse.h" />

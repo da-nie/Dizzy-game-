@@ -4,6 +4,7 @@
 #include "csyntaxanalyzer.h"
 #include "cconditionalofintersection.h"
 #include "cconditionalofdizzyintersection.h"
+#include "cconditionalofnotdizzyintersection.h"
 #include "cconditionalofuse.h"
 #include "cconditionalofpickup.h"
 #include "cconditionaloftimer.h"
@@ -24,6 +25,7 @@
 #include "cactionaddlife.h"
 #include "cactionaddscore.h"
 #include "cactionadditem.h"
+#include "cactionchangeanimationmode.h"
 
 //****************************************************************************************************
 //глобальные переменные
@@ -50,6 +52,10 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  //логический тип
  cLexicalAnalyzer.AddLexeme("true",ID_LEXEME_TYPE_BOOL);
  cLexicalAnalyzer.AddLexeme("false",ID_LEXEME_TYPE_BOOL); 
+ //типы анимации
+ cLexicalAnalyzer.AddLexeme("animation_cyclic",ID_LEXEME_TYPE_ANIMATION_MODE);
+ cLexicalAnalyzer.AddLexeme("animation_set_step",ID_LEXEME_TYPE_ANIMATION_MODE); 
+ cLexicalAnalyzer.AddLexeme("animation_one_shot",ID_LEXEME_TYPE_ANIMATION_MODE); 
  //служебные команды
  cLexicalAnalyzer.AddLexeme("SetDescription",ID_LEXEME_TYPE_SET_DESCRIPTION);
  cLexicalAnalyzer.AddLexeme("CopyPosition",ID_LEXEME_TYPE_COPY_POSITION);
@@ -74,10 +80,12 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cLexicalAnalyzer.AddLexeme("ActionAddScore",ID_LEXEME_TYPE_ACTION_ADD_SCORE);
  cLexicalAnalyzer.AddLexeme("ActionAddLife",ID_LEXEME_TYPE_ACTION_ADD_LIFE);
  cLexicalAnalyzer.AddLexeme("ActionAddItem",ID_LEXEME_TYPE_ACTION_ADD_ITEM);
+ cLexicalAnalyzer.AddLexeme("ActionChangeAnimationMode",ID_LEXEME_TYPE_ACTION_CHANGE_ANIMATION_MODE);
  //команды условий
 
  cLexicalAnalyzer.AddLexeme("IfIntersection",ID_LEXEME_TYPE_IF_INTERSECTION); 
  cLexicalAnalyzer.AddLexeme("IfDizzyIntersection",ID_LEXEME_TYPE_IF_DIZZY_INTERSECTION);
+ cLexicalAnalyzer.AddLexeme("IfNotDizzyIntersection",ID_LEXEME_TYPE_IF_NOT_DIZZY_INTERSECTION);
  cLexicalAnalyzer.AddLexeme("IfPickUp",ID_LEXEME_TYPE_IF_PICK_UP); 
  cLexicalAnalyzer.AddLexeme("IfUse",ID_LEXEME_TYPE_IF_USE); 
  cLexicalAnalyzer.AddLexeme("IfTimer",ID_LEXEME_TYPE_IF_TIMER);
@@ -228,11 +236,25 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cAutomath_Syntax.AddRule("action_add_item","action_add_item(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
  cAutomath_Syntax.AddRule("action_add_item(","action_add_item()",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
+
+ //команда ActionChangeAnimationMode(animation_mode_stop)
+ cAutomath_Syntax.AddRule("begin","action_change_animation_mode",ID_LEXEME_TYPE_ACTION_CHANGE_ANIMATION_MODE,ID_LEXEME_TYPE_ACTION_CHANGE_ANIMATION_MODE,false);
+ cAutomath_Syntax.AddRule("action_change_animation_mode","action_change_animation_mode(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("action_change_animation_mode(","action_change_animation_mode(M",ID_LEXEME_TYPE_ANIMATION_MODE,ID_LEXEME_TYPE_ANIMATION_MODE,false);
+ cAutomath_Syntax.AddRule("action_change_animation_mode(M","action_change_animation_mode(M)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+
  //команда IfDizzyIntersection("CAT")
  cAutomath_Syntax.AddRule("begin","if_dizzy_intersection",ID_LEXEME_TYPE_IF_DIZZY_INTERSECTION,ID_LEXEME_TYPE_IF_DIZZY_INTERSECTION,false);
  cAutomath_Syntax.AddRule("if_dizzy_intersection","if_dizzy_intersection(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
  cAutomath_Syntax.AddRule("if_dizzy_intersection(","if_dizzy_intersection(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("if_dizzy_intersection(`A`","if_dizzy_intersection(`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+
+ //команда IfNotDizzyIntersection("CAT")
+ cAutomath_Syntax.AddRule("begin","if_not_dizzy_intersection",ID_LEXEME_TYPE_IF_NOT_DIZZY_INTERSECTION,ID_LEXEME_TYPE_IF_NOT_DIZZY_INTERSECTION,false);
+ cAutomath_Syntax.AddRule("if_not_dizzy_intersection","if_not_dizzy_intersection(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
+ cAutomath_Syntax.AddRule("if_not_dizzy_intersection(","if_not_dizzy_intersection(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("if_not_dizzy_intersection(`A`","if_not_dizzy_intersection(`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
  //команда IfIntersection("CAT","WATER")
  cAutomath_Syntax.AddRule("begin","if_intersection",ID_LEXEME_TYPE_IF_INTERSECTION,ID_LEXEME_TYPE_IF_INTERSECTION,false);
@@ -473,6 +495,11 @@ bool CSyntaxAnalyzer::ModeWaitCommand(const CLexeme &cLexeme_Command,int32_t lin
   Mode=MODE_WAIT_ACTION_BEGIN;
   return(true);
  }
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_IF_NOT_DIZZY_INTERSECTION)
+ {
+  Mode=MODE_WAIT_ACTION_BEGIN;
+  return(true);
+ }
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_IF_PICK_UP)
  {
   Mode=MODE_WAIT_ACTION_BEGIN;
@@ -558,6 +585,7 @@ bool CSyntaxAnalyzer::IsAction(const CLexeme &cLexeme_Command)
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_SCORE) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_LIFE) return(true);
  if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_ADD_ITEM) return(true);
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_CHANGE_ANIMATION_MODE) return(true);
  return(false);
 }
 
@@ -763,6 +791,17 @@ std::shared_ptr<IAction> CSyntaxAnalyzer::CreateAction(const std::vector<CLexeme
  {
   return(std::shared_ptr<IAction>(new CActionAddItem(next_ptr)));
  }
+ if (cLexeme_Command.GetType()==ID_LEXEME_TYPE_ACTION_CHANGE_ANIMATION_MODE)
+ {
+  std::string mode_str;
+  lexeme[2].GetName(mode_str);
+  CTilesSequence::ANIMATION_MODE mode=CTilesSequence::ANIMATION_MODE_SET_STEP;
+  if (mode_str.compare("animation_cyclic")==0) mode=CTilesSequence::ANIMATION_MODE_CYCLIC;
+  if (mode_str.compare("animation_set_step")==0) mode=CTilesSequence::ANIMATION_MODE_SET_STEP;
+  if (mode_str.compare("animation_one_shot")==0) mode=CTilesSequence::ANIMATION_MODE_ONE_SHOT;
+  return(std::shared_ptr<IAction>(new CActionChangeAnimationMode(mode,next_ptr)));
+ }
+
  return(std::shared_ptr<IAction>(NULL));
 }
 //----------------------------------------------------------------------------------------------------
@@ -787,6 +826,21 @@ std::shared_ptr<IConditionalExpression> CSyntaxAnalyzer::CreateConditional(void)
   std::string name;
   CommandLexeme[0][2].GetName(name);
   return(std::shared_ptr<IConditionalExpression>(new CConditionalOfDizzyIntersection(name,iAction_Ptr)));
+ }
+
+ if (CommandLexeme[0][0].GetType()==ID_LEXEME_TYPE_IF_NOT_DIZZY_INTERSECTION)
+ {  
+  std::shared_ptr<IAction> iAction_Ptr;
+  for(size_t n=size-1;n>0;n--)
+  {
+   if (IsAction(CommandLexeme[n][0])==true)
+   {
+    iAction_Ptr=CreateAction(CommandLexeme[n],iAction_Ptr);
+   }
+  }
+  std::string name;
+  CommandLexeme[0][2].GetName(name);
+  return(std::shared_ptr<IConditionalExpression>(new CConditionalOfNotDizzyIntersection(name,iAction_Ptr)));
  }
 
  if (CommandLexeme[0][0].GetType()==ID_LEXEME_TYPE_IF_PICK_UP)

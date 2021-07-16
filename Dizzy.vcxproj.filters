@@ -150,6 +150,12 @@
     <ClCompile Include="cactioncopypositionoffset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cactionchangeanimationmode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cconditionalofnotdizzyintersection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cgame.h">
@@ -285,6 +291,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="cactioncopypositionoffset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cactionchangeanimationmode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cconditionalofnotdizzyintersection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,7 +8,6 @@ ActionBegin
  ActionMove(0,2) 
 ActionEnd
 
-
 IfIntersection("PLATFORM_DOWN","PLATFORM_DOWN_BORDER")
 ActionFirstBegin
  ActionChangeName("PLATFORM_UP")

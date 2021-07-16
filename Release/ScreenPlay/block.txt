@@ -1,4 +1,4 @@
 IfDizzyIntersection("BLOCK")
 ActionBegin
- ActionSetAnimationStep(1)
+ ActionChangeAnimationMode(animation_one_shot)
 ActionEnd

@@ -1,7 +1,8 @@
 //****************************************************************************************************
 //подключаемые библиотеки
 //****************************************************************************************************
-#include "cactionsingle.h"
+#include "cconditionalofnotdizzyintersection.h"
+#include <algorithm>
 
 //****************************************************************************************************
 //глобальные переменные
@@ -22,15 +23,16 @@
 //----------------------------------------------------------------------------------------------------
 //конструктор
 //----------------------------------------------------------------------------------------------------
-CActionSingle::CActionSingle(std::shared_ptr<IAction> iAction_Ptr)
-{
- iAction_NextPtr=iAction_Ptr;
+CConditionalOfNotDizzyIntersection::CConditionalOfNotDizzyIntersection(const std::string &name,std::shared_ptr<IAction> iAction_SetPtr)
+{ 
+ Name=name;
+ iAction_Ptr=iAction_SetPtr;
  Init();
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
 //----------------------------------------------------------------------------------------------------
-CActionSingle::~CActionSingle()
+CConditionalOfNotDizzyIntersection::~CConditionalOfNotDizzyIntersection()
 {
 }
 
@@ -39,27 +41,52 @@ CActionSingle::~CActionSingle()
 //****************************************************************************************************
 
 //----------------------------------------------------------------------------------------------------
-//
+//инициализация
 //----------------------------------------------------------------------------------------------------
+void CConditionalOfNotDizzyIntersection::Init(void)
+{
+ if (iAction_Ptr.get()!=NULL) iAction_Ptr->Init();
+}
 
 //****************************************************************************************************
 //открытые функции
 //****************************************************************************************************
 
 //----------------------------------------------------------------------------------------------------
-//выполнить действие с элементом
+//проверить условие и выполнить действие
 //----------------------------------------------------------------------------------------------------
-void CActionSingle::Execute(std::shared_ptr<IPart> iPart_Ptr,CGameState &cGameState)
+void CConditionalOfNotDizzyIntersection::Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,bool timer,CGameState &cGameState)
 {
- if (First==false) return;
- First=false; 
- if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Execute(iPart_Ptr,cGameState);	
-}
-//----------------------------------------------------------------------------------------------------
-//инициализация
-//----------------------------------------------------------------------------------------------------
-void CActionSingle::Init(void)
-{
- First=true;
- if (iAction_NextPtr.get()!=NULL) iAction_NextPtr->Init();
+ Init();
+
+ std::shared_ptr<IAction> iAction_LocalPtr=iAction_Ptr;
+ auto execute_function=[this,&cGameState,&iAction_LocalPtr,part_width,part_height,dizzy_x,dizzy_y,dizzy_width,dizzy_height](std::shared_ptr<IPart> iPart_Ptr)
+ {  
+  if (iPart_Ptr->Name.compare(Name)!=0) return;//имена не совпадают
+  if (iPart_Ptr->InInventory==true) return;//предмет в инвентаре
+  if (iPart_Ptr->Enabled==false) return;//предмет неактивен
+
+  //проверяем пересечение
+  int32_t x1=iPart_Ptr->BlockPosX;
+  int32_t y1=iPart_Ptr->BlockPosY;
+  int32_t x2=x1+part_width-1;
+  int32_t y2=y1+part_height-1;
+
+  int32_t xd1=dizzy_x;
+  int32_t yd1=dizzy_y;
+  int32_t xd2=xd1+dizzy_width-1;
+  int32_t yd2=yd1+dizzy_height-1;
+  
+  bool intersection=true;
+
+  if (xd1<x1 && xd2<x1) intersection=false;
+  if (xd1>x2 && xd2>x2) intersection=false;
+  if (yd1<y1 && yd2<y1) intersection=false;
+  if (yd1>y2 && yd2>y2) intersection=false;
+  
+  if (intersection==true) return;
+  //объекты не пересекаются
+  if (iAction_LocalPtr.get()!=NULL) iAction_LocalPtr->Execute(iPart_Ptr,cGameState);
+ };
+ std::for_each(cGameState.MapNamed.begin(),cGameState.MapNamed.end(),execute_function);
 }

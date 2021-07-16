@@ -46,18 +46,23 @@ class CGame
   static const uint32_t BLACK_COLOR=(0<<24)|(0<<16)|(0<<8)|(0<<0);//чёрный цвет
   static const uint32_t YELLOW_COLOR=(0<<24)|(255<<16)|(255<<8)|(0<<0);//жёлтый цвет цвет
 
-  static const uint32_t SKY_COLOR=(0<<24)|(81<<16)|(162<<8)|(243<<0);//цвет неба
-  static const uint32_t BLEND_COLOR=(00<<24)|(81<<16)|(162<<8)|(243<<0);//прозрачный цвет
   static const uint8_t BLEND_COLOR_R=81;//прозрачный цвет, компонент R
   static const uint8_t BLEND_COLOR_G=162;//прозрачный цвет, компонент G
   static const uint8_t BLEND_COLOR_B=243;//прозрачный цвет, компонент B
+  static const uint32_t SKY_COLOR=(0<<24)|(BLEND_COLOR_R<<16)|(BLEND_COLOR_G<<8)|(BLEND_COLOR_B<<0);//цвет неба
+  static const uint32_t BLEND_COLOR=(00<<24)|(BLEND_COLOR_R<<16)|(BLEND_COLOR_G<<8)|(BLEND_COLOR_B<<0);//прозрачный цвет
 
-  static const uint32_t NO_BARRIER_COLOR=(0x00<<24)|(0x00<<16)|(0x00<<8)|(0x00<<0);//цвет остутствия препятствий
   static const uint8_t NO_BARRIER_COLOR_R=0;//цвет отсутствия препятствий, компонент R
   static const uint8_t NO_BARRIER_COLOR_G=0;//цвет отсутствия препятствий, компонент G
   static const uint8_t NO_BARRIER_COLOR_B=0;//цвет отсутствия препятствий, компонент B
+  static const uint32_t NO_BARRIER_COLOR=(0x00<<24)|(NO_BARRIER_COLOR_R<<16)|(NO_BARRIER_COLOR_G<<8)|(NO_BARRIER_COLOR_B<<0);//цвет остутствия препятствий
+
+  static const uint32_t ENERGY_GOOD_COLOR=(0<<24)|(64<<16)|(255<<8)|(64<<0);//цвет "отлично"
+  static const uint32_t ENERGY_NORMAL_COLOR=(0<<24)|(255<<16)|(255<<8)|(64<<0);//цвет "хорошо"
+  static const uint32_t ENERGY_BAD_COLOR=(0<<24)|(255<<16)|(64<<8)|(64<<0);//цвет "плохо"
 
   static const int32_t TILES_ANIMATION_TICK_COUNTER_DIVIDER=7;//делитель такта анимации тайлов
+  static const int32_t FLASH_TICK_COUNTER_DIVIDER=6;//делитель такта для мигания инвентаря
   static const int32_t DIZZY_ANIMATION_TICK_COUNTER_DIVIDER=3;//делитель такта анимации Диззи
   static const int32_t MOVE_TICK_COUNTER_DIVIDER=7;//делитель такта перемещения Диззи
   
@@ -86,9 +91,6 @@ class CGame
   //-переменные-----------------------------------------------------------------------------------------
   CDizzy cDizzy;//Диззи
 
-  int32_t Map_X;//координаты левого верхнего угла карты
-  int32_t Map_Y;
-
   CSprite cSprite_Dizzy;//спрайт Диззи
   CSprite cSprite_Frame;//рамки
   CSprite cSprite_ScreenFrame;//рамки для экрана
@@ -97,9 +99,6 @@ class CGame
   CSprite cSprite_Tiles;//тайлы
   CSprite cSprite_TilesBarrier;//непроницаемость тайлов
   
-  int32_t X;//координаты Диззи на экране
-  int32_t Y;
-
   int32_t dX;//скорости Диззи
   int32_t dY;
 

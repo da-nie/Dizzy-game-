@@ -1,16 +1,23 @@
-IfTimer("BRIDGE_DOWN")
+IfDizzyIntersection("BRIDGE")
 ActionBegin
  ActionMove(0,1) 
 ActionEnd
 
-IfDizzyIntersection("BRIDGE")
+IfNotDizzyIntersection("BRIDGE")
 ActionBegin
- ActionChangeGlobalName("BRIDGE_DOWN")
+ ActionMove(0,-1) 
 ActionEnd
 
-IfIntersection("BRIDGE_DOWN","BRIDGE_DOWN_BORDER")
+IfIntersection("BRIDGE","BRIDGE_DOWN_BORDER")
 ActionFirstBegin
- ActionChangeGlobalName("BRIDGE_STOP")
+ ActionMove(0,-1)
+ActionFirstEnd
+ActionSecondBegin
+ActionSecondEnd
+
+IfIntersection("BRIDGE","BRIDGE_UP_BORDER")
+ActionFirstBegin
+ ActionMove(0,1) 
 ActionFirstEnd
 ActionSecondBegin
 ActionSecondEnd

@@ -70,7 +70,7 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
  //рисуем предметы
  DrawItemMap(iVideo_Ptr);
  //рисуем Диззи
- cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,X,Y,DIZZY_WIDTH*cDizzy.sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
+ cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,cGameState.X,cGameState.Y,DIZZY_WIDTH*cDizzy.sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
  //рисуем элементы переднего плана
  DrawFirstPlaneMap(iVideo_Ptr); 
  //рисуем рамку вокруг экрана
@@ -142,7 +142,7 @@ void CGame::KeyboardControl(bool left,bool right,bool up,bool down,bool fire)
    //перемещаем доступные для взятия предметы в инвентарь
    size_t size=cGameState.ConditionalExpression.size();
    cGameState.Take.clear();   
-   for(size_t n=0;n<size;n++) cGameState.ConditionalExpression[n]->Execute(X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,false,cGameState);
+   for(size_t n=0;n<size;n++) cGameState.ConditionalExpression[n]->Execute(cGameState.X+cGameState.Map_X,cGameState.Y+cGameState.Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,false,cGameState);
    //перемещаем возможные для взятия объекты в инвентарь
    size=cGameState.Take.size();
    for(size_t n=0;n<size;n++)
@@ -169,14 +169,14 @@ void CGame::PressUse(void)
   //поэтому выкладываем предмет мы уже после использования и никак иначе.
   std::shared_ptr<IPart> unit=cGameState.Inventory[cGameState.InventorySelectedIndex-1];  
   //задаём предмету координаты Диззи и применяем правила игры
-  unit->BlockPosX=(X+DIZZY_WIDTH/2)-TILE_WIDTH/2+Map_X;
-  unit->BlockPosY=(Y+DIZZY_HEIGHT)-TILE_HEIGHT+Map_Y;
+  unit->BlockPosX=(cGameState.X+DIZZY_WIDTH/2)-TILE_WIDTH/2+cGameState.Map_X;
+  unit->BlockPosY=(cGameState.Y+DIZZY_HEIGHT)-TILE_HEIGHT+cGameState.Map_Y;
   //указываем, какой предмет мы будем использовать
   cGameState.UsedObject=unit;
   //проверяем условия использования
   size_t cond_size=cGameState.ConditionalExpression.size();
   cGameState.Take.clear();  
-  for(size_t m=0;m<cond_size;m++) cGameState.ConditionalExpression[m]->Execute(X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,false,cGameState);
+  for(size_t m=0;m<cond_size;m++) cGameState.ConditionalExpression[m]->Execute(cGameState.X+cGameState.Map_X,cGameState.Y+cGameState.Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,true,false,cGameState);
   //выкладываем предмет из инвентаря
   PopInventory(cGameState.InventorySelectedIndex-1);
   //если UsedObject был использован, указатель станет NULL.
@@ -231,33 +231,33 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
   if (step_x>0) step_x--;
   if (step_y>0) step_y--;
     
-  int32_t last_x=X;
-  int32_t last_y=Y;
+  int32_t last_x=cGameState.X;
+  int32_t last_y=cGameState.Y;
   
-  if (dx>0) X++;
-  if (dx<0) X--;
+  if (dx>0) cGameState.X++;
+  if (dx<0) cGameState.X--;
   
-  if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
+  if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true)//зафиксировано столкновение
   {
-   if (IsCollizionBody(iVideo_Ptr,X,Y)==false)//пересечение не выше допуска
+   if (IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==false)//пересечение не выше допуска
    {
     //поднимаем Диззи на уровень без пересечения
-    while(IsCollizionLegs(iVideo_Ptr,X,Y)==true) Y--;
+    while(IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true) cGameState.Y--;
    }
    else
    {
-    X=last_x;
+    cGameState.X=last_x;
     dx=0;
 	//dX=0;//TODO: если так сделать, Диззи не сможет забираться перекатываясь через края блоков.
    }
   }
   
-  if (dy>0) Y++;
-  if (dy<0) Y--;
+  if (dy>0) cGameState.Y++;
+  if (dy<0) cGameState.Y--;
   
-  if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
+  if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true)//зафиксировано столкновение
   {
-   Y=last_y;
+   cGameState.Y=last_y;
    dy=0;
    dY=0;
   }  
@@ -271,14 +271,13 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
   }
  }
 
- if (IsCollizionLegs(iVideo_Ptr,X,Y+1)==false)//можно падать
+ if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y+1)==false)//можно падать
  {
   if (MoveTickCounter==0)
   {
    if (dY<SPEED_Y) dY++;
   }
-  if (dY>0) Y++;
-  //while (IsCollizionLegs(iVideo_Ptr,X,Y+1)==false) Y++;
+  if (dY>0) cGameState.Y++;
   MoveControl=false;
  }
  else
@@ -291,12 +290,12 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
  }
  
  //особый случай: Диззи не двигался, но произошло столкновение (так как двигался другой элемент)
- if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true)//зафиксировано столкновение
+ if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true)//зафиксировано столкновение
  {
   //предмет вытесняет Диззи вверх
   for(size_t n=0;n<TILE_WIDTH/4;n++)
   {
-   if (IsCollizionLegs(iVideo_Ptr,X,Y)==true || IsCollizionBody(iVideo_Ptr,X,Y)==true) Y--;
+   if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true) cGameState.Y--;
   }
  }
 }
@@ -323,13 +322,15 @@ void CGame::ConditionalProcessing(void)
 {
  size_t size=cGameState.ConditionalExpression.size();
  cGameState.Take.clear(); 
- for(size_t n=0;n<size;n++) cGameState.ConditionalExpression[n]->Execute(X+Map_X,Y+Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,false,true,cGameState);
+ for(size_t n=0;n<size;n++) cGameState.ConditionalExpression[n]->Execute(cGameState.X+cGameState.Map_X,cGameState.Y+cGameState.Map_Y,DIZZY_WIDTH,DIZZY_HEIGHT,TILE_WIDTH,TILE_HEIGHT,false,true,cGameState);
 }
 //----------------------------------------------------------------------------------------------------
 //выполнить обработку энергии Диззи
 //----------------------------------------------------------------------------------------------------
 void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
 {
+ static const char RESPAWN[]="RESPAWN";//название тайла восстановления
+
  if (cGameState.Energy==0)//Диззи погиб
  {
   cGameState.AddMessage("ДИЗЗИ ПОГИБ!\\ВЫ ПОТЕРЯЛИ ЖИЗНЬ",100,120);
@@ -349,10 +350,10 @@ void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
   for(size_t n=0;n<size;n++)
   {
    std::shared_ptr<IPart> iPart_Ptr=cGameState.MapNamed[n];
-   if (iPart_Ptr->Name.compare("RESPAWN")!=0) continue;
+   if (iPart_Ptr->Name.compare(RESPAWN)!=0) continue;
 
-   float dx=((X+Map_X)-iPart_Ptr->BlockPosX)/TILE_WIDTH;
-   float dy=((Y+Map_Y)-iPart_Ptr->BlockPosY)/TILE_HEIGHT;
+   float dx=((cGameState.X+cGameState.Map_X)-iPart_Ptr->BlockPosX)/TILE_WIDTH;
+   float dy=((cGameState.Y+cGameState.Map_Y)-iPart_Ptr->BlockPosY)/TILE_HEIGHT;
    float distance=dx*dx+dy*dy;
    if (first==true || min_distance>distance)
    {
@@ -364,8 +365,8 @@ void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
   }
   cGameState.Energy=100;
   cGameState.ScreenEnergy=0;
-  X=x-Map_X;
-  Y=y-Map_Y;
+  cGameState.X=x-cGameState.Map_X;
+  cGameState.Y=y-cGameState.Map_Y;
   dX=0;
   dY=0;  
   cDizzy.sFrame_Ptr=cDizzy.sFrame_Stop_Ptr;
@@ -418,8 +419,8 @@ void CGame::DrawBarrier(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
+  int32_t screen_x=block_x-cGameState.Map_X;
+  int32_t screen_y=block_y-cGameState.Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -449,8 +450,8 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
+  int32_t screen_x=block_x-cGameState.Map_X;
+  int32_t screen_y=block_y-cGameState.Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -479,8 +480,8 @@ void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
+  int32_t screen_x=block_x-cGameState.Map_X;
+  int32_t screen_y=block_y-cGameState.Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -510,8 +511,8 @@ void CGame::DrawItemMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
+  int32_t screen_x=block_x-cGameState.Map_X;
+  int32_t screen_y=block_y-cGameState.Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -743,10 +744,7 @@ void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
  int32_t x2=ENERGY_OFFSET_POS_X+ENERGY_WIDTH*cGameState.ScreenEnergy/cGameState.ENERGY_MAX_VALUE;
  int32_t y1=ENERGY_OFFSET_POS_Y;
  int32_t y2=y1+ENERGY_HEIGHT;
- int32_t part=ENERGY_WIDTH/3;
- static const int32_t ENERGY_GOOD_COLOR=(0<<24)|(64<<16)|(255<<8)|(64<<0);//цвет "отлично"
- static const int32_t ENERGY_NORMAL_COLOR=(0<<24)|(255<<16)|(255<<8)|(64<<0);//цвет "хорошо"
- static const int32_t ENERGY_BAD_COLOR=(0<<24)|(255<<16)|(64<<8)|(64<<0);//цвет "плохо"
+ int32_t part=ENERGY_WIDTH/ENERGY_PART;
 
  int32_t x_bad=x1+part;
  if (x2<x_bad) x_bad=x2;
@@ -763,8 +761,11 @@ void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
   }
  }
  //выводим количество собранных предметов
+ static const int32_t ITEM_OFFSET_POS_X=129;//положение количества собранных предметов по X
+ static const int32_t ITEM_OFFSET_POS_Y=32;//положение количества собранных предметов по Y
+
  sprintf(str,"%02i",cGameState.Items);
- cFontPrinter_Ptr->PrintAt(129,32,str,iVideo_Ptr);
+ cFontPrinter_Ptr->PrintAt(ITEM_OFFSET_POS_X,ITEM_OFFSET_POS_Y,str,iVideo_Ptr);
 }
 //----------------------------------------------------------------------------------------------------
 //загрузить карту
@@ -891,7 +892,7 @@ void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
 {
  if (UseDelayCounter>0 && fire==false) UseDelayCounter--; 
  FlashTickCounter++;
- FlashTickCounter%=6;
+ FlashTickCounter%=FLASH_TICK_COUNTER_DIVIDER;
 
  //узнаём, есть ли сообщения
  if (cGameState.Message.size()>0)//если есть сообщения, экран не стираем, чтобы прошлые сообщения не пропали
@@ -945,28 +946,28 @@ void CGame::MoveMap(IVideo *iVideo_Ptr)
 bool CGame::MoveMapStep(int32_t width,int32_t height,int32_t offset_y)
 {
  bool update=false;
- if (X<width/4 && Map_X>=2)
+ if (cGameState.X<width/4 && cGameState.Map_X>=2)
  {
-  Map_X-=2;
-  X+=2;
+  cGameState.Map_X-=2;
+  cGameState.X+=2;
   update=true;
  }
- if (X>=3*width/4)
+ if (cGameState.X>=3*width/4)
  {
-  Map_X+=2;
-  X-=2;
+  cGameState.Map_X+=2;
+  cGameState.X-=2;
   update=true;
  }
- if (Y>=(3*height/4+offset_y))
+ if (cGameState.Y>=(3*height/4+offset_y))
  {
-  Y-=2;
-  Map_Y+=2;
+  cGameState.Y-=2;
+  cGameState.Map_Y+=2;
   update=true;
  }
- if (Y<(height/4+offset_y) && Map_Y>=2)
+ if (cGameState.Y<(height/4+offset_y) && cGameState.Map_Y>=2)
  {
-  Y+=2;
-  Map_Y-=2;
+  cGameState.Y+=2;
+  cGameState.Map_Y-=2;
   update=true;
  }
  return(update);
@@ -979,11 +980,11 @@ bool CGame::Init(IVideo *iVideo_Ptr)
 {
  cDizzy.Init(); 
 
- X=160;
- Y=5;
+ cGameState.X=160;
+ cGameState.Y=5;
 
- Map_X=0;
- Map_Y=0;
+ cGameState.Map_X=0;
+ cGameState.Map_Y=0;
  
  dX=0;
  dY=0;
@@ -1030,8 +1031,8 @@ bool CGame::Init(IVideo *iVideo_Ptr)
   return(false);
  }
  //меняем позицию Диззи
- X=cGameState.DizzyStartPositionX;
- Y=cGameState.DizzyStartPositionY;
+ cGameState.X=cGameState.DizzyStartPositionX;
+ cGameState.Y=cGameState.DizzyStartPositionY;
 
  //перемещаем карту
  MoveMap(iVideo_Ptr);

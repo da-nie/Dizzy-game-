@@ -55,6 +55,7 @@ bool CTilesSequence::Save(std::ofstream &file)
 {
  uint8_t animation_mode=ANIMATION_MODE_SET_STEP_FOR_SAVE;
  if (AnimationMode==ANIMATION_MODE_CYCLIC) animation_mode=ANIMATION_MODE_CYCLIC_FOR_SAVE;
+ if (AnimationMode==ANIMATION_MODE_ONE_SHOT) animation_mode=ANIMATION_MODE_ONE_SHOT_FOR_SAVE;
  if (file.write(reinterpret_cast<char*>(&animation_mode),sizeof(animation_mode)).fail()==true) return(false);
 
  bool ret=true;
@@ -76,6 +77,7 @@ bool CTilesSequence::Load(std::ifstream &file)
  if (file.read(reinterpret_cast<char*>(&animation_mode),sizeof(animation_mode)).fail()==true) return(false);
  AnimationMode=ANIMATION_MODE_SET_STEP;
  if (animation_mode==ANIMATION_MODE_CYCLIC_FOR_SAVE) AnimationMode=ANIMATION_MODE_CYCLIC;
+ if (animation_mode==ANIMATION_MODE_ONE_SHOT_FOR_SAVE) AnimationMode=ANIMATION_MODE_ONE_SHOT;
 
  int32_t size;
  if (file.read(reinterpret_cast<char*>(&size),sizeof(size)).fail()==true) return(false);
@@ -138,6 +140,10 @@ void CTilesSequence::ToNextTile(void)
  {
   CurrentIndex++;
   CurrentIndex%=GetSize();
+ }
+ if (AnimationMode==ANIMATION_MODE_ONE_SHOT)
+ {
+  if (CurrentIndex<GetSize()-1) CurrentIndex++;
  }
 }
 //----------------------------------------------------------------------------------------------------
