@@ -59,9 +59,8 @@ long WINAPI CWnd_Main::WNDProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
    cWnd_Main.Paint(hWnd,wParam,lParam);
    return(0);
   }
-  case WM_TIMER:
+  case WM_ERASEBKGND:
   {
-   cWnd_Main.Timer(hWnd,wParam,lParam);
    return(0);
   }
  }
@@ -126,16 +125,13 @@ void CWnd_Main::Create(HWND hWnds,WPARAM wParam,LPARAM lParam)
  MoveWindow(hWnd,w_rect.left,w_rect.top,w_rect.right,w_rect.bottom,TRUE);
 
  Enabled=cGame_Ptr->Init(iVideo_Ptr.get());
-
- SetTimer(hWnd,TIMER_ID,1000/FPS,NULL);
 }
 //----------------------------------------------------------------------------------------------------
 //уничтожения окна
 //----------------------------------------------------------------------------------------------------
 void CWnd_Main::Destroy(HWND hWnds,WPARAM wParam,LPARAM lParam)
 {
- Active=false;
- KillTimer(hWnd,TIMER_ID);
+ Active=false; 
 }
 //----------------------------------------------------------------------------------------------------
 //рисование окна
@@ -178,14 +174,6 @@ void CWnd_Main::Paint(HWND hWnds,WPARAM wParam,LPARAM lParam)
  StretchDIBits(hdc,0,0,width*2,height*2,0,0,width,height,vptr,&info,DIB_RGB_COLORS,SRCCOPY);
  
  EndPaint(hWnd,&ps);
-}
-
-//----------------------------------------------------------------------------------------------------
-//таймер
-//----------------------------------------------------------------------------------------------------
-void CWnd_Main::Timer(HWND hWnds,WPARAM wParam,LPARAM lParam)
-{
- Processing();
 }
 
 //----------------------------------------------------------------------------------------------------

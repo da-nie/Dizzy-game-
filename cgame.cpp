@@ -70,7 +70,7 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
  //рисуем предметы
  DrawItemMap(iVideo_Ptr);
  //рисуем Диззи
- cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,cGameState.X,cGameState.Y,DIZZY_WIDTH*cDizzy.sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
+ cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,cGameState.X+(cGameState.Map_X-Map_X),cGameState.Y+(cGameState.Map_Y-Map_Y),DIZZY_WIDTH*cDizzy.sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
  //рисуем элементы переднего плана
  DrawFirstPlaneMap(iVideo_Ptr); 
  //рисуем рамку вокруг экрана
@@ -380,6 +380,13 @@ void CGame::Processing(IVideo *iVideo_Ptr)
  ConditionalProcessing();//выполняем обработку событий
  DizzyEnergyProcessing(iVideo_Ptr);
  DizzyMoveProcessing(iVideo_Ptr);//выполняем обработку движения Диззи
+
+ static const int32_t STEP=2;
+
+ if (Map_X-(STEP-1)>cGameState.Map_X) Map_X-=STEP;
+ if (Map_X+(STEP-1)<cGameState.Map_X) Map_X+=STEP;
+ if (Map_Y-(STEP-1)>cGameState.Map_Y) Map_Y-=STEP;
+ if (Map_Y+(STEP-1)<cGameState.Map_Y) Map_Y+=STEP;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -444,8 +451,8 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-cGameState.Map_X;
-  int32_t screen_y=block_y-cGameState.Map_Y;
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -474,8 +481,8 @@ void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-cGameState.Map_X;
-  int32_t screen_y=block_y-cGameState.Map_Y;
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -505,8 +512,8 @@ void CGame::DrawItemMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-cGameState.Map_X;
-  int32_t screen_y=block_y-cGameState.Map_Y;
+  int32_t screen_x=block_x-Map_X;
+  int32_t screen_y=block_y-Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -580,7 +587,7 @@ void CGame::PutFrame(int32_t x,int32_t y,int32_t text_width,int32_t text_height,
  int32_t rx2=rx1+width-1;
  int32_t ry2=ry1+height-1;
  //закрашиваем прямоугольник
- iVideo_Ptr->FillRectangle(rx1,ry1,rx2,ry2,0x00000000);
+ iVideo_Ptr->FillRectangle(rx1,ry1,rx2,ry2,BLACK_COLOR);
  //рисуем рамку
  //сначала уголки
  cSprite_Frame.PutSpriteItem(iVideo_Ptr,rx1-FRAME_ANGLE_WIDTH,ry1-FRAME_ANGLE_HEIGHT,FRAME_ANGLE_LEFT_UP_OFFSET_X,FRAME_ANGLE_LEFT_UP_OFFSET_Y,FRAME_ANGLE_WIDTH,FRAME_ANGLE_HEIGHT,true);
@@ -956,6 +963,8 @@ void CGame::MoveMap(IVideo *iVideo_Ptr)
  {
   if (MoveMapStep(width,height,offset_y)==false) break;
  }
+ Map_X=cGameState.Map_X;
+ Map_Y=cGameState.Map_Y;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -963,29 +972,31 @@ void CGame::MoveMap(IVideo *iVideo_Ptr)
 //----------------------------------------------------------------------------------------------------
 bool CGame::MoveMapStep(int32_t width,int32_t height,int32_t offset_y)
 {
+ static const int32_t DELTA=8;
+
  bool update=false;
- if (cGameState.X<width/4 && cGameState.Map_X>=2)
+ if (cGameState.X<width/4 && cGameState.Map_X>=DELTA)
  {
-  cGameState.Map_X-=2;
-  cGameState.X+=2;
+  cGameState.Map_X-=DELTA;
+  cGameState.X+=DELTA;
   update=true;
  }
  if (cGameState.X>=3*width/4)
  {
-  cGameState.Map_X+=2;
-  cGameState.X-=2;
+  cGameState.Map_X+=DELTA;
+  cGameState.X-=DELTA;
   update=true;
  }
  if (cGameState.Y>=(3*height/4+offset_y))
  {
-  cGameState.Y-=2;
-  cGameState.Map_Y+=2;
+  cGameState.Y-=DELTA;
+  cGameState.Map_Y+=DELTA;
   update=true;
  }
- if (cGameState.Y<(height/4+offset_y) && cGameState.Map_Y>=2)
+ if (cGameState.Y<(height/4+offset_y) && cGameState.Map_Y>=DELTA)
  {
-  cGameState.Y+=2;
-  cGameState.Map_Y-=2;
+  cGameState.Y+=DELTA;
+  cGameState.Map_Y-=DELTA;
   update=true;
  }
  return(update);
