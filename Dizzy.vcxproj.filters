@@ -179,9 +179,6 @@
     <ClInclude Include="ivideo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tga.h">
       <Filter>Header Files</Filter>
     </ClInclude>

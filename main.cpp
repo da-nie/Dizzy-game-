@@ -1,58 +1,74 @@
-#include "stdafx.h"
-//------------------------------------------------------------------------------
+//****************************************************************************************************
+//подключаемые библиотеки
+//****************************************************************************************************
+#include <windows.h>
+#include <stdint.h>
 #include "cwnd_main.h"
-//------------------------------------------------------------------------------
-class CWinApp_Main:public CWinApp
-{
- protected:
-  //-Переменные класса-------------------------------------------------------
-  //-Функции класса----------------------------------------------------------
-  //-Прочее------------------------------------------------------------------
- public:
-  //-Конструктор класса------------------------------------------------------
-  CWinApp_Main(void);
-  //-Деструктор класса-------------------------------------------------------
-  ~CWinApp_Main();
-  //-Переменные класса-------------------------------------------------------
-  //-Замещённые функции предка-----------------------------------------------
-  BOOL InitInstance(void);
-  //-Новые функции класса----------------------------------------------------
-  //-Функции обработки сообщений класса--------------------------------------
-  //-Новые функции класса----------------------------------------------------
-  //-Прочее------------------------------------------------------------------
-};
-//-Конструктор класса--------------------------------------------------------
-CWinApp_Main::CWinApp_Main(void)
-{
-}
-//-Деструктор класса---------------------------------------------------------
-CWinApp_Main::~CWinApp_Main()
-{
-}
-//-Замещённые функции предка-------------------------------------------------
-BOOL CWinApp_Main::InitInstance(void)
-{
- CWnd_Main *cWnd_Main=new CWnd_Main;
- HCURSOR hCursor=LoadStandardCursor(IDC_ARROW);
- HICON hIcon=LoadStandardIcon(IDI_APPLICATION);
- HBRUSH hBrush=(HBRUSH)COLOR_WINDOW;
- LPCSTR ClassName=AfxRegisterWndClass(CS_HREDRAW|CS_VREDRAW,hCursor,hBrush,hIcon);
- //определим размер окна по заданной клиентской области
- RECT Rect;
- Rect.left=0;
- Rect.right=320;
- Rect.top=0;
- Rect.bottom=240;
- AdjustWindowRect(&Rect,WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,FALSE);
- cWnd_Main->CreateEx(0,ClassName,"Dizzy",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,0,0,Rect.right-Rect.left,Rect.bottom-Rect.top,NULL,NULL);
- cWnd_Main->ShowWindow(m_nCmdShow);
- m_pMainWnd=cWnd_Main;
- return TRUE;
-}
-//-Новые функции класса------------------------------------------------------
-//-Функции обработки сообщений класса----------------------------------------
-//-Новые функции класса------------------------------------------------------
-//-Прочее--------------------------------------------------------------------
-CWinApp_Main cWinApp_Main;
 
+//****************************************************************************************************
+//глобальные переменные
+//****************************************************************************************************
+static const double FPS=30;//частота кадров
 
+HINSTANCE hProjectInstance;
+CWnd_Main cWnd_Main;
+
+//----------------------------------------------------------------------------------------------------
+//главная функция программы
+//----------------------------------------------------------------------------------------------------
+int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevstance,LPSTR lpstrCmdLine,int nCmdShow)
+{
+ hProjectInstance=hInstance;
+ MSG msg;
+ CWnd_Main::Register();
+
+ HWND hWnd=GetDesktopWindow();
+ RECT rect;
+ //GetWindowRect(hWnd,&rect);
+ rect.left=0;
+ rect.right=320;
+ rect.bottom=240;
+ rect.top=0;
+
+ 
+ HWND hWndS=CreateWindow("Dizzy","Игра про Dizzy",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX|WS_VISIBLE,rect.left,rect.top,rect.right,rect.bottom,hWnd,0,hProjectInstance,NULL);
+// HWND hWndS=CreateWindow("Dizzy","Игра про Dizzy",WS_POPUP|WS_VISIBLE,rect.left,rect.top,rect.right,rect.bottom,hWnd,0,hProjectInstance,NULL);
+ //SetWindowPos(hWndS,HWND_TOPMOST,0,0,0,SWP_NOMOVE|SWP_NOREDRAW,SWP_NOSIZE);
+
+ //while(ShowCursor(FALSE)==FALSE);
+
+ LARGE_INTEGER start_time;
+ LARGE_INTEGER current_time;
+ LARGE_INTEGER CounterFrequency;
+ QueryPerformanceFrequency(&CounterFrequency);
+ double d_CounterFrequency=(double)CounterFrequency.QuadPart;
+ QueryPerformanceCounter(&start_time);
+
+ while(1)
+ {
+  while(PeekMessage(&msg,NULL,0,0,PM_REMOVE))
+  {
+   if (msg.message==WM_QUIT) break;
+   TranslateMessage(&msg);
+   DispatchMessage(&msg);
+  }
+  if (msg.message==WM_QUIT) break;
+  //делаем синхронизацию по таймеру
+  while(1)
+  {
+   QueryPerformanceCounter(&current_time);
+   double delta_time=(double)(current_time.QuadPart-start_time.QuadPart);
+   if (delta_time<0) 
+   {
+    start_time=current_time;
+    continue;
+   }
+   if (delta_time<d_CounterFrequency/FPS) continue;
+   break;
+  }
+  QueryPerformanceCounter(&start_time);
+  cWnd_Main.Processing();
+ }
+ //while(ShowCursor(TRUE)==FALSE);
+ return(msg.wParam);
+}

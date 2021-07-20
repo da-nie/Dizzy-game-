@@ -7,6 +7,9 @@
 //глобальные переменные
 //****************************************************************************************************
 
+extern HINSTANCE hProjectInstance;
+extern CWnd_Main cWnd_Main;
+
 //****************************************************************************************************
 //константы
 //****************************************************************************************************
@@ -15,18 +18,50 @@
 //макроопределения
 //****************************************************************************************************
 
-
-//****************************************************************************************************
-//карта сообщений
-//****************************************************************************************************
-
-BEGIN_MESSAGE_MAP(CWnd_Main,CWnd)
- ON_WM_PAINT()
- ON_WM_CREATE()
- ON_WM_DESTROY()
- ON_WM_TIMER() 
- ON_WM_ERASEBKGND()
-END_MESSAGE_MAP()
+//----------------------------------------------------------------------------------------------------
+//зарегистировать класс окна
+//----------------------------------------------------------------------------------------------------
+void CWnd_Main::Register(void)
+{
+ WNDCLASS wc;
+ wc.style=CS_HREDRAW|CS_VREDRAW;
+ wc.cbClsExtra=0;
+ wc.cbWndExtra=0;
+ wc.hInstance=hProjectInstance;
+ wc.hIcon=LoadIcon(NULL,IDI_APPLICATION);
+ wc.hCursor=LoadCursor(NULL,IDC_ARROW);
+ wc.hbrBackground=(HBRUSH)(COLOR_WINDOW);
+ wc.lpszMenuName=NULL;
+ wc.lpszClassName="Dizzy";
+ wc.lpfnWndProc=(WNDPROC)WNDProc;
+ RegisterClass(&wc);
+}
+//----------------------------------------------------------------------------------------------------
+//функция обратного вызова окна
+//----------------------------------------------------------------------------------------------------
+long WINAPI CWnd_Main::WNDProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+ switch(msg)
+ {
+  case WM_CREATE:
+  {
+   cWnd_Main.Create(hWnd,wParam,lParam);
+   return(0);
+  }
+  case WM_DESTROY:
+  {
+   cWnd_Main.Destroy(hWnd,wParam,lParam);
+   PostQuitMessage(0);
+   return(0);
+  }
+  case WM_PAINT:
+  {
+   cWnd_Main.Paint(hWnd,wParam,lParam);
+   return(0);
+  }
+ }
+ return(DefWindowProc(hWnd,msg,wParam,lParam));
+}
 
 //****************************************************************************************************
 //конструктор и деструктор
@@ -37,6 +72,8 @@ END_MESSAGE_MAP()
 //----------------------------------------------------------------------------------------------------
 CWnd_Main::CWnd_Main(void)
 { 
+ Active=false;
+
  iVideo_Ptr.reset(IVideo::CreateNewCVideoSoftware(CGame::SCREEN_WIDTH,CGame::SCREEN_HEIGHT));
  iVideo_Ptr->Init();
 
@@ -55,14 +92,6 @@ CWnd_Main::~CWnd_Main()
 //закрытые функции
 //****************************************************************************************************
 
-//----------------------------------------------------------------------------------------------------
-//
-//----------------------------------------------------------------------------------------------------
-
-//****************************************************************************************************
-//функции обработки сообщений
-//****************************************************************************************************
-
 
 //****************************************************************************************************
 //открытые функции
@@ -71,9 +100,10 @@ CWnd_Main::~CWnd_Main()
 //----------------------------------------------------------------------------------------------------
 //создание окна
 //----------------------------------------------------------------------------------------------------
-afx_msg int CWnd_Main::OnCreate(LPCREATESTRUCT lpCreateStruct)
+void CWnd_Main::Create(HWND hWnds,WPARAM wParam,LPARAM lParam)
 {
- CWnd::OnCreate(lpCreateStruct);
+ hWnd=hWnds;
+ Active=true;
 
  //определим размер окна по заданной клиентской области
  RECT rect;
@@ -82,31 +112,32 @@ afx_msg int CWnd_Main::OnCreate(LPCREATESTRUCT lpCreateStruct)
  rect.top=0;
  rect.bottom=CGame::SCREEN_HEIGHT*2;
  AdjustWindowRect(&rect,WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,FALSE);
-
- CRect cRect;
- GetWindowRect(&cRect);
- cRect.right=cRect.left+rect.right-rect.left;
- cRect.bottom=cRect.top+rect.bottom-rect.top;
  
- MoveWindow(&cRect,TRUE);
+ RECT w_rect;
+ GetWindowRect(hWnd,&w_rect);
+ w_rect.right=rect.right-rect.left;
+ w_rect.bottom=rect.bottom-rect.top;
+
+ MoveWindow(hWnd,w_rect.left,w_rect.top,w_rect.right,w_rect.bottom,TRUE);
 
  Enabled=cGame_Ptr->Init(iVideo_Ptr.get());
- SetTimer(ID_TIMER_MAIN,30,NULL);
- return(0);
 }
 //----------------------------------------------------------------------------------------------------
-//уничтожение окна
+//уничтожения окна
 //----------------------------------------------------------------------------------------------------
-afx_msg void CWnd_Main::OnDestroy(void)
+void CWnd_Main::Destroy(HWND hWnds,WPARAM wParam,LPARAM lParam)
 {
- KillTimer(ID_TIMER_MAIN);
- CWnd::OnDestroy();
+ Active=false; 
 }
 //----------------------------------------------------------------------------------------------------
-//событие перерисовки окна
+//рисование окна
 //----------------------------------------------------------------------------------------------------
-afx_msg void CWnd_Main::OnPaint(void)
+void CWnd_Main::Paint(HWND hWnds,WPARAM wParam,LPARAM lParam)
 { 
+ if (Active==false) return;
+ PAINTSTRUCT ps;
+ HDC hdc=BeginPaint(hWnd,&ps);
+
  //вызываем отрисовку
  uint32_t width;
  uint32_t height;
@@ -116,7 +147,6 @@ afx_msg void CWnd_Main::OnPaint(void)
  uint32_t linesize;
  iVideo_Ptr->GetLineSize(linesize);
 
- CPaintDC dc(this);
  BITMAPINFOHEADER bmih;
  bmih.biSize=sizeof(BITMAPINFOHEADER);
  bmih.biWidth=width;
@@ -137,20 +167,17 @@ afx_msg void CWnd_Main::OnPaint(void)
  rgbq.rgbReserved=0;
  info.bmiHeader=bmih;
  info.bmiColors[0]=rgbq;
- StretchDIBits(dc.m_hDC,0,0,width*2,height*2,0,0,width,height,vptr,&info,DIB_RGB_COLORS,SRCCOPY);
- CWnd::OnPaint();
+ StretchDIBits(hdc,0,0,width*2,height*2,0,0,width,height,vptr,&info,DIB_RGB_COLORS,SRCCOPY);
+ 
+ EndPaint(hWnd,&ps);
 }
-//----------------------------------------------------------------------------------------------------
-//событие таймера
-//----------------------------------------------------------------------------------------------------
-afx_msg void CWnd_Main::OnTimer(UINT nIDEvent)
-{
- if (nIDEvent!=ID_TIMER_MAIN) 
- {
-  CWnd::OnTimer(nIDEvent);
-  return;
- }
 
+//----------------------------------------------------------------------------------------------------
+//создание кадра изображения
+//----------------------------------------------------------------------------------------------------
+void CWnd_Main::Processing(void)
+{
+ if (Active==false) return;
  if (Enabled==false) return;
 
  bool left=false;
@@ -168,13 +195,5 @@ afx_msg void CWnd_Main::OnTimer(UINT nIDEvent)
  if (GetAsyncKeyState(VK_RCONTROL)&32768) fire=true;
  
  cGame_Ptr->OnTimer(left,right,up,down,fire,iVideo_Ptr.get());
- InvalidateRect(NULL,FALSE);
+ InvalidateRect(hWnd,NULL,FALSE);
 }
-//----------------------------------------------------------------------------------------------------
-//событие очистки фона окна
-//----------------------------------------------------------------------------------------------------
-afx_msg BOOL CWnd_Main::OnEraseBkgnd(CDC *pDC)
-{
- return(TRUE);
-}
-
