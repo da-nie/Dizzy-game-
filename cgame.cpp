@@ -380,13 +380,18 @@ void CGame::Processing(IVideo *iVideo_Ptr)
  ConditionalProcessing();//выполняем обработку событий
  DizzyEnergyProcessing(iVideo_Ptr);
  DizzyMoveProcessing(iVideo_Ptr);//выполняем обработку движения Диззи
+ 
+ static const int32_t STEP=3;
 
- static const int32_t STEP=2;
-
- if (Map_X-(STEP-1)>cGameState.Map_X) Map_X-=STEP;
- if (Map_X+(STEP-1)<cGameState.Map_X) Map_X+=STEP;
- if (Map_Y-(STEP-1)>cGameState.Map_Y) Map_Y-=STEP;
- if (Map_Y+(STEP-1)<cGameState.Map_Y) Map_Y+=STEP;
+ int32_t step=STEP;
+ while(step>0)
+ {
+  if (Map_X>cGameState.Map_X) Map_X--;
+  if (Map_X<cGameState.Map_X) Map_X++;
+  if (Map_Y>cGameState.Map_Y) Map_Y--;
+  if (Map_Y<cGameState.Map_Y) Map_Y++;
+  step--;
+ }
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -972,7 +977,7 @@ void CGame::MoveMap(IVideo *iVideo_Ptr)
 //----------------------------------------------------------------------------------------------------
 bool CGame::MoveMapStep(int32_t width,int32_t height,int32_t offset_y)
 {
- static const int32_t DELTA=8;
+ static const int32_t DELTA=2;
 
  bool update=false;
  if (cGameState.X<width/4 && cGameState.Map_X>=DELTA)

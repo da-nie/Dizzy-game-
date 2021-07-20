@@ -63,6 +63,12 @@ long WINAPI CWnd_Main::WNDProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
   {
    return(0);
   }
+  case WM_TIMER:
+  {
+   cWnd_Main.Processing();
+   return(0);
+  }
+
  }
  return(DefWindowProc(hWnd,msg,wParam,lParam));
 }
@@ -125,13 +131,17 @@ void CWnd_Main::Create(HWND hWnds,WPARAM wParam,LPARAM lParam)
  MoveWindow(hWnd,w_rect.left,w_rect.top,w_rect.right,w_rect.bottom,TRUE);
 
  Enabled=cGame_Ptr->Init(iVideo_Ptr.get());
+
+// SetTimer(hWnd,TIMER_ID,1000/FPS,NULL);
+ //SetTimer(hWnd,TIMER_ID,30,NULL);
 }
 //----------------------------------------------------------------------------------------------------
 //уничтожения окна
 //----------------------------------------------------------------------------------------------------
 void CWnd_Main::Destroy(HWND hWnds,WPARAM wParam,LPARAM lParam)
 {
- Active=false; 
+ Active=false;
+ //KillTimer(hWnd,TIMER_ID);
 }
 //----------------------------------------------------------------------------------------------------
 //рисование окна
@@ -183,6 +193,22 @@ void CWnd_Main::Processing(void)
 {
  if (Active==false) return;
  if (Enabled==false) return;
+ /*
+ static LARGE_INTEGER start_time;
+ LARGE_INTEGER current_time;
+ LARGE_INTEGER CounterFrequency;
+ QueryPerformanceFrequency(&CounterFrequency);
+ double d_CounterFrequency=(double)CounterFrequency.QuadPart;
+ QueryPerformanceCounter(&current_time);
+ double delta_time=(double)(current_time.QuadPart-start_time.QuadPart);
+ delta_time/=d_CounterFrequency;
+ delta_time*=1000;
+ FILE *file=fopen("time.txt","ab");
+ fprintf(file,"%i\r\n",(int)(delta_time));
+ fclose(file);
+ start_time=current_time;
+ */
+
 
  bool left=false;
  bool right=false;
