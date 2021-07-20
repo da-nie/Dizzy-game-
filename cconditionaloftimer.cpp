@@ -23,8 +23,10 @@
 //----------------------------------------------------------------------------------------------------
 //конструктор
 //----------------------------------------------------------------------------------------------------
-CConditionalOfTimer::CConditionalOfTimer(const std::string &name,std::shared_ptr<IAction> iAction_SetPtr)
+CConditionalOfTimer::CConditionalOfTimer(int32_t divider,const std::string &name,std::shared_ptr<IAction> iAction_SetPtr)
 {
+ Divider=divider;
+ Counter=0;
  Name=name;
  iAction_Ptr=iAction_SetPtr;
  Init();
@@ -44,7 +46,7 @@ CConditionalOfTimer::~CConditionalOfTimer()
 //инициализация
 //----------------------------------------------------------------------------------------------------
 void CConditionalOfTimer::Init(void)
-{
+{ 
  if (iAction_Ptr.get()!=NULL) iAction_Ptr->Init();
 }
 
@@ -59,6 +61,9 @@ void CConditionalOfTimer::Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_
 {
  Init();
  if (timer==false) return;
+ Counter++;
+ Counter%=Divider;
+ if (Counter!=0) return;
 
  std::shared_ptr<IAction> iAction_LocalPtr=iAction_Ptr;
  auto execute_function=[this,&cGameState,&iAction_LocalPtr,part_width,part_height,dizzy_x,dizzy_y,dizzy_width,dizzy_height](std::shared_ptr<IPart> iPart_Ptr)

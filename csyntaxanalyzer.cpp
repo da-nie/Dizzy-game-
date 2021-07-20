@@ -278,11 +278,13 @@ CSyntaxAnalyzer::CSyntaxAnalyzer(void)
  cAutomath_Syntax.AddRule("if_use(`A`,","if_use(`A`,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
  cAutomath_Syntax.AddRule("if_use(`A`,`A`","if_use(`A`,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
- //команда IfTimer("WAIT CAT")
+ //команда IfTimer(1,"WAIT CAT")
  cAutomath_Syntax.AddRule("begin","if_timer",ID_LEXEME_TYPE_IF_TIMER,ID_LEXEME_TYPE_IF_TIMER,false);
  cAutomath_Syntax.AddRule("if_timer","if_timer(",CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,CLexeme::ID_LEXEME_TYPE_LEFTBRACKET,false);
- cAutomath_Syntax.AddRule("if_timer(","if_timer(`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
- cAutomath_Syntax.AddRule("if_timer(`A`","if_timer(`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
+ cAutomath_Syntax.AddRule("if_timer(","if_timer(N",CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,CLexeme::ID_LEXEME_TYPE_NATURAL_NUMBER,false);
+ cAutomath_Syntax.AddRule("if_timer(N","if_timer(N,",CLexeme::ID_LEXEME_TYPE_COMMA,CLexeme::ID_LEXEME_TYPE_COMMA,false);
+ cAutomath_Syntax.AddRule("if_timer(N,","if_timer(N,`A`",CLexeme::ID_LEXEME_TYPE_QUOTE,CLexeme::ID_LEXEME_TYPE_QUOTE,false);
+ cAutomath_Syntax.AddRule("if_timer(N,`A`","if_timer(N,`A`)",CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,CLexeme::ID_LEXEME_TYPE_RIGHTBRACKET,true);
 
  //команда SetDescription("BOTTLE WATER","БУТЫЛКА ВОДЫ")
  cAutomath_Syntax.AddRule("begin","set_description",ID_LEXEME_TYPE_SET_DESCRIPTION,ID_LEXEME_TYPE_SET_DESCRIPTION,false);
@@ -869,10 +871,13 @@ std::shared_ptr<IConditionalExpression> CSyntaxAnalyzer::CreateConditional(void)
     iAction_Ptr=CreateAction(CommandLexeme[n],iAction_Ptr);
    }
   }
+  std::string divider_str;
+  CommandLexeme[0][2].GetName(divider_str);
+  int32_t divider=atoi(divider_str.c_str());
+  if (divider==0) divider=1;
   std::string name;
-  CommandLexeme[0][2].GetName(name);
-
-  return(std::shared_ptr<IConditionalExpression>(new CConditionalOfTimer(name,iAction_Ptr)));
+  CommandLexeme[0][4].GetName(name);
+  return(std::shared_ptr<IConditionalExpression>(new CConditionalOfTimer(divider,name,iAction_Ptr)));
  }
 
  if (CommandLexeme[0][0].GetType()==ID_LEXEME_TYPE_IF_USE)

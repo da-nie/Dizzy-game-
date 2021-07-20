@@ -37,10 +37,12 @@ class CConditionalOfTimer:public IConditionalExpression
  private:
   //-переменные-----------------------------------------------------------------------------------------
   std::string Name;//имя объекта, который нужно обрабатывать
+  int32_t Counter;//счётчик
+  int32_t Divider;//делитель таймера
   std::shared_ptr<IAction> iAction_Ptr;//указатель на выполняемое действие
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CConditionalOfTimer(const std::string &name,std::shared_ptr<IAction> iAction_SetPtr);
+  CConditionalOfTimer(int32_t divider,const std::string &name,std::shared_ptr<IAction> iAction_SetPtr);
   //-деструктор-----------------------------------------------------------------------------------------
   ~CConditionalOfTimer();
  public:

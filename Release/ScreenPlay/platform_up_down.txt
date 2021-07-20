@@ -1,9 +1,9 @@
-IfTimer("PLATFORM_UP")
+IfTimer(1,"PLATFORM_UP")
 ActionBegin
  ActionMove(0,-2) 
 ActionEnd
 
-IfTimer("PLATFORM_DOWN")
+IfTimer(1,"PLATFORM_DOWN")
 ActionBegin
  ActionMove(0,2) 
 ActionEnd

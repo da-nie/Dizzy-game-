@@ -242,7 +242,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    if (IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==false)//пересечение не выше допуска
    {
     //поднимаем Диззи на уровень без пересечения
-    while(IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true) cGameState.Y--;
+    while(IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true) ChangeDizzyCoord(0,-1,iVideo_Ptr);
    }
    else
    {
@@ -262,13 +262,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    dY=0;
   }  
 
-  bool redraw_barrier=MoveMapStep(width,height,offset_y);
-
-  if (redraw_barrier==true)
-  {
-   iVideo_Ptr->ClearScreen(NO_BARRIER_COLOR); 
-   DrawBarrier(iVideo_Ptr);
-  }
+  ChangeDizzyCoord(0,0,iVideo_Ptr);
  }
 
  if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y+1)==false)//можно падать
@@ -295,7 +289,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
   //предмет вытесняет Диззи вверх
   for(size_t n=0;n<TILE_WIDTH/4;n++)
   {
-   if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true) cGameState.Y--;
+   if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true) ChangeDizzyCoord(0,-1,iVideo_Ptr);
   }
  }
 }
@@ -920,6 +914,30 @@ void CGame::OnTimer(bool left,bool right,bool up,bool down,bool fire,IVideo *iVi
    Processing(iVideo_Ptr);
    OnPaint(iVideo_Ptr);
   }
+ }
+}
+
+//----------------------------------------------------------------------------------------------------
+//изменить координаты Диззи, переместить карту и перерисовать барьеры
+//----------------------------------------------------------------------------------------------------
+void CGame::ChangeDizzyCoord(int32_t dx,int32_t dy,IVideo *iVideo_Ptr)
+{
+ uint32_t w;
+ uint32_t h;
+ iVideo_Ptr->GetScreenSize(w,h);
+ int32_t width=w;
+ int32_t height=h;
+ int32_t offset_y=cSprite_Header.GetHeight();
+ height-=offset_y; 
+
+ cGameState.X+=dx;
+ cGameState.Y+=dy;
+ 
+ bool redraw_barrier=MoveMapStep(width,height,offset_y);
+ if (redraw_barrier==true)
+ {
+  iVideo_Ptr->ClearScreen(NO_BARRIER_COLOR); 
+  DrawBarrier(iVideo_Ptr);
  }
 }
 //----------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-IfTimer("DROP_FIRE_0")
+IfTimer(1,"DROP_FIRE_0")
 ActionBegin
  ActionMove(0,1) 
 ActionEnd
@@ -17,7 +17,7 @@ ActionBegin
 ActionEnd
 
 
-IfTimer("DROP_FIRE_1")
+IfTimer(1,"DROP_FIRE_1")
 ActionBegin
  ActionMove(0,1) 
 ActionEnd
@@ -35,7 +35,7 @@ ActionBegin
  ActionEnergyUpdate(1)
 ActionEnd
 
-IfTimer("DROP_FIRE_2")
+IfTimer(1,"DROP_FIRE_2")
 ActionBegin
  ActionMove(0,1) 
 ActionEnd

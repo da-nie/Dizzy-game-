@@ -1,9 +1,9 @@
-IfTimer("PLATFORM_LEFT")
+IfTimer(1,"PLATFORM_LEFT")
 ActionBegin
  ActionMove(-2,0) 
 ActionEnd
 
-IfTimer("PLATFORM_RIGHT")
+IfTimer(1,"PLATFORM_RIGHT")
 ActionBegin
  ActionMove(2,0) 
 ActionEnd

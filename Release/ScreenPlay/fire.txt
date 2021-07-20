@@ -1,9 +1,9 @@
-IfTimer("FIRE_LEFT")
+IfTimer(2,"FIRE_LEFT")
 ActionBegin
  ActionMove(-2,0) 
 ActionEnd
 
-IfTimer("FIRE_RIGHT")
+IfTimer(2,"FIRE_RIGHT")
 ActionBegin
  ActionMove(2,0) 
 ActionEnd

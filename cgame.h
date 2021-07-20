@@ -150,6 +150,7 @@ class CGame
   bool LoadConditionalFile(const std::string &file_name,std::vector<std::string> &log);//загрузить файл условий игры
   bool LoadMap(const std::string &file_name);//загрузить карту
   void DrawScreenFrame(IVideo *iVideo_Ptr);//нарисовать экранную рамку
+  void ChangeDizzyCoord(int32_t dx,int32_t dy,IVideo *iVideo_Ptr);//изменить координаты Диззи, переместить карту и перерисовать барьеры
   void MoveMap(IVideo *iVideo_Ptr);//выполнить перемещение карты, если требуется
   bool MoveMapStep(int32_t width,int32_t height,int32_t offset_y);//выполнить перемещение карты на один шаг, если требуется
 };
