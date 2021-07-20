@@ -3,6 +3,7 @@
 //****************************************************************************************************
 #include <windows.h>
 #include <stdint.h>
+#include <mmsystem.h>
 #include "cwnd_main.h"
 
 //****************************************************************************************************
@@ -34,9 +35,19 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevstance,LPSTR lpstrCmdLine,
  HWND hWndS=CreateWindow("Dizzy","»гра про Dizzy",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX|WS_VISIBLE,rect.left,rect.top,rect.right,rect.bottom,hWnd,0,hProjectInstance,NULL);
 // HWND hWndS=CreateWindow("Dizzy","»гра про Dizzy",WS_POPUP|WS_VISIBLE,rect.left,rect.top,rect.right,rect.bottom,hWnd,0,hProjectInstance,NULL);
  //SetWindowPos(hWndS,HWND_TOPMOST,0,0,0,SWP_NOMOVE|SWP_NOREDRAW,SWP_NOSIZE);
+ timeBeginPeriod(1);
+ while(GetMessage(&msg,NULL,0,0))
+ {
+  TranslateMessage(&msg);
+  DispatchMessage(&msg);
+ }
+ timeEndPeriod(1);
+ return(msg.wParam);
+
 
  //while(ShowCursor(FALSE)==FALSE);
-
+ 
+ /*
  LARGE_INTEGER start_time;
  LARGE_INTEGER current_time;
  LARGE_INTEGER CounterFrequency;
@@ -69,6 +80,7 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevstance,LPSTR lpstrCmdLine,
   QueryPerformanceCounter(&start_time);
   cWnd_Main.Processing();
  }
+ */
  //while(ShowCursor(TRUE)==FALSE);
  return(msg.wParam);
 }
