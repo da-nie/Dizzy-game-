@@ -142,7 +142,7 @@ class CGame
   void DrawBarrier(IVideo *iVideo_Ptr);//нарисовать преграды
   void DrawMap(IVideo *iVideo_Ptr);//нарисовать карту
   void DrawFirstPlaneMap(IVideo *iVideo_Ptr);//нарисовать карту переднего плана
-  void DrawItemMap(IVideo *iVideo_Ptr);//нарисовать карту предметов
+  void DrawBeforeBackgroundMap(IVideo *iVideo_Ptr);//нарисовать карту тайлов перед фоном
   void PutMessage(CGameState::SMessage &sMessage,IVideo *iVideo_Ptr);//вывод сообщения
   void PutFrame(int32_t x,int32_t y,int32_t text_width,int32_t text_height,IVideo *iVideo_Ptr);//нарисовать рамку с заданным внутренним полем для текста (x,y,text_width,text_height - зона вывода текста)
   void PutInventory(IVideo *iVideo_Ptr);//вывести инвентарь

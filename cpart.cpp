@@ -22,14 +22,14 @@
 //----------------------------------------------------------------------------------------------------
 //конструктор
 //----------------------------------------------------------------------------------------------------
-CPart::CPart(int32_t block_x,int32_t block_y,const CTilesSequence &cTilesSequence_Set,bool barrier,bool first_plane,bool item,const std::string &name)
+CPart::CPart(int32_t block_x,int32_t block_y,const CTilesSequence &cTilesSequence_Set,bool barrier,bool first_plane,bool before_background,const std::string &name)
 {
  BlockPosX=block_x;
  BlockPosY=block_y;
  cTilesSequence=cTilesSequence_Set;
  Barrier=barrier;
  FirstPlane=first_plane;
- Item=item;
+ BeforeBackground=before_background;
  Name=name;
 
  InInventory=false;
@@ -64,7 +64,7 @@ bool CPart::Save(std::ofstream &file)
  uint8_t type=0;
  if (Barrier==true) type|=MASK_PART_IS_BARRIER;
  if (FirstPlane==true) type|=MASK_PART_IS_FIRST_PLANE;
- if (Item==true) type|=MASK_PART_IS_ITEM;
+ if (BeforeBackground==true) type|=MASK_PART_IS_BEFORE_BACKGROUND;
  if (file.write(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
  //сохраняем координаты элемента
  if (file.write(reinterpret_cast<char*>(&BlockPosX),sizeof(BlockPosX)).fail()==true) return(false);
@@ -105,8 +105,8 @@ bool CPart::Load(std::ifstream &file)
                            else Barrier=false;
  if (type&MASK_PART_IS_FIRST_PLANE) FirstPlane=true;
                                else FirstPlane=false;
- if (type&MASK_PART_IS_ITEM) Item=true;
-                        else Item=false;
+ if (type&MASK_PART_IS_BEFORE_BACKGROUND) BeforeBackground=true;
+                        else BeforeBackground=false;
  return(true);
 }
 //----------------------------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ bool CPart::Export(std::ofstream &file,int32_t scale_x,int32_t scale_y)
  uint8_t type=0;
  if (Barrier==true) type|=MASK_PART_IS_BARRIER;
  if (FirstPlane==true) type|=MASK_PART_IS_FIRST_PLANE;
- if (Item==true) type|=MASK_PART_IS_ITEM;
+ if (BeforeBackground==true) type|=MASK_PART_IS_BEFORE_BACKGROUND;
  if (file.write(reinterpret_cast<char*>(&type),sizeof(type)).fail()==true) return(false);
 
  int32_t pos_x=scale_x*BlockPosX;

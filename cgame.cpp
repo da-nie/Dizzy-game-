@@ -67,8 +67,8 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
  iVideo_Ptr->ClearScreen(SKY_COLOR);
  //рисуем карту
  DrawMap(iVideo_Ptr);
- //рисуем предметы
- DrawItemMap(iVideo_Ptr);
+ //рисуем тайлы перед фоном
+ DrawBeforeBackgroundMap(iVideo_Ptr);
  //рисуем Диззи
  cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,cGameState.X+(cGameState.Map_X-Map_X),cGameState.Y+(cGameState.Map_Y-Map_Y),DIZZY_WIDTH*cDizzy.sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
  //рисуем элементы переднего плана
@@ -242,7 +242,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    if (IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==false)//пересечение не выше допуска
    {
     //поднимаем Диззи на уровень без пересечения
-    while(IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true) ChangeDizzyCoord(0,-1,iVideo_Ptr);
+    while(IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true && IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==false) ChangeDizzyCoord(0,-1,iVideo_Ptr);
    }
    else
    {
@@ -265,7 +265,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
   ChangeDizzyCoord(0,0,iVideo_Ptr);
  }
 
- if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y+1)==false)//можно падать
+ if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y+1)==false && IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y+1)==false)//можно падать
  {
   if (MoveTickCounter==0)
   {
@@ -281,8 +281,7 @@ void CGame::DizzyMoveProcessing(IVideo *iVideo_Ptr)
    if (cDizzy.sFrame_Ptr->EndFrame==true) MoveControl=true;//перекатывание завершено
   }
   else MoveControl=true;
- }
- 
+ } 
  //особый случай: Диззи не двигался, но произошло столкновение (так как двигался другой элемент)
  if (IsCollizionLegs(iVideo_Ptr,cGameState.X,cGameState.Y)==true || IsCollizionBody(iVideo_Ptr,cGameState.X,cGameState.Y)==true)//зафиксировано столкновение
  {
@@ -449,7 +448,7 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
  auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
  { 
   if (iPart_Ptr->FirstPlane==true) return;//передний план выводится отдельно
-  if (iPart_Ptr->Item==true) return;//предметы выводятся отдельно
+  if (iPart_Ptr->BeforeBackground==true) return;//тайлы перед фоном выводятся отдельно
   if (iPart_Ptr->InInventory==true) return;//предметы в инвентаре не выводятся
   if (iPart_Ptr->Enabled==false) return;//предмет неактивен
 
@@ -501,16 +500,16 @@ void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
 }
 
 //----------------------------------------------------------------------------------------------------
-//нарисовать карту предметов
+//нарисовать тайлы перед фоном
 //----------------------------------------------------------------------------------------------------
-void CGame::DrawItemMap(IVideo *iVideo_Ptr)
+void CGame::DrawBeforeBackgroundMap(IVideo *iVideo_Ptr)
 {
  //рисуем фон
  CSprite &tiles=cSprite_Tiles;
 
  auto drawing_function=[this,&tiles,&iVideo_Ptr](std::shared_ptr<IPart> iPart_Ptr)
  { 
-  if (iPart_Ptr->Item==false) return;//здесь выводятся только предметы
+  if (iPart_Ptr->BeforeBackground==false) return;//здесь выводятся только тайлы перед фоном
   if (iPart_Ptr->InInventory==true) return;//предметы в инвентаре не выводятся
   if (iPart_Ptr->Enabled==false) return;//предмет неактивен
 

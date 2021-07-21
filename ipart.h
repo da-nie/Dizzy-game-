@@ -41,14 +41,14 @@ class IPart:public std::enable_shared_from_this<IPart>
   static const uint8_t MASK_PART_IS_UNION=(1<<0);//указание, что данный элемент является объединением
   static const uint8_t MASK_PART_IS_BARRIER=(1<<1);//указание, что данный элемент является препятствием
   static const uint8_t MASK_PART_IS_FIRST_PLANE=(1<<2);//указание, что данный элемент является элементом переднего плана
-  static const uint8_t MASK_PART_IS_ITEM=(1<<3);//указание, что данный элемент является предметом
+  static const uint8_t MASK_PART_IS_BEFORE_BACKGROUND=(1<<3);//указание, что данный элемент выводится перед фоном
   //-переменные-----------------------------------------------------------------------------------------
   int32_t BlockPosX;//позиция в блоках
   int32_t BlockPosY;
   CTilesSequence cTilesSequence;//последовательность тайлов
   bool Barrier;//является ли барьером
   bool FirstPlane;//является ли передним планом (выводится поверх персонажа)
-  bool Item;//является ли предметом
+  bool BeforeBackground;//выводится ли перед фоном
   bool Selected;//выбран
   std::string Name;//название
   std::string Description;//описание
@@ -65,7 +65,7 @@ class IPart:public std::enable_shared_from_this<IPart>
    BlockPosY=0;
    Barrier=false;
    FirstPlane=false;
-   Item=false;
+   BeforeBackground=false;
    Selected=false;
    InInventory=false;
    Enabled=true;
