@@ -326,11 +326,11 @@ void CGame::DizzyEnergyProcessing(IVideo *iVideo_Ptr)
 
  if (cGameState.Energy==0)//Диззи погиб
  {
-  cGameState.AddMessage("ДИЗЗИ ПОГИБ!\\ВЫ ПОТЕРЯЛИ ЖИЗНЬ",100,120);
+  cGameState.AddMessageLifeLost();  
   if (cGameState.Life>1) cGameState.Life--;
   else//игра начинается сначала
   {
-   cGameState.AddMessage("ВЫ ПРОИГРАЛИ!",150,120);
+   cGameState.AddMessageGameOver();   
    Init(iVideo_Ptr);
    return;
   }

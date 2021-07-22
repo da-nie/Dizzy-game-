@@ -76,6 +76,10 @@ class CGameState
 
   int32_t Map_X;//координаты левого верхнего угла карты
   int32_t Map_Y;
+
+
+  SMessage sMessage_GameOver;//сообщение о конце игры
+  SMessage sMessage_LifeLost;//сообщение о потеряной жизни
  private:
   //-переменные-----------------------------------------------------------------------------------------  
  public:
@@ -87,13 +91,18 @@ class CGameState
   //-открытые функции-----------------------------------------------------------------------------------
   void ClearTake(void);//очистить список возможных для взятия объектов
   void AddTake(std::shared_ptr<IPart> iPart_Ptr);//добавить объект в список возможных для взятия
+  SMessage CreateMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//создать сообщение
   void AddMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//добавить сообщение
+  void AddMessageLifeLost(void);//добавить сообщение о потере жизни
+  void AddMessageGameOver(void);//добавить сообщение о завершении игры
+  void SetLifeLostMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//задать сообщение о потере жизни
+  void SetGameOverMessage(const std::string &message,int32_t screen_x,int32_t screen_y);//задать сообщение о завершении игры
   void EnergyUpdate(int32_t d_energy);//выполнить изменение энергии Диззи
   void AddScore(int32_t d_score);//добавить очки Диззи
   void AddLife(void);//добавить жизнь Диззи
   void AddItem(void);//добавить найденный предмет Диззи
   void SetDizzyStartPosition(int32_t x,int32_t y);//задать стартовую позицию Диззи
-  void Init(void);//инициализация игры  
+  void Init(void);//инициализация игры    
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
 };

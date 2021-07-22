@@ -4,3 +4,5 @@
  SetDescription("RING","йнкэжн я тхюмхрнл")
  SetDescription("POISON","йнкаю я ъднл")
  SetDescription("PAIL","бедпн")
+SetLifeLostMessage(50,150,"дхггх онцха!\\бш гпъ онрепъкх фхгмэ.")
+SetGameOverMessage(100,200,"хцпю нйнмвемю!")

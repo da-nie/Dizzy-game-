@@ -60,9 +60,9 @@ void CGameState::AddTake(std::shared_ptr<IPart> iPart_Ptr)
  Take.push_back(iPart_Ptr);
 }
 //----------------------------------------------------------------------------------------------------
-//добавить сообщение
+//создать сообщение
 //----------------------------------------------------------------------------------------------------
-void CGameState::AddMessage(const std::string &message,int32_t screen_x,int32_t screen_y)
+CGameState::SMessage CGameState::CreateMessage(const std::string &message,int32_t screen_x,int32_t screen_y)
 {
  //определяем размер сообщения в символах
  SMessage sMessage;
@@ -86,7 +86,43 @@ void CGameState::AddMessage(const std::string &message,int32_t screen_x,int32_t 
  sMessage.ScreenX=screen_x;
  sMessage.ScreenY=screen_y;
  sMessage.InSymbolHeight=sMessage.Message.size();
- Message.push_back(sMessage);
+ return(sMessage);
+}
+
+//----------------------------------------------------------------------------------------------------
+//добавить сообщение
+//----------------------------------------------------------------------------------------------------
+void CGameState::AddMessage(const std::string &message,int32_t screen_x,int32_t screen_y)
+{
+ Message.push_back(CreateMessage(message,screen_x,screen_y));
+}
+//----------------------------------------------------------------------------------------------------
+//добавить сообщение о потере жизни
+//----------------------------------------------------------------------------------------------------
+void CGameState::AddMessageLifeLost(void)
+{
+ Message.push_back(sMessage_LifeLost);
+}
+//----------------------------------------------------------------------------------------------------
+//добавить сообщение о завершении игры
+//----------------------------------------------------------------------------------------------------
+void CGameState::AddMessageGameOver(void)
+{
+ Message.push_back(sMessage_GameOver);
+}
+//----------------------------------------------------------------------------------------------------
+//задать сообщение о потере жизни
+//----------------------------------------------------------------------------------------------------
+void CGameState::SetLifeLostMessage(const std::string &message,int32_t screen_x,int32_t screen_y)
+{
+ sMessage_LifeLost=CreateMessage(message,screen_x,screen_y);
+}
+//----------------------------------------------------------------------------------------------------
+//задать сообщение о завершении игры
+//----------------------------------------------------------------------------------------------------
+void CGameState::SetGameOverMessage(const std::string &message,int32_t screen_x,int32_t screen_y)
+{
+ sMessage_GameOver=CreateMessage(message,screen_x,screen_y);
 }
 //----------------------------------------------------------------------------------------------------
 //выполнить изменение энергии Диззи
@@ -143,4 +179,8 @@ void CGameState::Init(void)
  InventorySelectedIndex=0;
  DizzyStartPositionX=0;
  DizzyStartPositionY=0;
+
+
+ sMessage_LifeLost=CreateMessage("ДИЗЗИ ПОГИБ!\\ВЫ ПОТЕРЯЛИ ЖИЗНЬ",100,120);
+ sMessage_GameOver=CreateMessage("ВЫ ПРОИГРАЛИ!",150,120);
 }
