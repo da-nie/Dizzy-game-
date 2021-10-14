@@ -44,6 +44,41 @@ class CGameState
    int32_t InSymbolHeight;//высота в символах
    std::vector<std::string> Message;//выводимые сообщения
   };
+
+  //структура узла квадратичного дерева
+  struct SQuadricTree
+  {
+   //указатели на поддеревья
+   std::shared_ptr<SQuadricTree> LeftTop_Ptr;//левое верхнее поддерево
+   std::shared_ptr<SQuadricTree> LeftBottom_Ptr;//левое нижнее поддерево
+   std::shared_ptr<SQuadricTree> RightTop_Ptr;//правое верхнее поддерево
+   std::shared_ptr<SQuadricTree> RightBottom_Ptr;//правое нижнее поддерево
+
+   //центр
+   int32_t CenterX;
+   int32_t CenterY;
+
+   //описывающий прямоугольник
+   int32_t Left;
+   int32_t Right;
+   int32_t Top;
+   int32_t Bottom;
+   //элементы листа
+   std::vector<std::shared_ptr<IPart>> LeafItem;//элементы листа
+  };
+
+  //структура для обхода дерева карты
+  struct SVisitTree
+  {
+   //прямоугольник экрана
+   int32_t ScreenLeft;
+   int32_t ScreenRight;
+   int32_t ScreenTop;
+   int32_t ScreenBottom;
+
+   std::function<void(std::shared_ptr<IPart>)> callback_function;//функция обратного вызова для листа
+  };
+
   //-константы------------------------------------------------------------------------------------------
   static const int32_t ENERGY_MAX_VALUE=100;//максимальное значение энергии
   static const int32_t MAX_DIZZY_LIFE=3;//максимальное количество жизней Диззи
@@ -53,6 +88,8 @@ class CGameState
   std::shared_ptr<IPart> UsedObject;//используемый предмет
   std::vector<std::shared_ptr<IPart> > Map;//карта
   std::vector<std::shared_ptr<IPart> > MapNamed;//именованые блоки карты
+
+  std::shared_ptr<SQuadricTree> QuadricTree_Ptr;//квадратичное дерево карты
 
   std::vector<SMessage> Message;//список сообщений
 

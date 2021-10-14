@@ -102,7 +102,7 @@ class CGame
   int32_t dX;//скорости Диззи
   int32_t dY;
 
-  int32_t Map_X;
+  int32_t Map_X;//координаты левого верхнего угла карты на экране
   int32_t Map_Y;
 
   bool MoveControl;//управляем ли Dizzy игроком
@@ -149,10 +149,12 @@ class CGame
   void SetDescription(const std::string &name,const std::string &description);//задать описание
   void PushInventory(std::shared_ptr<IPart> iPart_Ptr);//положить в инвентарь
   std::shared_ptr<IPart> PopInventory(size_t index);//вынуть из инвентаря
+  void DrawScreenFrame(IVideo *iVideo_Ptr);//нарисовать экранную рамку
+  void VisitTree(std::shared_ptr<CGameState::SQuadricTree> &sQuadricTree_Ptr,CGameState::SVisitTree &sVisitTree);//функция обхода дерева
+  bool LoadMap(const std::string &file_name);//загрузить карту
+  std::shared_ptr<CGameState::SQuadricTree> LoadQuadricTree(std::ifstream &file);//загрузить квадратичное дерево
   bool LoadConditional(const std::string &path,std::vector<std::string> &log);//загрузить условия игры
   bool LoadConditionalFile(const std::string &file_name,std::vector<std::string> &log);//загрузить файл условий игры
-  bool LoadMap(const std::string &file_name);//загрузить карту
-  void DrawScreenFrame(IVideo *iVideo_Ptr);//нарисовать экранную рамку
   void ChangeDizzyCoord(int32_t dx,int32_t dy,IVideo *iVideo_Ptr);//изменить координаты Диззи, переместить карту и перерисовать барьеры
   void MoveMap(IVideo *iVideo_Ptr);//выполнить перемещение карты, если требуется
   bool MoveMapStep(int32_t width,int32_t height,int32_t offset_y);//выполнить перемещение карты на один шаг, если требуется
