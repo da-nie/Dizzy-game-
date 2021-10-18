@@ -70,7 +70,7 @@ void CGame::OnPaint(IVideo *iVideo_Ptr)
  //рисуем тайлы перед фоном
  DrawBeforeBackgroundMap(iVideo_Ptr);
  //рисуем Диззи
- cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,cGameState.X+(cGameState.Map_X-Map_X),cGameState.Y+(cGameState.Map_Y-Map_Y),DIZZY_WIDTH*cDizzy.sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
+ cSprite_Dizzy.PutSpriteItem(iVideo_Ptr,cGameState.X,cGameState.Y,DIZZY_WIDTH*cDizzy.sFrame_Ptr->ImageFrame,0,DIZZY_WIDTH,DIZZY_HEIGHT,true); 
  //рисуем элементы переднего плана
  DrawFirstPlaneMap(iVideo_Ptr); 
  //рисуем рамку вокруг экрана
@@ -379,18 +379,6 @@ void CGame::Processing(IVideo *iVideo_Ptr)
  ConditionalProcessing();//выполняем обработку событий
  DizzyEnergyProcessing(iVideo_Ptr);
  DizzyMoveProcessing(iVideo_Ptr);//выполняем обработку движения Диззи
- 
- static const int32_t STEP=3;
-
- int32_t step=STEP;
- while(step>0)
- {
-  if (Map_X>cGameState.Map_X) Map_X--;
-  if (Map_X<cGameState.Map_X) Map_X++;
-  if (Map_Y>cGameState.Map_Y) Map_Y--;
-  if (Map_Y<cGameState.Map_Y) Map_Y++;
-  step--;
- }
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -438,8 +426,8 @@ void CGame::DrawBarrier(IVideo *iVideo_Ptr)
 
  CGameState::SVisitTree sVisitTree;
  sVisitTree.callback_function=drawing_barrier_function;
- sVisitTree.ScreenLeft=Map_X;
- sVisitTree.ScreenTop=Map_Y;
+ sVisitTree.ScreenLeft=cGameState.Map_X;
+ sVisitTree.ScreenTop=cGameState.Map_Y;
  sVisitTree.ScreenRight=sVisitTree.ScreenLeft+SCREEN_WIDTH;
  sVisitTree.ScreenBottom=sVisitTree.ScreenTop+SCREEN_HEIGHT;
 
@@ -465,8 +453,8 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
+  int32_t screen_x=block_x-cGameState.Map_X;
+  int32_t screen_y=block_y-cGameState.Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -479,8 +467,8 @@ void CGame::DrawMap(IVideo *iVideo_Ptr)
 
  CGameState::SVisitTree sVisitTree;
  sVisitTree.callback_function=drawing_function;
- sVisitTree.ScreenLeft=Map_X;
- sVisitTree.ScreenTop=Map_Y;
+ sVisitTree.ScreenLeft=cGameState.Map_X;
+ sVisitTree.ScreenTop=cGameState.Map_Y;
  sVisitTree.ScreenRight=sVisitTree.ScreenLeft+SCREEN_WIDTH;
  sVisitTree.ScreenBottom=sVisitTree.ScreenTop+SCREEN_HEIGHT;
 
@@ -505,8 +493,8 @@ void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
+  int32_t screen_x=block_x-cGameState.Map_X;
+  int32_t screen_y=block_y-cGameState.Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -519,8 +507,8 @@ void CGame::DrawFirstPlaneMap(IVideo *iVideo_Ptr)
  
  CGameState::SVisitTree sVisitTree;
  sVisitTree.callback_function=drawing_function;
- sVisitTree.ScreenLeft=Map_X;
- sVisitTree.ScreenTop=Map_Y;
+ sVisitTree.ScreenLeft=cGameState.Map_X;
+ sVisitTree.ScreenTop=cGameState.Map_Y;
  sVisitTree.ScreenRight=sVisitTree.ScreenLeft+SCREEN_WIDTH;
  sVisitTree.ScreenBottom=sVisitTree.ScreenTop+SCREEN_HEIGHT;
 
@@ -546,8 +534,8 @@ void CGame::DrawBeforeBackgroundMap(IVideo *iVideo_Ptr)
   int32_t block_x=iPart_Ptr->BlockPosX;
   int32_t block_y=iPart_Ptr->BlockPosY;
 
-  int32_t screen_x=block_x-Map_X;
-  int32_t screen_y=block_y-Map_Y;
+  int32_t screen_x=block_x-cGameState.Map_X;
+  int32_t screen_y=block_y-cGameState.Map_Y;
 
   size_t tile_index=iPart_Ptr->cTilesSequence.GetCurrentIndex();
   CTile &cTile=iPart_Ptr->cTilesSequence.GetTile(tile_index);
@@ -560,8 +548,8 @@ void CGame::DrawBeforeBackgroundMap(IVideo *iVideo_Ptr)
 
  CGameState::SVisitTree sVisitTree;
  sVisitTree.callback_function=drawing_function;
- sVisitTree.ScreenLeft=Map_X;
- sVisitTree.ScreenTop=Map_Y;
+ sVisitTree.ScreenLeft=cGameState.Map_X;
+ sVisitTree.ScreenTop=cGameState.Map_Y;
  sVisitTree.ScreenRight=sVisitTree.ScreenLeft+SCREEN_WIDTH;
  sVisitTree.ScreenBottom=sVisitTree.ScreenTop+SCREEN_HEIGHT;
 
@@ -1049,8 +1037,6 @@ void CGame::MoveMap(IVideo *iVideo_Ptr)
  {
   if (MoveMapStep(width,height,offset_y)==false) break;
  }
- Map_X=cGameState.Map_X;
- Map_Y=cGameState.Map_Y;
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -1058,31 +1044,31 @@ void CGame::MoveMap(IVideo *iVideo_Ptr)
 //----------------------------------------------------------------------------------------------------
 bool CGame::MoveMapStep(int32_t width,int32_t height,int32_t offset_y)
 {
- static const int32_t DELTA=2;
+ static const int32_t DELTA=0;
 
  bool update=false;
  if (cGameState.X<width/4 && cGameState.Map_X>=DELTA)
  {
-  cGameState.Map_X-=DELTA;
-  cGameState.X+=DELTA;
+  cGameState.Map_X-=(width/4-cGameState.X);
+  cGameState.X=width/4;
   update=true;
  }
- if (cGameState.X>=3*width/4)
+ if (cGameState.X>3*width/4)
  {
-  cGameState.Map_X+=DELTA;
-  cGameState.X-=DELTA;
+  cGameState.Map_X+=(cGameState.X-3*width/4);
+  cGameState.X=3*width/4;
   update=true;
  }
- if (cGameState.Y>=(3*height/4+offset_y))
+ if (cGameState.Y>(3*height/4+offset_y))
  {
-  cGameState.Y-=DELTA;
-  cGameState.Map_Y+=DELTA;
+  cGameState.Map_Y+=(cGameState.Y-(3*height/4+offset_y));
+  cGameState.Y=(3*height/4+offset_y);
   update=true;
- }
+ } 
  if (cGameState.Y<(height/4+offset_y) && cGameState.Map_Y>=DELTA)
  {
-  cGameState.Y+=DELTA;
-  cGameState.Map_Y-=DELTA;
+  cGameState.Map_Y-=((height/4+offset_y)-cGameState.Y);
+  cGameState.Y=(height/4+offset_y);
   update=true;
  }
  return(update);

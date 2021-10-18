@@ -102,9 +102,6 @@ class CGame
   int32_t dX;//скорости Диззи
   int32_t dY;
 
-  int32_t Map_X;//координаты левого верхнего угла карты на экране
-  int32_t Map_Y;
-
   bool MoveControl;//управляем ли Dizzy игроком
 
   int32_t TilesAnimationTickCounter;//счётчик анимации тайлов
