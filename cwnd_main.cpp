@@ -10,6 +10,12 @@
 extern HINSTANCE hProjectInstance;
 extern CWnd_Main cWnd_Main;
 
+LPDIRECTDRAW lpdd_old=NULL;
+LPDIRECTDRAW7 lpdd=NULL;
+DDSURFACEDESC2 ddsd;
+LPDIRECTDRAWSURFACE7 lpddsprimary=NULL;
+LPDIRECTDRAWSURFACE7 lpddssecondary=NULL;
+
 //****************************************************************************************************
 //константы
 //****************************************************************************************************
@@ -57,6 +63,16 @@ long WINAPI CWnd_Main::WNDProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
   case WM_PAINT:
   {
    cWnd_Main.Paint(hWnd,wParam,lParam);
+   return(0);
+  }
+  case WM_ACTIVATE:
+  {
+   cWnd_Main.Activate(hWnd,wParam,lParam);
+   return(0);
+  }
+  case WM_KEYDOWN:
+  {
+   cWnd_Main.KeyDown(hWnd,wParam,lParam);
    return(0);
   }
   case WM_ERASEBKGND:
@@ -113,35 +129,65 @@ CWnd_Main::~CWnd_Main()
 void CWnd_Main::Create(HWND hWnds,WPARAM wParam,LPARAM lParam)
 {
  hWnd=hWnds;
- Active=true;
-
- //определим размер окна по заданной клиентской области
- RECT rect;
- rect.left=0;
- rect.right=CGame::SCREEN_WIDTH*2;
- rect.top=0;
- rect.bottom=CGame::SCREEN_HEIGHT*2;
- AdjustWindowRect(&rect,WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,FALSE);
- 
- RECT w_rect;
- GetWindowRect(hWnd,&w_rect);
- w_rect.right=rect.right-rect.left;
- w_rect.bottom=rect.bottom-rect.top;
-
- MoveWindow(hWnd,w_rect.left,w_rect.top,w_rect.right,w_rect.bottom,TRUE);
+ //инициализируем DirectDraw
+ lpdd=NULL;
+ lpddsprimary=NULL;
+ lpddssecondary=NULL;
+ if (FAILED(DirectDrawCreate(NULL,&lpdd_old,NULL)))
+ {
+  MessageBox(hWnd,"Ошибка инициализации DirectDraw7","ERROR",MB_OK);
+  DestroyWindow(hWnd);
+  return;
+ }
+ lpdd_old->QueryInterface(IID_IDirectDraw7,(void **)&lpdd);
+ lpdd_old->Release();
 
  Enabled=cGame_Ptr->Init(iVideo_Ptr.get());
-
-// SetTimer(hWnd,TIMER_ID,1000/FPS,NULL);
- //SetTimer(hWnd,TIMER_ID,30,NULL);
 }
 //----------------------------------------------------------------------------------------------------
 //уничтожения окна
 //----------------------------------------------------------------------------------------------------
 void CWnd_Main::Destroy(HWND hWnds,WPARAM wParam,LPARAM lParam)
 {
+ if (lpdd!=NULL) lpdd->Release();
+ lpdd=NULL;
+ if (Active==true)
+ {
+  if (lpddsprimary!=NULL) lpddsprimary->Release();
+ }
  Active=false;
- //KillTimer(hWnd,TIMER_ID);
+}
+//----------------------------------------------------------------------------------------------------
+//смена активности окна
+//----------------------------------------------------------------------------------------------------
+void CWnd_Main::Activate(HWND hWnds,WPARAM wParam,LPARAM lParam)
+{
+ if ((LOWORD(wParam)==WA_ACTIVE || LOWORD(wParam)==WA_CLICKACTIVE) && Active==false) 
+ {
+  lpdd->SetCooperativeLevel(hWnd,DDSCL_FULLSCREEN|DDSCL_ALLOWMODEX|DDSCL_EXCLUSIVE|DDSCL_ALLOWREBOOT);
+  lpdd->SetDisplayMode(CGame::SCREEN_WIDTH*2,CGame::SCREEN_HEIGHT*2,32,0,0);
+  memset(&ddsd,0,sizeof(ddsd));
+  ddsd.dwSize=sizeof(DDSURFACEDESC2);
+  ddsd.dwFlags=DDSD_CAPS|DDSD_BACKBUFFERCOUNT;
+  ddsd.dwBackBufferCount=1;
+  ddsd.ddsCaps.dwCaps=DDSCAPS_COMPLEX|DDSCAPS_FLIP|DDSCAPS_PRIMARYSURFACE;
+  lpdd->CreateSurface(&ddsd,&lpddsprimary,NULL);
+  ddsd.ddsCaps.dwCaps=DDSCAPS_BACKBUFFER;
+  lpddsprimary->GetAttachedSurface(&ddsd.ddsCaps,&lpddssecondary);
+  Active=true;
+ }
+ if (LOWORD(wParam)==WA_INACTIVE && Active==true) 
+ {
+  if (lpddsprimary!=NULL) lpddsprimary->Release();
+  Active=false;
+ }
+}
+//----------------------------------------------------------------------------------------------------
+//обработка нажатия клавиш
+//----------------------------------------------------------------------------------------------------
+void CWnd_Main::KeyDown(HWND hWnds,WPARAM wParam,LPARAM lParam)
+{
+ if (GetAsyncKeyState(VK_ESCAPE)&32768) DestroyWindow(hWnd);
 }
 //----------------------------------------------------------------------------------------------------
 //рисование окна
@@ -149,66 +195,66 @@ void CWnd_Main::Destroy(HWND hWnds,WPARAM wParam,LPARAM lParam)
 void CWnd_Main::Paint(HWND hWnds,WPARAM wParam,LPARAM lParam)
 { 
  if (Active==false) return;
- PAINTSTRUCT ps;
- HDC hdc=BeginPaint(hWnd,&ps);
 
  //вызываем отрисовку
  uint32_t width;
  uint32_t height;
  iVideo_Ptr->GetScreenSize(width,height);
- void *vptr;
- iVideo_Ptr->GetVideoPointer(vptr);
+ void *iptr;
+ iVideo_Ptr->GetVideoPointer(iptr);
  uint32_t linesize;
  iVideo_Ptr->GetLineSize(linesize);
 
- BITMAPINFOHEADER bmih;
- bmih.biSize=sizeof(BITMAPINFOHEADER);
- bmih.biWidth=width;
- bmih.biHeight=-static_cast<long>(height);
- bmih.biPlanes=1;
- bmih.biBitCount=32;
- bmih.biCompression=BI_RGB;
- bmih.biSizeImage=0;
- bmih.biXPelsPerMeter=300;
- bmih.biYPelsPerMeter=300;
- bmih.biClrUsed=0;
- bmih.biClrImportant=0;
- RGBQUAD rgbq;
- BITMAPINFO info;
- rgbq.rgbBlue=1;
- rgbq.rgbGreen=0;
- rgbq.rgbRed=0;
- rgbq.rgbReserved=0;
- info.bmiHeader=bmih;
- info.bmiColors[0]=rgbq;
- StretchDIBits(hdc,0,0,width*2,height*2,0,0,width,height,vptr,&info,DIB_RGB_COLORS,SRCCOPY);
- 
+ PAINTSTRUCT ps;
+ BeginPaint(hWnd,&ps);
  EndPaint(hWnd,&ps);
+
+ lpddssecondary->Lock(NULL,&ddsd,DDLOCK_SURFACEMEMORYPTR|DDLOCK_WAIT,NULL);
+ UINT* video_buffer=(UINT*)ddsd.lpSurface;
+ UINT lPitch32=ddsd.lPitch>>2;
+ //рисуем с удвоением
+ UINT *vptr=video_buffer;
+ UINT *sptr=reinterpret_cast<UINT*>(iptr);
+ for(int32_t y=0;y<CGame::SCREEN_HEIGHT;y++,sptr+=linesize)
+ {
+  UINT *vptrx_1=vptr;
+  UINT *vptrx_2=vptr+lPitch32;
+  UINT *sptrx=sptr;
+  for(int32_t x=0;x<CGame::SCREEN_WIDTH;x++,sptrx++)
+  {
+   *(vptrx_1)=*(sptrx);
+   vptrx_1++;
+   *(vptrx_1)=*(sptrx);
+   vptrx_1++;
+
+   *(vptrx_2)=*(sptrx);
+   vptrx_2++;
+   *(vptrx_2)=*(sptrx);
+   vptrx_2++;
+  }
+  vptr+=lPitch32;
+  vptr+=lPitch32;
+ }
+ lpddssecondary->Unlock(NULL);
+ lpddsprimary->Flip(NULL,DDFLIP_WAIT);
 }
 
 //----------------------------------------------------------------------------------------------------
 //создание кадра изображения
 //----------------------------------------------------------------------------------------------------
 void CWnd_Main::Processing(void)
-{
+{ 
+ static int32_t tick=0;
+ tick++;
+ tick%=2;
+ if (tick==0)
+ {
+  Paint(hWnd,0,0);
+  return;
+ }
+
  if (Active==false) return;
  if (Enabled==false) return;
- /*
- static LARGE_INTEGER start_time;
- LARGE_INTEGER current_time;
- LARGE_INTEGER CounterFrequency;
- QueryPerformanceFrequency(&CounterFrequency);
- double d_CounterFrequency=(double)CounterFrequency.QuadPart;
- QueryPerformanceCounter(&current_time);
- double delta_time=(double)(current_time.QuadPart-start_time.QuadPart);
- delta_time/=d_CounterFrequency;
- delta_time*=1000;
- FILE *file=fopen("time.txt","ab");
- fprintf(file,"%i\r\n",(int)(delta_time));
- fclose(file);
- start_time=current_time;
- */
-
 
  bool left=false;
  bool right=false;
@@ -222,8 +268,9 @@ void CWnd_Main::Processing(void)
  if (GetAsyncKeyState(VK_SPACE)&32768) fire=true;
  if (GetAsyncKeyState(VK_RETURN)&32768) fire=true;
  if (GetAsyncKeyState(VK_LCONTROL)&32768) fire=true;
- if (GetAsyncKeyState(VK_RCONTROL)&32768) fire=true;
+ if (GetAsyncKeyState(VK_RCONTROL)&32768) fire=true; 
  
  cGame_Ptr->OnTimer(left,right,up,down,fire,iVideo_Ptr.get());
- InvalidateRect(hWnd,NULL,FALSE);
+ //InvalidateRect(hWnd,NULL,FALSE);
+ Paint(hWnd,0,0);
 }

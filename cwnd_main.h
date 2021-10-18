@@ -14,6 +14,9 @@
 #include <memory>
 #include <stdint.h>
 
+#include <initguid.h>
+#include <ddraw.h>
+
 //****************************************************************************************************
 //макроопределения
 //****************************************************************************************************
@@ -54,6 +57,8 @@ class CWnd_Main
   //-открытые функции-----------------------------------------------------------------------------------
   void Create(HWND hWnds,WPARAM wParam,LPARAM lParam);//создание окна
   void Destroy(HWND hWnds,WPARAM wParam,LPARAM lParam);//уничтожения окна
+  void Activate(HWND hWnds,WPARAM wParam,LPARAM lParam);//смена активности окна
+  void KeyDown(HWND hWnds,WPARAM wParam,LPARAM lParam);//обработка нажатия клавиш
   void Paint(HWND hWnds,WPARAM wParam,LPARAM lParam);//рисование окна  
   void Processing(void);//создание кадра изображения
  private:
