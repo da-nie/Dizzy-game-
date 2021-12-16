@@ -7,6 +7,7 @@
 #include "system.h"
 #include <algorithm>
 #include <memory>
+#include <deque>
 
 //****************************************************************************************************
 //глобальные переменные
@@ -807,24 +808,31 @@ void CGame::DrawScreenFrame(IVideo *iVideo_Ptr)
 //----------------------------------------------------------------------------------------------------
 void CGame::VisitTree(std::shared_ptr<CGameState::SQuadricTree> &sQuadricTree_Ptr,CGameState::SVisitTree &sVisitTree)
 {
- if (sQuadricTree_Ptr.get()==NULL) return;
- //проверяем описывающий прямоугольник
- if (sQuadricTree_Ptr->Left>sVisitTree.ScreenRight) return;
- if (sQuadricTree_Ptr->Top>sVisitTree.ScreenBottom) return;
- if (sQuadricTree_Ptr->Right<sVisitTree.ScreenLeft) return;
- if (sQuadricTree_Ptr->Bottom<sVisitTree.ScreenTop) return;
- //обрабатываем дерево
- size_t size=sQuadricTree_Ptr->LeafItem.size();
- if (size>0)//это лист
+ std::deque<std::shared_ptr<CGameState::SQuadricTree>> deque_ptr;
+ deque_ptr.push_front(sQuadricTree_Ptr);
+ while(deque_ptr.empty()==false)
  {
-  for(size_t n=0;n<size;n++) sVisitTree.callback_function(sQuadricTree_Ptr->LeafItem[n]);
-  return;
+  std::shared_ptr<CGameState::SQuadricTree> ptr=deque_ptr[0];
+  deque_ptr.pop_front();
+
+  if (ptr.get()==NULL) continue;
+  if (ptr->Left>sVisitTree.ScreenRight) continue;
+  if (ptr->Top>sVisitTree.ScreenBottom) continue;
+  if (ptr->Right<sVisitTree.ScreenLeft) continue;
+  if (ptr->Bottom<sVisitTree.ScreenTop) continue;
+
+  size_t size=ptr->LeafItem.size();
+  if (size>0)//это лист
+  {
+   for(size_t n=0;n<size;n++) sVisitTree.callback_function(ptr->LeafItem[n]);
+   continue;
+  }
+  //добавляем поддеревья
+  deque_ptr.push_front(ptr->LeftTop_Ptr);
+  deque_ptr.push_front(ptr->LeftBottom_Ptr);
+  deque_ptr.push_front(ptr->RightTop_Ptr);
+  deque_ptr.push_front(ptr->RightBottom_Ptr);
  }
- //вызываем обход поддеревьев
- VisitTree(sQuadricTree_Ptr->LeftTop_Ptr,sVisitTree);
- VisitTree(sQuadricTree_Ptr->LeftBottom_Ptr,sVisitTree);
- VisitTree(sQuadricTree_Ptr->RightTop_Ptr,sVisitTree);
- VisitTree(sQuadricTree_Ptr->RightBottom_Ptr,sVisitTree);
 }
 
 //----------------------------------------------------------------------------------------------------
@@ -858,19 +866,17 @@ bool CGame::LoadMap(const std::string &file_name)
  return(true);
 }
 //----------------------------------------------------------------------------------------------------
-//загрузить квадратичное дерево
+//загрузить узел квадратичного дерева
 //----------------------------------------------------------------------------------------------------
-std::shared_ptr<CGameState::SQuadricTree> CGame::LoadQuadricTree(std::ifstream &file)
+std::shared_ptr<CGameState::SQuadricTree> CGame::LoadNode(std::ifstream &file,bool &is_tree,uint8_t &leaf_mask)
 {
- std::shared_ptr<CGameState::SQuadricTree> sQuadricTree(new CGameState::SQuadricTree());
+ is_tree=false;
+ leaf_mask=0;
 
  static const uint8_t STATE_LEAF=0;//элемент является листом дерева
  static const uint8_t STATE_TREE=1;//элемент является узлом деревом
 
- static const uint8_t TREE_LEFT_TOP_MASK=(1<<0);//есть левое верхнее поддерево
- static const uint8_t TREE_LEFT_BOTTOM_MASK=(1<<1);//есть левое нижнее поддерево
- static const uint8_t TREE_RIGHT_TOP_MASK=(1<<2);//есть правое верхнее поддерево
- static const uint8_t TREE_RIGHT_BOTTOM_MASK=(1<<3);//есть правое нижнее поддерево
+ std::shared_ptr<CGameState::SQuadricTree> sQuadricTree(new CGameState::SQuadricTree());
  //считываем тип узла
  uint8_t state;
  if (file.read(reinterpret_cast<char*>(&state),sizeof(state)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
@@ -895,16 +901,52 @@ std::shared_ptr<CGameState::SQuadricTree> CGame::LoadQuadricTree(std::ifstream &
  //загружаем центр
  if (file.read(reinterpret_cast<char*>(&sQuadricTree->CenterX),sizeof(sQuadricTree->CenterX)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
  if (file.read(reinterpret_cast<char*>(&sQuadricTree->CenterY),sizeof(sQuadricTree->CenterY)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
- //загружаем поддеревья
- if (state==STATE_TREE)
- {  
-  if (file.read(reinterpret_cast<char*>(&state),sizeof(state)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
-  if (state&TREE_LEFT_TOP_MASK) sQuadricTree->LeftTop_Ptr=LoadQuadricTree(file);
-  if (state&TREE_LEFT_BOTTOM_MASK) sQuadricTree->LeftBottom_Ptr=LoadQuadricTree(file);
-  if (state&TREE_RIGHT_TOP_MASK) sQuadricTree->RightTop_Ptr=LoadQuadricTree(file);
-  if (state&TREE_RIGHT_BOTTOM_MASK) sQuadricTree->RightBottom_Ptr=LoadQuadricTree(file);  
- }
+ if (state==STATE_TREE) is_tree=true;
+ if (file.read(reinterpret_cast<char*>(&state),sizeof(state)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
+ leaf_mask=state;
  return(sQuadricTree);
+}
+
+//----------------------------------------------------------------------------------------------------
+//загрузить квадратичное дерево
+//----------------------------------------------------------------------------------------------------
+std::shared_ptr<CGameState::SQuadricTree> CGame::LoadQuadricTree(std::ifstream &file)
+{
+ static const uint8_t TREE_LEFT_TOP_MASK=(1<<0);//есть левое верхнее поддерево
+ static const uint8_t TREE_LEFT_BOTTOM_MASK=(1<<1);//есть левое нижнее поддерево
+ static const uint8_t TREE_RIGHT_TOP_MASK=(1<<2);//есть правое верхнее поддерево
+ static const uint8_t TREE_RIGHT_BOTTOM_MASK=(1<<3);//есть правое нижнее поддерево
+ 
+ std::shared_ptr<CGameState::SQuadricTree> sQuadricTree_Root(NULL); 
+
+ struct SParent
+ {
+ };
+ std::deque<std::shared_ptr<CGameState::SQuadricTree>*> deque_ptr; 
+ deque_ptr.push_back(NULL);
+ while(deque_ptr.empty()==false)
+ {
+  //считываем указатель на указатель предка для потомка
+  std::shared_ptr<CGameState::SQuadricTree> *parent;
+  parent=deque_ptr[0];
+  deque_ptr.pop_front();
+  //загружаем узел
+  bool is_tree;//является ли деревом или листом
+  uint8_t leaf_mask;//маска присутствующих поддеревьев
+  std::shared_ptr<CGameState::SQuadricTree> node=LoadNode(file,is_tree,leaf_mask);
+  if (node.get()==NULL) break;//данные закончились
+  if (sQuadricTree_Root.get()==NULL) sQuadricTree_Root=node;
+  if (parent!=NULL) *parent=node;
+  //добавляем поддеревья
+  if (is_tree==true)
+  {  
+   if (leaf_mask&TREE_LEFT_TOP_MASK) deque_ptr.push_front(&node->LeftTop_Ptr);
+   if (leaf_mask&TREE_LEFT_BOTTOM_MASK) deque_ptr.push_front(&node->LeftBottom_Ptr);
+   if (leaf_mask&TREE_RIGHT_TOP_MASK) deque_ptr.push_front(&node->RightTop_Ptr);
+   if (leaf_mask&TREE_RIGHT_BOTTOM_MASK) deque_ptr.push_front(&node->RightBottom_Ptr);
+  }
+ }
+ return(sQuadricTree_Root);
 }
 //----------------------------------------------------------------------------------------------------
 //загрузить условия игры

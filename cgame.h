@@ -149,6 +149,7 @@ class CGame
   void DrawScreenFrame(IVideo *iVideo_Ptr);//нарисовать экранную рамку
   void VisitTree(std::shared_ptr<CGameState::SQuadricTree> &sQuadricTree_Ptr,CGameState::SVisitTree &sVisitTree);//функция обхода дерева
   bool LoadMap(const std::string &file_name);//загрузить карту
+  std::shared_ptr<CGameState::SQuadricTree> LoadNode(std::ifstream &file,bool &is_tree,uint8_t &leaf_mask);//загрузить узел квадратичного дерева
   std::shared_ptr<CGameState::SQuadricTree> LoadQuadricTree(std::ifstream &file);//загрузить квадратичное дерево
   bool LoadConditional(const std::string &path,std::vector<std::string> &log);//загрузить условия игры
   bool LoadConditionalFile(const std::string &file_name,std::vector<std::string> &log);//загрузить файл условий игры
