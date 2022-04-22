@@ -16,7 +16,7 @@
 //****************************************************************************************************
 //константы
 //****************************************************************************************************
-static const char MAP_FILE_NAME[]="map.gam";//имя файла карты
+static const char MAP_FILE_NAME[]="./map.gam";//имя файла карты
 
 //****************************************************************************************************
 //макроопределения
@@ -31,23 +31,23 @@ static const char MAP_FILE_NAME[]="map.gam";//имя файла карты
 //----------------------------------------------------------------------------------------------------
 CGame::CGame(void)
 { 
- cSprite_Dizzy.Load("Sprites\\dizzy.tga");
+ cSprite_Dizzy.Load("./Sprites/dizzy.tga");
  cSprite_Dizzy.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
 
- cSprite_Tiles.Load("Tiles\\tiles.tga");
+ cSprite_Tiles.Load("./Tiles/tiles.tga");
  cSprite_Tiles.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
 
- cSprite_TilesBarrier.Load("Tiles\\tiles_barrier.tga");
+ cSprite_TilesBarrier.Load("./Tiles/tiles_barrier.tga");
  cSprite_TilesBarrier.SetAlpha(0,NO_BARRIER_COLOR_R,NO_BARRIER_COLOR_G,NO_BARRIER_COLOR_B);
 
- cSprite_Frame.Load("Sprites\\frame.tga");
+ cSprite_Frame.Load("./Sprites/frame.tga");
  cSprite_Frame.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
 
- cSprite_ScreenFrame.Load("Sprites\\screen_frame.tga");
+ cSprite_ScreenFrame.Load("./Sprites/screen_frame.tga");
  cSprite_ScreenFrame.SetAlpha(0,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B);
- cSprite_Header.Load("Sprites\\header.tga");
+ cSprite_Header.Load("./Sprites/header.tga");
 
- cFontPrinter_Ptr.reset(new CFontPrinter("Sprites\\font.tga",8,8,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B));
+ cFontPrinter_Ptr.reset(new CFontPrinter("./Sprites/font.tga",8,8,BLEND_COLOR_R,BLEND_COLOR_G,BLEND_COLOR_B));
 }
 //----------------------------------------------------------------------------------------------------
 //деструктор
@@ -844,10 +844,10 @@ bool CGame::LoadMap(const std::string &file_name)
  file.open(file_name,std::ios_base::in|std::ios_base::binary);
  if (file.is_open()==false) return(false);
  //загружаем список элементов карты
- size_t part;
+ uint32_t part;
  if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
 
- for(size_t n=0;n<part;n++)
+ for(uint32_t n=0;n<part;n++)
  {
   std::shared_ptr<IPart> iPart_Ptr(new CPart());
   if (iPart_Ptr->Load(file)==false) return(false);
@@ -855,9 +855,9 @@ bool CGame::LoadMap(const std::string &file_name)
  }
  //загружаем список индексов именованных элементов
  if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(false);
- for(size_t n=0;n<part;n++)
+ for(uint32_t n=0;n<part;n++)
  {
-  size_t index;
+  uint32_t index;
   if (file.read(reinterpret_cast<char*>(&index),sizeof(index)).fail()==true) return(false);
   cGameState.MapNamed.push_back(cGameState.Map[index]);
  }
@@ -888,11 +888,11 @@ std::shared_ptr<CGameState::SQuadricTree> CGame::LoadNode(std::ifstream &file,bo
  //загружаем данные дерева
  if (state==STATE_LEAF)//загружаем данные листа
  {
-  size_t part;
+  uint32_t part;
   if (file.read(reinterpret_cast<char*>(&part),sizeof(part)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
-  for(size_t n=0;n<part;n++)
+  for(uint32_t n=0;n<part;n++)
   {
-   size_t index;
+   uint32_t index;
    if (file.read(reinterpret_cast<char*>(&index),sizeof(index)).fail()==true) return(std::shared_ptr<CGameState::SQuadricTree>(NULL));
    sQuadricTree->LeafItem.push_back(cGameState.Map[index]);
   }
