@@ -25,6 +25,17 @@
 //----------------------------------------------------------------------------------------------------
 CLexicalAnalyzer::CLexicalAnalyzer(void)
 {
+ static const uint32_t SYMBOL_CODE_NEW_LINE=13;//код символа перевода строки
+ static const uint32_t SYMBOL_CODE_RETURN=10;//код символа возврата каретки
+ static const uint32_t SYMBOL_CODE_END_LINE=0;//код символа конец строки
+
+ static const uint32_t SYMBOL_CODE_CONTROL_BEGIN=0;//код символа управл€ющей последовательности ASCII
+ static const uint32_t SYMBOL_CODE_BEGIN=0;//код начального символа
+ static const uint32_t SYMBOL_CODE_END=255;//код последнего символа
+
+ static const uint32_t SYMBOL_CODE_SPACE=32;//код символа пробел
+
+
  //создаЄм автомат лексического разбора первого уровн€
  cAutomath_PrimaryLevel.AddRule("begin","left bracker end",'(','(',true);
  cAutomath_PrimaryLevel.AddRule("begin","right bracker end",')',')',true);
@@ -33,21 +44,21 @@ CLexicalAnalyzer::CLexicalAnalyzer(void)
  //cAutomath_PrimaryLevel.AddRule("begin","plus end",'+','+',true);
  //cAutomath_PrimaryLevel.AddRule("begin","minus end",'-','-',true);
  cAutomath_PrimaryLevel.AddRule("begin","quote",'\"','\"',false);
- cAutomath_PrimaryLevel.AddRule("begin","terminal",0,0,true);
- cAutomath_PrimaryLevel.AddRule("begin","terminal",10,10,true);
- cAutomath_PrimaryLevel.AddRule("begin","terminal",13,13,true);
+ cAutomath_PrimaryLevel.AddRule("begin","terminal",SYMBOL_CODE_END_LINE,SYMBOL_CODE_END_LINE,true);
+ cAutomath_PrimaryLevel.AddRule("begin","terminal",SYMBOL_CODE_RETURN,SYMBOL_CODE_RETURN,true);
+ cAutomath_PrimaryLevel.AddRule("begin","terminal",SYMBOL_CODE_NEW_LINE,SYMBOL_CODE_NEW_LINE,true);
 
- cAutomath_PrimaryLevel.AddRule("quote","quote end file",0,0,true);
+ cAutomath_PrimaryLevel.AddRule("quote","quote end file",SYMBOL_CODE_END_LINE,SYMBOL_CODE_END_LINE,true);
  cAutomath_PrimaryLevel.AddRule("quote","quote end",'\"','\"',true);
- cAutomath_PrimaryLevel.AddRule("quote","quote",0,255,false);
+ cAutomath_PrimaryLevel.AddRule("quote","quote",SYMBOL_CODE_BEGIN,SYMBOL_CODE_END,false);
 
  cAutomath_PrimaryLevel.AddRule("begin","slash",'/','/',false);
- cAutomath_PrimaryLevel.AddRule("slash","slash end",13,13,true);
- cAutomath_PrimaryLevel.AddRule("slash","slash end",10,10,true);
- cAutomath_PrimaryLevel.AddRule("slash","slash end",0,0,true);
- cAutomath_PrimaryLevel.AddRule("slash","slash",1,255,false);
+ cAutomath_PrimaryLevel.AddRule("slash","slash end",SYMBOL_CODE_NEW_LINE,SYMBOL_CODE_NEW_LINE,true);
+ cAutomath_PrimaryLevel.AddRule("slash","slash end",SYMBOL_CODE_RETURN,SYMBOL_CODE_RETURN,true);
+ cAutomath_PrimaryLevel.AddRule("slash","slash end",SYMBOL_CODE_END_LINE,SYMBOL_CODE_END_LINE,true);
+ cAutomath_PrimaryLevel.AddRule("slash","slash",SYMBOL_CODE_BEGIN+1,SYMBOL_CODE_END,false);
 
- cAutomath_PrimaryLevel.AddRule("begin","line",33,255,false);
+ cAutomath_PrimaryLevel.AddRule("begin","line",SYMBOL_CODE_SPACE+1,SYMBOL_CODE_END,false);
  cAutomath_PrimaryLevel.AddRule("line","line end symbol",'(','(',true);
  cAutomath_PrimaryLevel.AddRule("line","line end symbol",')',')',true);
  cAutomath_PrimaryLevel.AddRule("line","line end symbol",'=','=',true);
@@ -56,17 +67,17 @@ CLexicalAnalyzer::CLexicalAnalyzer(void)
  cAutomath_PrimaryLevel.AddRule("line","line end symbol",',',',',true);
  cAutomath_PrimaryLevel.AddRule("line","line end symbol",'\"','\"',true);
  cAutomath_PrimaryLevel.AddRule("line","line end symbol",'/','/',true);
- cAutomath_PrimaryLevel.AddRule("line","line end",0,32,true);
- cAutomath_PrimaryLevel.AddRule("line","line",33,255,false);
+ cAutomath_PrimaryLevel.AddRule("line","line end",SYMBOL_CODE_CONTROL_BEGIN,SYMBOL_CODE_SPACE,true);
+ cAutomath_PrimaryLevel.AddRule("line","line",SYMBOL_CODE_SPACE+1,SYMBOL_CODE_END,false);
  //автомат натурального числа
  cAutomath_NaturalNumber.AddRule("begin","NN",'0','9',false);
  cAutomath_NaturalNumber.AddRule("NN","NN",'0','9',false);
- cAutomath_NaturalNumber.AddRule("NN","NN1 end",0,32,true);
+ cAutomath_NaturalNumber.AddRule("NN","NN1 end",SYMBOL_CODE_CONTROL_BEGIN,SYMBOL_CODE_SPACE,true);
  //автомат целого числа
  cAutomath_NegativeNaturalNumber.AddRule("begin","NN",'0','9',false);
  cAutomath_NegativeNaturalNumber.AddRule("begin","NN",'-','-',false);
  cAutomath_NegativeNaturalNumber.AddRule("NN","NN",'0','9',false);
- cAutomath_NegativeNaturalNumber.AddRule("NN","NN1 end",0,32,true);
+ cAutomath_NegativeNaturalNumber.AddRule("NN","NN1 end",SYMBOL_CODE_CONTROL_BEGIN,SYMBOL_CODE_SPACE,true);
  //автомат угла
  cAutomath_AngleNumber.AddRule("begin","NN",'0','9',false);
  cAutomath_AngleNumber.AddRule("NN","NN",'0','9',false);
@@ -76,27 +87,27 @@ CLexicalAnalyzer::CLexicalAnalyzer(void)
  cAutomath_AngleNumber.AddRule("NN`NN","NN`NN`",'`','`',false);
  cAutomath_AngleNumber.AddRule("NN`NN`","NN`NN`NN",'0','9',false);
  cAutomath_AngleNumber.AddRule("NN`NN`NN","NN`NN`NN",'0','9',false);
- cAutomath_AngleNumber.AddRule("NN`NN`NN","end",0,'0'-1,true);
- cAutomath_AngleNumber.AddRule("NN`NN`NN","end",'9'+1,255,true);
+ cAutomath_AngleNumber.AddRule("NN`NN`NN","end",SYMBOL_CODE_CONTROL_BEGIN,'0'-1,true);
+ cAutomath_AngleNumber.AddRule("NN`NN`NN","end",'9'+1,SYMBOL_CODE_END,true);
  //автомат числа с плавающей точкой
  cAutomath_FloatNumber.AddRule("begin","+-",'-','-',false);
  cAutomath_FloatNumber.AddRule("begin","+-",'+','+',false);
  cAutomath_FloatNumber.AddRule("begin","+-.",'.','.',false);
  cAutomath_FloatNumber.AddRule("begin","N",'0','9',false);
  cAutomath_FloatNumber.AddRule("N","N",'0','9',false);
- cAutomath_FloatNumber.AddRule("N","number end",0,32,true);
+ cAutomath_FloatNumber.AddRule("N","number end",SYMBOL_CODE_CONTROL_BEGIN,SYMBOL_CODE_SPACE,true);
  cAutomath_FloatNumber.AddRule("N","N.",'.','.',false);
- cAutomath_FloatNumber.AddRule("N.","end",0,32,true);
+ cAutomath_FloatNumber.AddRule("N.","end",SYMBOL_CODE_CONTROL_BEGIN,SYMBOL_CODE_SPACE,true);
  cAutomath_FloatNumber.AddRule("N.","N.N",'0','9',false);
  cAutomath_FloatNumber.AddRule("N.N","N.N",'0','9',false);
- cAutomath_FloatNumber.AddRule("N.N","end",0,32,true);
+ cAutomath_FloatNumber.AddRule("N.N","end",SYMBOL_CODE_CONTROL_BEGIN,SYMBOL_CODE_SPACE,true);
  cAutomath_FloatNumber.AddRule("N.N","N.NE",'E','E',false);
  cAutomath_FloatNumber.AddRule("N.N","N.NE",'e','e',false);
  cAutomath_FloatNumber.AddRule("N.NE","N.NE+-",'-','-',false);
  cAutomath_FloatNumber.AddRule("N.NE","N.NE+-",'+','+',false);
  cAutomath_FloatNumber.AddRule("N.NE","N.NEN",'0','9',false);
  cAutomath_FloatNumber.AddRule("N.NEN","N.NEN",'0','9',false);
- cAutomath_FloatNumber.AddRule("N.NEN","end",0,32,true);
+ cAutomath_FloatNumber.AddRule("N.NEN","end",SYMBOL_CODE_CONTROL_BEGIN,SYMBOL_CODE_SPACE,true);
  cAutomath_FloatNumber.AddRule("+-","N",'0','9',false);
  cAutomath_FloatNumber.AddRule("+-","+-.",'.','.',false);
  cAutomath_FloatNumber.AddRule("+-.","N",'0','9',false);
