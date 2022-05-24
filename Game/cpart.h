@@ -12,7 +12,7 @@
 #include <fstream>
 #include <memory>
 #include <list>
-#include "ctilessequence.h"
+#include "../Graphics/ctilessequence.h"
 #include "ipart.h"
 
 

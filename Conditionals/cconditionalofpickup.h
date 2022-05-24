@@ -1,17 +1,17 @@
-#ifndef C_CONDITIONAL_OF_INTERSECTION_H
-#define C_CONDITIONAL_OF_INTERSECTION_H
+#ifndef C_CONDITIONAL_OF_PICK_UP_H
+#define C_CONDITIONAL_OF_PICK_UP_H
 
 //****************************************************************************************************
-//Класс условного выражения "пересечение"
+//Класс условного выражения "взять объект"
 //****************************************************************************************************
 
 //****************************************************************************************************
 //подключаемые библиотеки
 //****************************************************************************************************
 #include "iconditionalexpression.h"
-#include "iaction.h"
 #include <string>
 #include <stdint.h>
+#include "../Actions/iaction.h"
 
 //****************************************************************************************************
 //макроопределения
@@ -26,9 +26,9 @@
 //****************************************************************************************************
 
 //****************************************************************************************************
-//Класс условного выражения "пересечение"
+//Класс условного выражения "взять объект"
 //****************************************************************************************************
-class CConditionalOfIntersection:public IConditionalExpression
+class CConditionalOfPickUp:public IConditionalExpression
 {
  public:
   //-перечисления---------------------------------------------------------------------------------------
@@ -36,15 +36,13 @@ class CConditionalOfIntersection:public IConditionalExpression
   //-константы------------------------------------------------------------------------------------------
  private:
   //-переменные-----------------------------------------------------------------------------------------
-  std::string Name_One;//первый элемент
-  std::string Name_Two;//второй элемент
-  std::shared_ptr<IAction> iAction_OnePtr;//указатель на действие с первым объектом
-  std::shared_ptr<IAction> iAction_TwoPtr;//указатель на действие со вторым объектом
+  std::string Name;//имя объекта, который можно взять
+  std::shared_ptr<IAction> iAction_Ptr;//указатель на выполняемое действие
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CConditionalOfIntersection(const std::string &name_one,const std::string &name_two,std::shared_ptr<IAction> iAction_OneSetPtr,std::shared_ptr<IAction> iAction_TwoSetPtr);
+  CConditionalOfPickUp(const std::string &name,std::shared_ptr<IAction> iAction_SetPtr);
   //-деструктор-----------------------------------------------------------------------------------------
-  ~CConditionalOfIntersection();
+  ~CConditionalOfPickUp();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
   void Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,bool timer,CGameState &cGameState);//проверить условие и выполнить действие

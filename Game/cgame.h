@@ -14,11 +14,11 @@
 #include <math.h>
 #include <vector>
 
-#include "ivideo.h"
-#include "cfontprinter.h"
-#include "csprite.h"
+#include "../Video/ivideo.h"
+#include "../Graphics/cfontprinter.h"
+#include "../Graphics/csprite.h"
 #include "ipart.h"
-#include "iconditionalexpression.h"
+#include "../Conditionals/iconditionalexpression.h"
 #include "cgamestate.h"
 #include "cdizzy.h"
 

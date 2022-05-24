@@ -1,21 +1,17 @@
-#ifndef C_WND_MAIN_H
-#define C_WND_MAIN_H
+#ifndef C_CONDITIONAL_OF_INTERSECTION_H
+#define C_CONDITIONAL_OF_INTERSECTION_H
 
 //****************************************************************************************************
-//Главный класс программы
+//Класс условного выражения "пересечение"
 //****************************************************************************************************
 
 //****************************************************************************************************
 //подключаемые библиотеки
 //****************************************************************************************************
-#include <windows.h>
-#include "ivideo.h"
-#include "cgame.h"
-#include <memory>
+#include "iconditionalexpression.h"
+#include "../Actions/iaction.h"
+#include <string>
 #include <stdint.h>
-
-#include <initguid.h>
-#include <ddraw.h>
 
 //****************************************************************************************************
 //макроопределения
@@ -30,43 +26,31 @@
 //****************************************************************************************************
 
 //****************************************************************************************************
-//Главный класс программы
+//Класс условного выражения "пересечение"
 //****************************************************************************************************
-class CWnd_Main
+class CConditionalOfIntersection:public IConditionalExpression
 {
  public:
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
-  static const size_t TIMER_ID=1000;//идентификатор таймера
-  static const int32_t FPS=33;//частота кадров
  private:
   //-переменные-----------------------------------------------------------------------------------------
-  HWND hWnd;//дескриптор окна
-  std::unique_ptr<IVideo> iVideo_Ptr;//указатель на класс видеоэкрана
-  std::unique_ptr<CGame> cGame_Ptr;//указатель на класс игры
-  bool Enabled;//разрешена ли работа игры
-
-  bool Active;//активно ли окно
+  std::string Name_One;//первый элемент
+  std::string Name_Two;//второй элемент
+  std::shared_ptr<IAction> iAction_OnePtr;//указатель на действие с первым объектом
+  std::shared_ptr<IAction> iAction_TwoPtr;//указатель на действие со вторым объектом
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CWnd_Main(void);
+  CConditionalOfIntersection(const std::string &name_one,const std::string &name_two,std::shared_ptr<IAction> iAction_OneSetPtr,std::shared_ptr<IAction> iAction_TwoSetPtr);
   //-деструктор-----------------------------------------------------------------------------------------
-  ~CWnd_Main();
+  ~CConditionalOfIntersection();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  void Create(HWND hWnds,WPARAM wParam,LPARAM lParam);//создание окна
-  void Destroy(HWND hWnds,WPARAM wParam,LPARAM lParam);//уничтожения окна
-  void Activate(HWND hWnds,WPARAM wParam,LPARAM lParam);//смена активности окна
-  void KeyDown(HWND hWnds,WPARAM wParam,LPARAM lParam);//обработка нажатия клавиш
-  void Paint(HWND hWnds,WPARAM wParam,LPARAM lParam);//рисование окна  
-  void Processing(void);//создание кадра изображения
+  void Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,bool timer,CGameState &cGameState);//проверить условие и выполнить действие
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
- public:
-  //статические функции---------------------------------------------------------------------------------
-  static void Register(void);//зарегистировать класс окна
-  static long WINAPI WNDProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);//функция обратного вызова окна
+  void Init(void);//инициализация
 };
 
 #endif

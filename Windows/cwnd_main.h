@@ -1,17 +1,21 @@
-#ifndef C_CONDITIONAL_OF_DIZZY_INTERSECTION_H
-#define C_CONDITIONAL_OF_DIZZY_INTERSECTION_H
+#ifndef C_WND_MAIN_H
+#define C_WND_MAIN_H
 
 //****************************************************************************************************
-//Класс условного выражения "пересечение с Диззи"
+//Главный класс программы
 //****************************************************************************************************
 
 //****************************************************************************************************
 //подключаемые библиотеки
 //****************************************************************************************************
-#include "iconditionalexpression.h"
-#include "iaction.h"
-#include <string>
+#include <windows.h>
+#include "../Video/ivideo.h"
+#include "../Game/cgame.h"
+#include <memory>
 #include <stdint.h>
+
+#include <initguid.h>
+#include <ddraw.h>
 
 //****************************************************************************************************
 //макроопределения
@@ -26,29 +30,43 @@
 //****************************************************************************************************
 
 //****************************************************************************************************
-//Класс условного выражения "пересечение с Диззи"
+//Главный класс программы
 //****************************************************************************************************
-class CConditionalOfDizzyIntersection:public IConditionalExpression
+class CWnd_Main
 {
  public:
   //-перечисления---------------------------------------------------------------------------------------
   //-структуры------------------------------------------------------------------------------------------
   //-константы------------------------------------------------------------------------------------------
+  static const size_t TIMER_ID=1000;//идентификатор таймера
+  static const int32_t FPS=33;//частота кадров
  private:
   //-переменные-----------------------------------------------------------------------------------------
-  std::string Name;//имя объекта, пересечение с которым проверяется
-  std::shared_ptr<IAction> iAction_Ptr;//указатель на выполняемое действие
+  HWND hWnd;//дескриптор окна
+  std::unique_ptr<IVideo> iVideo_Ptr;//указатель на класс видеоэкрана
+  std::unique_ptr<CGame> cGame_Ptr;//указатель на класс игры
+  bool Enabled;//разрешена ли работа игры
+
+  bool Active;//активно ли окно
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CConditionalOfDizzyIntersection(const std::string &name,std::shared_ptr<IAction> iAction_SetPtr);
+  CWnd_Main(void);
   //-деструктор-----------------------------------------------------------------------------------------
-  ~CConditionalOfDizzyIntersection();
+  ~CWnd_Main();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  void Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,bool timer,CGameState &cGameState);//проверить условие и выполнить действие
+  void Create(HWND hWnds,WPARAM wParam,LPARAM lParam);//создание окна
+  void Destroy(HWND hWnds,WPARAM wParam,LPARAM lParam);//уничтожения окна
+  void Activate(HWND hWnds,WPARAM wParam,LPARAM lParam);//смена активности окна
+  void KeyDown(HWND hWnds,WPARAM wParam,LPARAM lParam);//обработка нажатия клавиш
+  void Paint(HWND hWnds,WPARAM wParam,LPARAM lParam);//рисование окна  
+  void Processing(void);//создание кадра изображения
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
-  void Init(void);//инициализация
+ public:
+  //статические функции---------------------------------------------------------------------------------
+  static void Register(void);//зарегистировать класс окна
+  static long WINAPI WNDProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);//функция обратного вызова окна
 };
 
 #endif

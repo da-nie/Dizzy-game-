@@ -1,17 +1,21 @@
-#ifndef C_CONDITIONAL_OF_NOT_DIZZY_INTERSECTION_H
-#define C_CONDITIONAL_OF_NOT_DIZZY_INTERSECTION_H
+#ifndef C_SPRITE_H
+#define C_SPRITE_H
 
 //****************************************************************************************************
-//Класс условного выражения "нет пересечения с Диззи"
+//Класс спрайтов
 //****************************************************************************************************
 
 //****************************************************************************************************
 //подключаемые библиотеки
 //****************************************************************************************************
-#include "iconditionalexpression.h"
-#include "iaction.h"
-#include <string>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <stdint.h>
+#include <memory>
+
+#include "../Video/ivideo.h"
+#include "tga.h"
 
 //****************************************************************************************************
 //макроопределения
@@ -26,9 +30,9 @@
 //****************************************************************************************************
 
 //****************************************************************************************************
-//Класс условного выражения "не пересечения с Диззи"
+//Класс спрайтов
 //****************************************************************************************************
-class CConditionalOfNotDizzyIntersection:public IConditionalExpression
+class CSprite
 {
  public:
   //-перечисления---------------------------------------------------------------------------------------
@@ -36,19 +40,29 @@ class CConditionalOfNotDizzyIntersection:public IConditionalExpression
   //-константы------------------------------------------------------------------------------------------
  private:
   //-переменные-----------------------------------------------------------------------------------------
-  std::string Name;//имя объекта, пересечение с которым проверяется
-  std::shared_ptr<IAction> iAction_Ptr;//указатель на выполняемое действие
+  int32_t Width;//ширина
+  int32_t Height;//высота
+  std::unique_ptr<uint32_t[]> Data_Ptr;//указатель на данные спрайта
  public:
   //-конструктор----------------------------------------------------------------------------------------
-  CConditionalOfNotDizzyIntersection(const std::string &name,std::shared_ptr<IAction> iAction_SetPtr);
+  CSprite(void);
   //-деструктор-----------------------------------------------------------------------------------------
-  ~CConditionalOfNotDizzyIntersection();
+  ~CSprite();
  public:
   //-открытые функции-----------------------------------------------------------------------------------
-  void Execute(int32_t dizzy_x,int32_t dizzy_y,int32_t dizzy_width,int32_t dizzy_height,int32_t part_width,int32_t part_height,bool use,bool timer,CGameState &cGameState);//проверить условие и выполнить действие
+  bool Load(const char *file_name);//загрузить спрайт
+  void Put(IVideo *iVideo_Ptr,int32_t x,int32_t y,bool alpha);//отобразить спрайт
+  void PutSpriteItem(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offsetx,int32_t offsety,int32_t width,int32_t height,bool alpha);//отобразить часть спрайта
+  bool IsCollizionSpriteItem(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offsetx,int32_t offsety,int32_t width,int32_t height,bool alpha,uint8_t back_r,uint8_t back_g,uint8_t back_b);//проверить на пересечение части спрайта с точками, отличными от фона
+  void PutSpriteItemMask(IVideo *iVideo_Ptr,int32_t x,int32_t y,int32_t offsetx,int32_t offsety,int32_t width,int32_t height,uint8_t *Mask);//отобразить часть спрайта с маской
+  void SetAlpha(uint8_t alpha,uint8_t r,uint8_t g,uint8_t b);//установить значение прозрачности
+  void Release(void);//удалить спрайт
+  int32_t GetWidth(void);//получить ширину спрайта
+  int32_t GetHeight(void);//получить высоту спрайта
+  void Normalize(void);//нормировать изображение спрайта
+  bool Save(char *file_name);//сохранить изображение спрайта
  private:
   //-закрытые функции-----------------------------------------------------------------------------------  
-  void Init(void);//инициализация
 };
 
 #endif

@@ -13,288 +13,342 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Actions">
+      <UniqueIdentifier>{01493b85-4c86-4872-aad8-4f99180d0afc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Actions">
+      <UniqueIdentifier>{8483b590-e31f-4181-9718-7b0e659287d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Conditionals">
+      <UniqueIdentifier>{0c7b3947-8361-4d08-b7a7-5d16eaa605c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Conditionals">
+      <UniqueIdentifier>{ee363772-35e9-447e-96a5-aa37fda9e982}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\IO">
+      <UniqueIdentifier>{178497a5-576f-466a-835e-75c20e9c6efb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\IO">
+      <UniqueIdentifier>{4d10d458-0298-4504-9b66-34e1e3b41ddb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Game">
+      <UniqueIdentifier>{7ae22de6-53d6-4c1f-8de4-f83551f702ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{77de918f-1654-4c2e-a5d2-75ad4d3860ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{b73793fd-4e14-49b3-bc10-295e10abe665}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{34d345b1-a3bc-4962-a99e-f44d930cf215}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Interpreter">
+      <UniqueIdentifier>{f377a3e1-1c88-42a7-b598-4aeed50fd427}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Interpreter">
+      <UniqueIdentifier>{79910898-35f7-4eb9-96dd-f5b115077b8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\System">
+      <UniqueIdentifier>{0e829115-bf91-4f94-8b49-672b07b95c24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\System">
+      <UniqueIdentifier>{21291e2e-4220-4631-acf2-d9e407d2e714}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Video">
+      <UniqueIdentifier>{b2de2470-14cd-41f7-852a-cfb5daf29587}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Video">
+      <UniqueIdentifier>{a1cb3efc-6bd7-46b6-9a27-52ab7db1da8f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Windows">
+      <UniqueIdentifier>{d17f7253-8ba7-42ba-adb7-fdfa10e7b8e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Windows">
+      <UniqueIdentifier>{bb3c765e-8f3c-4947-98b5-17316615f3e3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="cgame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="craiifilein.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="craiifileout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="csprite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cvideo_software.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cwnd_main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ivideo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tga.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cpart.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ctile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ctilessequence.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ipart.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cconditionalofintersection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cconditionalofuse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="iconditionalexpression.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionchangename.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionchangeposition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="iaction.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionsetanimationstep.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionpickup.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cgamestate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cconditionalofpickup.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactioncopyposition.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cfontprinter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionmessage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionsetenabled.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionchangenameglobal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionsingle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionchangedescription.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionchangedescriptionglobal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cautomath.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clexeme.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="clexicalanalyzer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="csyntaxanalyzer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="system.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionmove.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cconditionaloftimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cconditionalofdizzyintersection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionenergyupdate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionaddlife.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionaddscore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionadditem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cdizzy.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactioncopypositionoffset.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cactionchangeanimationmode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="cconditionalofnotdizzyintersection.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClInclude Include="Actions\cactionadditem.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionaddlife.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionaddscore.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionchangeanimationmode.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionchangedescription.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionchangedescriptionglobal.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionchangename.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionchangenameglobal.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionchangeposition.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactioncopyposition.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactioncopypositionoffset.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionenergyupdate.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionmessage.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionmove.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionpickup.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionsetanimationstep.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionsetenabled.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\cactionsingle.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Actions\iaction.h">
+      <Filter>Header Files\Actions</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditionals\cconditionalofdizzyintersection.h">
+      <Filter>Header Files\Conditionals</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditionals\cconditionalofintersection.h">
+      <Filter>Header Files\Conditionals</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditionals\cconditionalofnotdizzyintersection.h">
+      <Filter>Header Files\Conditionals</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditionals\cconditionalofpickup.h">
+      <Filter>Header Files\Conditionals</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditionals\cconditionaloftimer.h">
+      <Filter>Header Files\Conditionals</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditionals\cconditionalofuse.h">
+      <Filter>Header Files\Conditionals</Filter>
+    </ClInclude>
+    <ClInclude Include="Conditionals\iconditionalexpression.h">
+      <Filter>Header Files\Conditionals</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\craiifilein.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="IO\craiifileout.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\cdizzy.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\cgame.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\cgamestate.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\cpart.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Game\ipart.h">
+      <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\cfontprinter.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\csprite.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\ctile.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\ctilessequence.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\tga.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Interpreter\cautomath.h">
+      <Filter>Header Files\Interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="Interpreter\clexeme.h">
+      <Filter>Header Files\Interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="Interpreter\clexicalanalyzer.h">
+      <Filter>Header Files\Interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="Interpreter\csyntaxanalyzer.h">
+      <Filter>Header Files\Interpreter</Filter>
+    </ClInclude>
+    <ClInclude Include="System\system.h">
+      <Filter>Header Files\System</Filter>
+    </ClInclude>
+    <ClInclude Include="Video\cvideo_software.h">
+      <Filter>Header Files\Video</Filter>
+    </ClInclude>
+    <ClInclude Include="Video\ivideo.h">
+      <Filter>Header Files\Video</Filter>
+    </ClInclude>
+    <ClInclude Include="Windows\cwnd_main.h">
+      <Filter>Header Files\Windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cgame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="craiifilein.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="craiifileout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="csprite.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cvideo_software.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cwnd_main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ivideo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tga.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ipart.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cpart.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ctile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ctilessequence.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="iconditionalexpression.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cconditionalofintersection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cconditionalofuse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="iaction.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionchangename.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionchangeposition.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionsetanimationstep.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cgamestate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionpickup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cconditionalofpickup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactioncopyposition.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cfontprinter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionmessage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionsetenabled.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionsingle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionchangenameglobal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionchangedescription.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionchangedescriptionglobal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="csyntaxanalyzer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cautomath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clexeme.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="clexicalanalyzer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="system.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionmove.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cconditionaloftimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cconditionalofdizzyintersection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionenergyupdate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionaddlife.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionaddscore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionadditem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cdizzy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactioncopypositionoffset.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cactionchangeanimationmode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cconditionalofnotdizzyintersection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClCompile Include="Actions\cactionadditem.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionaddlife.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionaddscore.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionchangeanimationmode.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionchangedescription.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionchangedescriptionglobal.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionchangename.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionchangenameglobal.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionchangeposition.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactioncopyposition.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactioncopypositionoffset.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionenergyupdate.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionmessage.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionmove.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionpickup.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionsetanimationstep.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionsetenabled.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\cactionsingle.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Actions\iaction.cpp">
+      <Filter>Source Files\Actions</Filter>
+    </ClCompile>
+    <ClCompile Include="Conditionals\cconditionalofdizzyintersection.cpp">
+      <Filter>Source Files\Conditionals</Filter>
+    </ClCompile>
+    <ClCompile Include="Conditionals\cconditionalofintersection.cpp">
+      <Filter>Source Files\Conditionals</Filter>
+    </ClCompile>
+    <ClCompile Include="Conditionals\cconditionalofnotdizzyintersection.cpp">
+      <Filter>Source Files\Conditionals</Filter>
+    </ClCompile>
+    <ClCompile Include="Conditionals\cconditionalofpickup.cpp">
+      <Filter>Source Files\Conditionals</Filter>
+    </ClCompile>
+    <ClCompile Include="Conditionals\cconditionaloftimer.cpp">
+      <Filter>Source Files\Conditionals</Filter>
+    </ClCompile>
+    <ClCompile Include="Conditionals\cconditionalofuse.cpp">
+      <Filter>Source Files\Conditionals</Filter>
+    </ClCompile>
+    <ClCompile Include="Conditionals\iconditionalexpression.cpp">
+      <Filter>Source Files\Conditionals</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\craiifilein.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="IO\craiifileout.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\cdizzy.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\cgame.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\cgamestate.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\cpart.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Game\ipart.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\cfontprinter.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\csprite.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\ctile.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\ctilessequence.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\tga.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Interpreter\cautomath.cpp">
+      <Filter>Source Files\Interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="Interpreter\clexeme.cpp">
+      <Filter>Source Files\Interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="Interpreter\clexicalanalyzer.cpp">
+      <Filter>Source Files\Interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="Interpreter\csyntaxanalyzer.cpp">
+      <Filter>Source Files\Interpreter</Filter>
+    </ClCompile>
+    <ClCompile Include="System\system.cpp">
+      <Filter>Source Files\System</Filter>
+    </ClCompile>
+    <ClCompile Include="Video\cvideo_software.cpp">
+      <Filter>Source Files\Video</Filter>
+    </ClCompile>
+    <ClCompile Include="Video\ivideo.cpp">
+      <Filter>Source Files\Video</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\cwnd_main.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
+    <ClCompile Include="Windows\main.cpp">
+      <Filter>Source Files\Windows</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

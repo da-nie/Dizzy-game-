@@ -10,9 +10,9 @@
 //****************************************************************************************************
 #include "clexicalanalyzer.h"
 #include "cautomath.h"
-#include "iconditionalexpression.h"
-#include "iaction.h"
-#include "cgamestate.h"
+#include "../Conditionals/iconditionalexpression.h"
+#include "../Actions/iaction.h"
+#include "../Game/cgamestate.h"
 #include <vector>
 #include <string>
 

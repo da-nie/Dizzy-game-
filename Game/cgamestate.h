@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include <vector>
 #include <string>
-#include "ipart.h"
-#include "iconditionalexpression.h"
+#include "../Game/ipart.h"
+#include "../Conditionals/iconditionalexpression.h"
 
 //****************************************************************************************************
 //макроопределения

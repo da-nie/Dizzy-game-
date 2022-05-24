@@ -3,8 +3,8 @@
 //****************************************************************************************************
 #include "cgame.h"
 #include "cpart.h"
-#include "csyntaxanalyzer.h"
-#include "system.h"
+#include "../Interpreter/csyntaxanalyzer.h"
+#include "../System/system.h"
 #include <algorithm>
 #include <memory>
 #include <deque>
